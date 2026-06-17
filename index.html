@@ -1,180 +1,67 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Project Manager System</title>
-
-<style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'맑은 고딕',sans-serif;
-}
-
-body{
-background:#f4f6f9;
-}
-
-.header{
-background:#1f2937;
-color:white;
-padding:15px;
-font-size:22px;
-font-weight:bold;
-}
-
-.container{
-display:flex;
-height:calc(100vh - 60px);
-}
-
-.sidebar{
-width:250px;
-background:#374151;
-color:white;
-padding:20px;
-}
-
-.sidebar ul{
-list-style:none;
-}
-
-.sidebar li{
-padding:12px;
-cursor:pointer;
-border-radius:5px;
-margin-bottom:5px;
-}
-
-.sidebar li:hover{
-background:#4b5563;
-}
-
-.content{
-flex:1;
-padding:20px;
-overflow:auto;
-}
-
-.card{
-background:white;
-padding:20px;
-margin-bottom:15px;
-border-radius:10px;
-box-shadow:0 2px 5px rgba(0,0,0,.1);
-}
-
-input,textarea{
-width:100%;
-padding:10px;
-margin-top:10px;
-margin-bottom:10px;
-}
-
-button{
-background:#2563eb;
-color:white;
-border:none;
-padding:10px 15px;
-cursor:pointer;
-border-radius:5px;
-}
-
-table{
-width:100%;
-border-collapse:collapse;
-margin-top:15px;
-}
-
-table th,table td{
-border:1px solid #ddd;
-padding:10px;
-}
-
-@media(max-width:768px){
-.container{
-flex-direction:column;
-}
-
-.sidebar{
-width:100%;
-}
-}
-</style>
-</head>
-
-<body>
-
-<div class="header">
-SPMS - Smart Project Management System
-</div>
-
-<div class="container">
-
-<div class="sidebar">
 <ul>
 <li onclick="showDashboard()">대시보드</li>
 <li onclick="showProject()">프로젝트 관리</li>
+<li onclick="showSchedule()">일정 관리</li>
 <li onclick="showSupplier()">공급업체 관리</li>
-<li onclick="showTrip()">출장 관리</li>
 <li onclick="showIssue()">이슈 관리</li>
-</ul>
-</div>
+<li onclick="showAction()">Action Item</li>
+</ul>projects.push({
+projectName,
+customer,
+supplier,
+pm,
+status,
+progress,
+evt,
+dvt,
+pvt,
+mp,
+issue
+});function showDashboard(){
 
-<div class="content" id="content">
-</div>
+let total = projects.length;
 
-</div>
+let risk =
+projects.filter(
+x=>x.status==="위험"
+).length;
 
-<script>
-
-let projects =
-JSON.parse(localStorage.getItem('projects')) || [];
-
-function showDashboard(){
+let delay =
+projects.filter(
+x=>x.status==="지연"
+).length;
 
 document.getElementById('content').innerHTML = `
+
 <div class="card">
-<h2>대시보드</h2>
-<p>프로젝트 수 : ${projects.length}</p>
+<h2>PM Dashboard</h2>
+
+<p>전체 프로젝트 : ${total}</p>
+
+<p>지연 프로젝트 : ${delay}</p>
+
+<p>위험 프로젝트 : ${risk}</p>
+
 </div>
+
 `;
-}
 
-function saveProject(){
-
-let name =
-document.getElementById('projectName').value;
-
-let manager =
-document.getElementById('manager').value;
-
-projects.push({
-name,
-manager
-});
-
-localStorage.setItem(
-'projects',
-JSON.stringify(projects)
-);
-
-showProject();
-}
-
-function showProject(){
+}function showSchedule(){
 
 let rows='';
 
 projects.forEach(p=>{
 
-rows+=`
+rows += `
+
 <tr>
-<td>${p.name}</td>
-<td>${p.manager}</td>
+<td>${p.projectName}</td>
+<td>${p.evt}</td>
+<td>${p.dvt}</td>
+<td>${p.pvt}</td>
+<td>${p.mp}</td>
 </tr>
+
 `;
 
 });
@@ -183,115 +70,24 @@ document.getElementById('content').innerHTML=`
 
 <div class="card">
 
-<h2>프로젝트 등록</h2>
-
-<input id="projectName"
-placeholder="프로젝트명">
-
-<input id="manager"
-placeholder="담당자">
-
-<button onclick="saveProject()">
-등록
-</button>
+<h2>프로젝트 일정</h2>
 
 <table>
+
 <tr>
-<th>프로젝트명</th>
-<th>담당자</th>
+<th>프로젝트</th>
+<th>EVT</th>
+<th>DVT</th>
+<th>PVT</th>
+<th>MP</th>
 </tr>
+
 ${rows}
-</table>
-
-</div>
-
-`;
-}
-
-function showSupplier(){
-
-document.getElementById('content').innerHTML=`
-
-<div class="card">
-<h2>공급업체 관리</h2>
-
-<table>
-<tr>
-<th>업체명</th>
-<th>등급</th>
-</tr>
-
-<tr>
-<td>LVSUN</td>
-<td>A</td>
-</tr>
-
-<tr>
-<td>SPACOZ</td>
-<td>A</td>
-</tr>
-
-</table>
-</div>
-
-`;
-}
-
-function showTrip(){
-
-document.getElementById('content').innerHTML=`
-
-<div class="card">
-<h2>출장 관리</h2>
-
-<textarea rows="8"
-placeholder="출장 결과 입력">
-</textarea>
-
-<button>
-저장
-</button>
-
-</div>
-
-`;
-
-}
-
-function showIssue(){
-
-document.getElementById('content').innerHTML=`
-
-<div class="card">
-<h2>이슈 관리</h2>
-
-<table>
-
-<tr>
-<th>구분</th>
-<th>상태</th>
-</tr>
-
-<tr>
-<td>PCB 번인</td>
-<td>진행중</td>
-</tr>
-
-<tr>
-<td>안전재고</td>
-<td>검토중</td>
-</tr>
 
 </table>
 
 </div>
 
 `;
+
 }
-
-showDashboard();
-
-</script>
-
-</body>
-</html>
