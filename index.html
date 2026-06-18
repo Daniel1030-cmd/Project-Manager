@@ -203,6 +203,27 @@ window.addSite = async function () {
 
     }
 };
+    window.updateSiteStatus = async function(id, status) {
+
+    try {
+
+        await updateDoc(
+            doc(db,"site",id),
+            {
+                status: status
+            }
+        );
+
+        alert("상태 변경 완료");
+
+    } catch(err) {
+
+        console.error(err);
+        alert("상태 변경 실패");
+
+    }
+
+};
 
 /* ================= TASK ================= */
 window.addTask = async function () {
