@@ -177,14 +177,14 @@ window.addSite = async function () {
     const pm = prompt("PM");
 
     await addDoc(siteCol, {
-        고객사,
-        장비,
-        수량,
-        계약타입,
-        계약일자,
-        계약종료,
-        유지보수 기간,
-        PM,
+        client,
+        equipment,
+        quantity,
+        contractType,
+        contractStart,
+        contractEnd,
+        maintenancePeriod,
+        pm,
         status: "준비",
         risk: "Low",
         createdAt: serverTimestamp()
