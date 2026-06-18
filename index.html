@@ -164,38 +164,44 @@ onSnapshot(issueCol, snap => {
 /* ================= SITE CREATE ================= */
 window.addSite = async function () {
 
-    const name = prompt("현장명");
-    if(!name) return;
+    try {
 
-    const client = prompt("고객사");
-    const equipment = prompt("장비");
-    const quantity = prompt("수량");
-    const contractType = prompt("계약타입");
-    const contractStart = prompt("계약일자");
-    const contractEnd = prompt("계약종료");
-    const maintenancePeriod = prompt("유지보수 기간");
-    const pm = prompt("PM");
+        const name = prompt("현장명");
+        if(!name) return;
 
-    await addDoc(siteCol, {
-        client,
-        equipment,
-        quantity,
-        contractType,
-        contractStart,
-        contractEnd,
-        maintenancePeriod,
-        pm,
-        status: "준비",
-        risk: "Low",
-        createdAt: serverTimestamp()
-    });
-};
+        const client = prompt("고객사");
+        const equipment = prompt("장비");
+        const quantity = prompt("수량");
+        const contractType = prompt("계약타입");
+        const contractStart = prompt("계약일자");
+        const contractEnd = prompt("계약종료");
+        const maintenancePeriod = prompt("유지보수 기간");
+        const pm = prompt("PM");
 
-/* ================= SITE STATUS UPDATE (FIXED) ================= */
-window.updateSitetatus = async function(id, status) {
-    await updateDoc(doc(db,"site",id), {
-        status
-    });
+        const docRef = await addDoc(siteCol, {
+            name,
+            client,
+            equipment,
+            quantity,
+            contractType,
+            contractStart,
+            contractEnd,
+            maintenancePeriod,
+            pm,
+            status: "준비",
+            risk: "Low",
+            createdAt: serverTimestamp()
+        });
+
+        console.log("저장 성공:", docRef.id);
+        alert("저장 완료");
+
+    } catch(err) {
+
+        console.error(err);
+        alert("저장 실패");
+
+    }
 };
 
 /* ================= TASK ================= */
