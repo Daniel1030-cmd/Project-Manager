@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Enterprise PMO System</title>
+<title>PMO System</title>
 
 <style>
 body {
@@ -22,7 +22,7 @@ body {
 }
 
 .sidebar li {
-    padding:14px 18px;
+    padding:14px;
     cursor:pointer;
 }
 
@@ -38,9 +38,9 @@ body {
 .card {
     background:white;
     padding:15px;
+    margin-bottom:10px;
     border-radius:10px;
-    margin-bottom:12px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+    box-shadow:0 2px 6px rgba(0,0,0,0.08);
 }
 
 table {
@@ -58,7 +58,7 @@ th, td {
 th { background:#f1f2f6; }
 
 button {
-    padding:6px 10px;
+    padding:5px 10px;
     margin:2px;
     cursor:pointer;
 }
@@ -75,7 +75,7 @@ button {
 
 .gantt-track {
     flex:1;
-    height:16px;
+    height:14px;
     background:#eee;
     position:relative;
 }
@@ -104,7 +104,7 @@ button {
 
 <script type="module">
 
-/* ================= FIREBASE (최상단 고정) ================= */
+/* ================= FIREBASE ================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
 import {
     getFirestore,
@@ -126,7 +126,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* ================= COLLECTIONS ================= */
+/* ================= COLLECTION (중요: sites 통일) ================= */
 const siteCol = collection(db, "sites");
 const taskCol = collection(db, "tasks");
 const issueCol = collection(db, "issues");
@@ -140,54 +140,48 @@ let current = "dashboard";
 const content = document.getElementById("content");
 const menu = document.querySelectorAll(".sidebar li");
 
-const user = "PM-USER";
+const user = "PM";
 
 /* ================= REALTIME ================= */
-onSnapshot(siteCol, s => {
-    sites = s.docs.map(d => ({ id:d.id, ...d.data() }));
+onSnapshot(siteCol, snap => {
+    sites = snap.docs.map(d => ({ id:d.id, ...d.data() }));
     render(current);
 });
 
-onSnapshot(taskCol, s => {
-    tasks = s.docs.map(d => ({ id:d.id, ...d.data() }));
+onSnapshot(taskCol, snap => {
+    tasks = snap.docs.map(d => ({ id:d.id, ...d.data() }));
     render(current);
 });
 
-onSnapshot(issueCol, s => {
-    issues = s.docs.map(d => ({ id:d.id, ...d.data() }));
+onSnapshot(issueCol, snap => {
+    issues = snap.docs.map(d => ({ id:d.id, ...d.data() }));
     render(current);
 });
 
-/* ================= SITE ACTION (핵심 수정 완료) ================= */
+/* ================= SITE ADD ================= */
 window.addSite = async function () {
 
     const name = prompt("현장명");
     if(!name) return;
 
-    const project = prompt("프로젝트");
     const client = prompt("고객사");
-    const location = prompt("위치");
+    const project = prompt("프로젝트");
     const pm = prompt("PM");
 
     await addDoc(siteCol, {
         name,
-        project,
         client,
-        location,
+        project,
         pm,
         status:"준비",
-        level:"Medium",
         risk:"Low",
-        createdBy:user,
-        createdAt:serverTimestamp()
+        createdAt: serverTimestamp()
     });
 };
 
 /* ================= SITE STATUS ================= */
 window.updateSiteStatus = async function(id, status) {
-    await updateDoc(doc(db,"sites",id), {
-        status
-    });
+    await updateDoc(doc(db,"sites",id), { status });
 };
 
 /* ================= TASK ================= */
@@ -210,18 +204,15 @@ window.addIssue = async function () {
     await addDoc(issueCol, {
         title,
         status:"New",
-        siteId: sites[0]?.id || null,
-        createdBy:user,
-        createdAt:serverTimestamp()
+        createdAt: serverTimestamp()
     });
 };
 
 /* ================= KPI ================= */
-function calcKPI() {
-    const closed = issues.filter(i => i.status === "Closed").length;
+function kpi() {
+    const closed = issues.filter(i => i.status==="Closed").length;
     return {
         total: issues.length,
-        closed,
         rate: issues.length ? (closed/issues.length*100).toFixed(1) : 0
     };
 }
@@ -232,7 +223,8 @@ function ganttRow(t) {
         <div class="gantt-row">
             <div class="gantt-label">${t.name}</div>
             <div class="gantt-track">
-                <div class="gantt-bar" style="left:${(t.start||0)*10}px;width:${(t.duration||10)*10}px"></div>
+                <div class="gantt-bar"
+                style="left:${(t.start||0)*10}px;width:${(t.duration||10)*10}px"></div>
             </div>
         </div>
     `;
@@ -242,38 +234,42 @@ function ganttRow(t) {
 function render(page) {
     current = page;
 
-    if(page === "dashboard") {
-        const kpi = calcKPI();
-
+    if(page==="dashboard") {
+        const kk = kpi();
         content.innerHTML = `
             <div class="card"><h2>PMO Dashboard</h2></div>
             <div class="card">Sites: ${sites.length}</div>
             <div class="card">Tasks: ${tasks.length}</div>
             <div class="card">Issues: ${issues.length}</div>
-            <div class="card">Resolution Rate: ${kpi.rate}%</div>
+            <div class="card">Close Rate: ${kk.rate}%</div>
         `;
     }
 
-    else if(page === "site") {
+    else if(page==="site") {
         content.innerHTML = `
             <div class="card">
                 <h2>Site Master</h2>
-                <button onclick="addSite()">+ 현장 등록</button>
+                <button onclick="addSite()">+ Site</button>
             </div>
 
             <div class="card">
                 <table>
                     <tr>
-                        <th>ID</th><th>Name</th><th>Project</th>
-                        <th>Client</th><th>PM</th><th>Status</th><th>Action</th>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Client</th>
+                        <th>Project</th>
+                        <th>PM</th>
+                        <th>Status</th>
+                        <th>Action</th>
                     </tr>
 
-                    ${sites.map(s => `
+                    ${sites.map(s=>`
                         <tr>
                             <td>${s.id}</td>
                             <td>${s.name||""}</td>
-                            <td>${s.project||""}</td>
                             <td>${s.client||""}</td>
+                            <td>${s.project||""}</td>
                             <td>${s.pm||""}</td>
                             <td>${s.status||""}</td>
                             <td>
@@ -288,20 +284,18 @@ function render(page) {
         `;
     }
 
-    else if(page === "project") {
+    else if(page==="project") {
         content.innerHTML = `
             <div class="card">
                 <h2>Project</h2>
                 <button onclick="addTask()">+ Task</button>
             </div>
 
-            ${tasks.map(t => `
-                <div class="card">${t.name}</div>
-            `).join("")}
+            ${tasks.map(t=>`<div class="card">${t.name}</div>`).join("")}
         `;
     }
 
-    else if(page === "gantt") {
+    else if(page==="gantt") {
         content.innerHTML = `
             <div class="card"><h2>Gantt</h2></div>
             <div class="card">
@@ -310,24 +304,24 @@ function render(page) {
         `;
     }
 
-    else if(page === "issue") {
+    else if(page==="issue") {
         content.innerHTML = `
             <div class="card">
                 <h2>Issues</h2>
                 <button onclick="addIssue()">+ Issue</button>
             </div>
 
-            ${issues.map(i => `
-                <div class="card">${i.title} - ${i.status}</div>
+            ${issues.map(i=>`
+                <div class="card">${i.title}</div>
             `).join("")}
         `;
     }
 }
 
 /* ================= MENU ================= */
-menu.forEach(m => {
-    m.onclick = () => {
-        menu.forEach(i => i.classList.remove("active"));
+menu.forEach(m=>{
+    m.onclick=()=>{
+        menu.forEach(x=>x.classList.remove("active"));
         m.classList.add("active");
         render(m.dataset.page);
     };
