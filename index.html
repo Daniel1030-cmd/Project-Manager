@@ -348,15 +348,48 @@ window.completeProject = async function(id){
 };
     
 /* ================= ISSUE ================= */
-window.addIssue = async function () {
-    const title = prompt("Issue");
-    if(!title) return;
+window.addIssue = async function(){
 
-    await addDoc(issueCol, {
-        title,
-        status: "New",
-        createdAt: serverTimestamp()
+    const siteName =
+    prompt("현장명");
+
+    if(!siteName) return;
+
+
+    const type =
+    prompt(
+    "유형 입력\n기술 / 일정 / 자재 / 고객"
+    );
+
+
+    const content =
+    prompt("이슈 내용");
+
+
+    const reporter =
+    prompt("등록자");
+
+
+    await addDoc(issueCol,{
+
+        siteName,
+
+        type,
+
+        content,
+
+        reporter,
+
+        status:"Open",
+
+        createdAt:
+        serverTimestamp()
+
     });
+
+
+    alert("Issue 등록 완료");
+
 };
 
 /* ================= KPI ================= */
@@ -970,20 +1003,411 @@ h
 
 }
 
-    else if(page === "issue") {
-        content.innerHTML = `
-            <div class="card">
-                <h2>Issues</h2>
-                <button onclick="addIssue()">+ Issue</button>
-            </div>
+    else if(page==="issue"){
 
-            ${issues.map(i => `
-                <div class="card">${i.title}</div>
-            `).join("")}
-        `;
-    }
+
+
+function getDate(v){
+
+    if(!v)
+        return null;
+
+
+    if(v.toDate)
+        return v.toDate();
+
+
+    return new Date(v);
+
 }
 
+
+
+
+
+function periodFilter(type){
+
+
+const now=new Date();
+
+
+
+return tasks.filter(t=>{
+
+
+const d=getDate(t.createdAt);
+
+
+if(!d)
+return false;
+
+
+
+if(type==="day"){
+
+return d.toDateString()
+===now.toDateString();
+
+}
+
+
+
+if(type==="week"){
+
+
+const start =
+new Date(
+now.getFullYear(),
+now.getMonth(),
+now.getDate()-7
+);
+
+
+return d>=start;
+
+}
+
+
+
+
+if(type==="month"){
+
+
+return (
+d.getMonth()
+===now.getMonth()
+&&
+d.getFullYear()
+===now.getFullYear()
+);
+
+
+}
+
+
+
+});
+
+
+}
+
+
+
+
+function countComplete(data){
+
+return data.filter(
+x=>x.status==="완료"
+).length;
+
+}
+
+
+
+
+
+// 기간 데이터
+
+const day =
+periodFilter("day");
+
+
+const week =
+periodFilter("week");
+
+
+const month =
+periodFilter("month");
+
+
+
+
+
+// 현장별 Project 집계
+
+let siteMap={};
+
+
+tasks.forEach(t=>{
+
+
+const name =
+t.siteName || "미등록";
+
+
+
+if(!siteMap[name]){
+
+siteMap[name]={
+
+total:0,
+
+complete:0
+
+};
+
+}
+
+
+
+siteMap[name].total++;
+
+
+
+if(t.status==="완료")
+siteMap[name].complete++;
+
+
+});
+
+
+
+
+
+content.innerHTML=`
+
+
+<div class="card">
+
+
+<h2>Issue Management</h2>
+
+
+<button onclick="addIssue()">
++ Issue 등록
+</button>
+
+
+</div>
+
+
+
+
+
+<div class="card">
+
+
+<h3>Project 접수 분석</h3>
+
+
+<table>
+
+
+<tr>
+
+<th>구분</th>
+
+<th>접수건</th>
+
+<th>처리건</th>
+
+</tr>
+
+
+
+<tr>
+
+<td>일간</td>
+
+<td>${day.length}</td>
+
+<td>${countComplete(day)}</td>
+
+</tr>
+
+
+
+<tr>
+
+<td>주간</td>
+
+<td>${week.length}</td>
+
+<td>${countComplete(week)}</td>
+
+</tr>
+
+
+
+<tr>
+
+<td>월간</td>
+
+<td>${month.length}</td>
+
+<td>${countComplete(month)}</td>
+
+</tr>
+
+
+
+</table>
+
+
+</div>
+
+
+
+
+
+
+<div class="card">
+
+
+<h3>
+현장별 Project 접수 현황
+</h3>
+
+
+<table>
+
+
+<tr>
+
+<th>현장명</th>
+
+<th>접수건</th>
+
+<th>완료</th>
+
+</tr>
+
+
+
+${
+Object.keys(siteMap)
+.map(k=>{
+
+
+let s=siteMap[k];
+
+
+return `
+
+
+<tr>
+
+
+<td>${k}</td>
+
+<td>${s.total}</td>
+
+<td>${s.complete}</td>
+
+
+</tr>
+
+
+`;
+
+})
+.join("")
+}
+
+
+
+</table>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="card">
+
+
+<h3>
+Issue List
+</h3>
+
+
+<table>
+
+
+<tr>
+
+<th>현장</th>
+
+<th>유형</th>
+
+<th>내용</th>
+
+<th>등록자</th>
+
+<th>등록일</th>
+
+
+</tr>
+
+
+
+${
+issues.map(i=>{
+
+
+return `
+
+
+<tr>
+
+<td>
+${i.siteName||""}
+</td>
+
+
+<td>
+${i.type||""}
+</td>
+
+
+<td>
+${i.content||""}
+</td>
+
+
+<td>
+${i.reporter||""}
+</td>
+
+
+<td>
+
+${
+i.createdAt
+?
+i.createdAt
+.toDate()
+.toLocaleDateString()
+:""
+}
+
+</td>
+
+
+</tr>
+
+
+`;
+
+
+}).join("")
+}
+
+
+
+</table>
+
+
+</div>
+
+
+`;
+
+}
 /* ================= MENU ================= */
 menu.forEach(m => {
     m.onclick = () => {
