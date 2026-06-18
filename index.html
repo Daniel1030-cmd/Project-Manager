@@ -349,92 +349,14 @@ window.completeProject = async function(id){
     
 /* ================= ISSUE ================= */
 window.addIssue = async function () {
+    const title = prompt("Issue");
+    if(!title) return;
 
-
-    try {
-
-
-        const siteName =
-        prompt("현장명");
-
-
-        if(!siteName){
-            alert("현장명을 입력하세요");
-            return;
-        }
-
-
-
-        const type =
-        prompt(
-        "유형 선택\n기술 / 일정 / 자재 / 고객"
-        );
-
-
-        if(!type){
-            alert("유형을 입력하세요");
-            return;
-        }
-
-
-
-
-        const issueContent =
-        prompt("이슈 내용");
-
-
-
-        if(!issueContent){
-            alert("이슈 내용을 입력하세요");
-            return;
-        }
-
-
-
-
-        const reporter =
-        prompt("등록자");
-
-
-
-        await addDoc(issueCol,{
-
-
-            siteName:siteName,
-
-
-            type:type,
-
-
-            content:issueContent,
-
-
-            reporter:reporter,
-
-
-            status:"Open",
-
-
-            createdAt:
-            serverTimestamp()
-
-
-        });
-
-
-
-        alert("Issue 등록 완료");
-
-
-    }
-    catch(err){
-
-        console.error(err);
-
-        alert("Issue 등록 실패");
-
-    }
-
+    await addDoc(issueCol, {
+        title,
+        status: "New",
+        createdAt: serverTimestamp()
+    });
 };
 
 /* ================= KPI ================= */
@@ -1049,131 +971,17 @@ h
 }
 
     else if(page === "issue") {
-
-
-content.innerHTML=`
-
-
-<div class="card">
-
-
-<h2>Issue Management</h2>
-
-
-<button onclick="addIssue()">
-
-+ Issue 등록
-
-</button>
-
-
-</div>
-
-
-
-
-
-<div class="card">
-
-
-<table>
-
-
-<tr>
-
-<th>현장명</th>
-
-<th>유형</th>
-
-<th>이슈내용</th>
-
-<th>등록자</th>
-
-<th>상태</th>
-
-<th>등록일</th>
-
-
-</tr>
-
-
-
-
-
-${
-issues.map(i=>{
-
-
-return `
-
-
-<tr>
-
-
-<td>
-${i.siteName || ""}
-</td>
-
-
-
-<td>
-${i.type || ""}
-</td>
-
-
-
-<td>
-${i.content || ""}
-</td>
-
-
-
-<td>
-${i.reporter || ""}
-</td>
-
-
-
-<td>
-${i.status || ""}
-</td>
-
-
-
-<td>
-
-${
-i.createdAt
-?
-i.createdAt.toDate()
-.toLocaleDateString()
-:
-""
-}
-
-</td>
-
-
-</tr>
-
-
-`;
-
-
-}).join("")
-
-}
-
-
-
-</table>
-
-
-</div>
-
-
-`;
-
+        content.innerHTML = `
+            <div class="card">
+                <h2>Issues</h2>
+                <button onclick="addIssue()">+ Issue</button>
+            </div>
+
+            ${issues.map(i => `
+                <div class="card">${i.title}</div>
+            `).join("")}
+        `;
+    }
 }
 
 /* ================= MENU ================= */
