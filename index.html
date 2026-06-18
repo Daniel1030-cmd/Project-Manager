@@ -132,7 +132,7 @@ const taskCol = collection(db, "tasks");
 const issueCol = collection(db, "issues");
 
 /* ================= STATE ================= */
-let sites = [];
+let site = [];
 let tasks = [];
 let issues = [];
 let current = "dashboard";
@@ -144,7 +144,7 @@ const user = "PM";
 
 /* ================= REALTIME ================= */
 onSnapshot(siteCol, snap => {
-    sites = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    site = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     render(current);
 });
 
@@ -180,7 +180,7 @@ window.addSite = async function () {
 };
 
 /* ================= SITE STATUS UPDATE (FIXED) ================= */
-window.updateSiteStatus = async function(id, status) {
+window.updateSitetatus = async function(id, status) {
     await updateDoc(doc(db,"site",id), {
         status
     });
@@ -240,7 +240,7 @@ function render(page) {
         const k = kpi();
         content.innerHTML = `
             <div class="card"><h2>PMO Dashboard</h2></div>
-            <div class="card">Sites: ${sites.length}</div>
+            <div class="card">Site: ${site.length}</div>
             <div class="card">Tasks: ${tasks.length}</div>
             <div class="card">Issues: ${issues.length}</div>
             <div class="card">Close Rate: ${k.rate}%</div>
@@ -266,7 +266,7 @@ function render(page) {
                         <th>Action</th>
                     </tr>
 
-                    ${sites.map(s => `
+                    ${site.map(s => `
                         <tr>
                             <td>${s.id}</td>
                             <td>${s.name || ""}</td>
@@ -275,9 +275,9 @@ function render(page) {
                             <td>${s.pm || ""}</td>
                             <td>${s.status || ""}</td>
                             <td>
-                                <button onclick="updateSiteStatus('${s.id}','진행')">진행</button>
-                                <button onclick="updateSiteStatus('${s.id}','보류')">보류</button>
-                                <button onclick="updateSiteStatus('${s.id}','완료')">완료</button>
+                                <button onclick="updateSitetatus('${s.id}','진행')">진행</button>
+                                <button onclick="updateSitetatus('${s.id}','보류')">보류</button>
+                                <button onclick="updateSitetatus('${s.id}','완료')">완료</button>
                             </td>
                         </tr>
                     `).join("")}
