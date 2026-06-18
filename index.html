@@ -404,10 +404,12 @@ window.addIssue = async function(){
 
 /* ================= KPI ================= */
 function kpi() {
+
     return {
         total: issues.length,
-        rate: issues.length ? (closed/issues.length*100).toFixed(1) : 0
+        rate: 0
     };
+
 }
 
 /* ================= GANTT ================= */
@@ -1049,8 +1051,6 @@ content.innerHTML=`
 <th>등록자</th>
 
 <th>조치계획</th>
-
-<th>Status</th>
 
 <th>등록일</th>
 
