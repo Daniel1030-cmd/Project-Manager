@@ -116,7 +116,8 @@ button {
 <script type="module">
 window.addSite = async function () {
 
-    const name = prompt("현장명");
+/* ================= FIREBASE ================= */
+        const name = prompt("현장명");
     if(!name) return;
 
     const project = prompt("프로젝트명");
@@ -146,7 +147,6 @@ window.updateSiteStatus = async function(id, status) {
         status
     });
 };
-/* ================= FIREBASE ================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
 import {
     getFirestore,
