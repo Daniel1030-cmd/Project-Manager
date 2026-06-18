@@ -168,14 +168,23 @@ window.addSite = async function () {
     if(!name) return;
 
     const client = prompt("고객사");
-    const project = prompt("프로젝트");
+    const project = prompt("장비");
+    const project = prompt("수량");
+    const project = prompt("계약타입");
+    const project = prompt("계약일자");
+    const project = prompt("계약종료");
+    const project = prompt("유지보수 기간");
     const pm = prompt("PM");
 
     await addDoc(siteCol, {
-        name,
-        client,
-        project,
-        pm,
+        고객사,
+        장비,
+        수량,
+        계약타입,
+        계약일자,
+        계약종료,
+        유지보수 기간,
+        PM,
         status: "준비",
         risk: "Low",
         createdAt: serverTimestamp()
