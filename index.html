@@ -114,7 +114,38 @@ button {
 <div class="content" id="content"></div>
 
 <script type="module">
+window.addSite = async function () {
 
+    const name = prompt("현장명");
+    if(!name) return;
+
+    const project = prompt("프로젝트명");
+    const client = prompt("고객사");
+    const location = prompt("위치 (국가/도시)");
+    const pm = prompt("담당 PM");
+
+    await addDoc(collection(db,"sites"), {
+        name,
+        project,
+        client,
+        location,
+        pm,
+        status:"준비",
+        level:"Medium",
+        risk:"Low",
+        createdBy:user,
+        createdAt:serverTimestamp()
+    });
+};
+
+window.updateSiteStatus = async function(id, status) {
+
+    const ref = doc(db,"sites",id);
+
+    await updateDoc(ref, {
+        status
+    });
+};
 /* ================= FIREBASE ================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
 import {
@@ -280,23 +311,51 @@ function render(page) {
         `;
     }
 
-    /* SITE */
-    else if(page === "site") {
-        content.innerHTML = `
-            <div class="card"><h2>🏗 Site Master</h2></div>
+else if(page === "site") {
 
+    content.innerHTML = `
+        <div class="card">
+            <h2>🏗 Site Master (PMO Control)</h2>
+            <button onclick="addSite()">+ 현장 등록</button>
+        </div>
+
+        <div class="card">
             <table>
-                <tr><th>ID</th><th>Name</th><th>Status</th></tr>
+                <tr>
+                    <th>ID</th>
+                    <th>현장명</th>
+                    <th>프로젝트</th>
+                    <th>고객사</th>
+                    <th>위치</th>
+                    <th>상태</th>
+                    <th>난이도</th>
+                    <th>PM</th>
+                    <th>리스크</th>
+                    <th>Action</th>
+                </tr>
+
                 ${sites.map(s => `
                     <tr>
                         <td>${s.id}</td>
                         <td>${s.name || "-"}</td>
+                        <td>${s.project || "-"}</td>
+                        <td>${s.client || "-"}</td>
+                        <td>${s.location || "-"}</td>
                         <td>${s.status || "-"}</td>
+                        <td>${s.level || "-"}</td>
+                        <td>${s.pm || "-"}</td>
+                        <td>${s.risk || "-"}</td>
+                        <td>
+                            <button onclick="updateSiteStatus('${s.id}','진행')">진행</button>
+                            <button onclick="updateSiteStatus('${s.id}','보류')">보류</button>
+                            <button onclick="updateSiteStatus('${s.id}','완료')">완료</button>
+                        </td>
                     </tr>
                 `).join("")}
             </table>
-        `;
-    }
+        </div>
+    `;
+}
 
     /* PROJECT */
     else if(page === "project") {
