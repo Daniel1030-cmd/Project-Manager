@@ -1,239 +1,143 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Project-Manager | PMO System</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>관리 시스템</title>
 
 <style>
-body{font-family:Arial,sans-serif;margin:0;background:#f4f6f9}
-.header{background:#1f2937;color:#fff;padding:15px;font-size:22px;font-weight:bold}
-.container{display:flex}
-.sidebar{width:240px;background:#374151;color:#fff;min-height:100vh;padding:15px}
-.sidebar li{list-style:none;padding:10px;cursor:pointer}
-.sidebar li:hover{background:#4b5563}
-.content{flex:1;padding:20px}
-.card{background:#fff;padding:20px;border-radius:8px;margin-bottom:15px}
-table{width:100%;border-collapse:collapse;margin-top:15px}
-th,td{border:1px solid #ddd;padding:8px}
-input,select{width:100%;padding:8px;margin:5px 0;box-sizing:border-box}
-button{
-    padding:10px 15px;
-    background:#2563eb;
-    color:#fff;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-}
-button:hover{
-    background:#1d4ed8;
-}
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        display: flex;
+        height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        width: 220px;
+        background: #2c3e50;
+        color: #fff;
+        padding-top: 20px;
+    }
+
+    .sidebar ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .sidebar li {
+        padding: 15px 20px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .sidebar li:hover {
+        background: #34495e;
+    }
+
+    .sidebar li.active {
+        background: #1abc9c;
+        font-weight: bold;
+    }
+
+    /* Content */
+    .content {
+        flex: 1;
+        padding: 20px;
+        background: #f5f6fa;
+    }
+
+    .card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
 </style>
 </head>
 
 <body>
 
-<div class="header">Project-Manager | PMO System</div>
-
-<div class="container">
-
-    <div class="sidebar">
-        <ul>
-            <li onclick="showDashboard()">대시보드</li>
-            <li onclick="showProject()">프로젝트 관리</li>
-            <li onclick="showSchedule()">일정 관리</li>
-            <li onclick="showSupplier()">공급업체 관리</li>
-            <li onclick="showIssue()">이슈 관리</li>
-        </ul>
-    </div>
-
-    <div class="content" id="content"></div>
-
+<div class="sidebar">
+    <ul>
+        <li data-page="dashboard">대시보드</li>
+        <li data-page="project">프로젝트 관리</li>
+        <li data-page="schedule">일정 관리</li>
+        <li data-page="supplier">공급업체 관리</li>
+        <li data-page="issue">이슈 관리</li>
+    </ul>
 </div>
 
-<script type="module">
+<div class="content" id="content">
+    <!-- 기본 화면 -->
+</div>
 
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-
-import {
-    getFirestore,
-    collection,
-    addDoc,
-    getDocs,
-    doc,
-    updateDoc,
-    deleteDoc
-}
-from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
-
-
-/* Firebase 설정 */
-const firebaseConfig = {
-    apiKey: "AIzaSyBouCzxzCSpmCdVqVp9-h3zSR-jps4bNtM",
-    authDomain: "project-manager-79e25.firebaseapp.com",
-    projectId: "project-manager-79e25",
-    storageBucket: "project-manager-79e25.firebasestorage.app",
-    messagingSenderId: "808738416305",
-    appId: "1:808738416305:web:b366ad2258471790852490"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-let projects = [];
-
-
-/* 프로젝트 불러오기 */
-async function loadProjects(){
-
-    projects = [];
-
-snapshot.forEach(d=>{
-    projects.push({
-        id:d.id,
-        ...d.data()
-    });
-});
-
-    snapshot.forEach(doc=>{
-        projects.push(doc.data());
-    });
-
-}
-
-
-/* 프로젝트 저장 */
-async function removeProject(id){
-   ...
-}
-
-async function editProject(id){
-   ...
-}
-
-    const p = {
-        name: document.getElementById("projectName").value,
-        customer: document.getElementById("customer").value,
-        pm: document.getElementById("pm").value,
-        status: document.getElementById("status").value
+<script>
+    // 페이지별 콘텐츠 정의
+    const pages = {
+        dashboard: `
+            <div class="card">
+                <h2>대시보드</h2>
+                <p>전체 현황을 확인할 수 있습니다.</p>
+            </div>
+        `,
+        project: `
+            <div class="card">
+                <h2>프로젝트 관리</h2>
+                <p>프로젝트 생성 및 진행 상태를 관리합니다.</p>
+            </div>
+        `,
+        schedule: `
+            <div class="card">
+                <h2>일정 관리</h2>
+                <p>일정 및 캘린더를 관리합니다.</p>
+            </div>
+        `,
+        supplier: `
+            <div class="card">
+                <h2>공급업체 관리</h2>
+                <p>협력 업체 정보를 관리합니다.</p>
+            </div>
+        `,
+        issue: `
+            <div class="card">
+                <h2>이슈 관리</h2>
+                <p>발생한 이슈를 추적하고 처리합니다.</p>
+            </div>
+        `
     };
 
-    await addDoc(
-        collection(db,"projects"),
-        p
-    );
+    const menuItems = document.querySelectorAll(".sidebar li");
+    const content = document.getElementById("content");
 
-    await showProject();
-}
+    // 렌더 함수
+    function renderPage(page) {
+        content.innerHTML = pages[page] || "<div class='card'>페이지 없음</div>";
+    }
 
+    // active 처리
+    function setActive(el) {
+        menuItems.forEach(item => item.classList.remove("active"));
+        el.classList.add("active");
+    }
 
-/* 대시보드 */
-async function showDashboard(){
-
-    await loadProjects();
-
-    document.getElementById('content').innerHTML=`
-    <div class="card">
-        <h2>PM Dashboard</h2>
-        <p>전체 프로젝트 : ${projects.length}</p>
-    </div>`;
-}
-
-
-/* 프로젝트 관리 */
-async function showProject(){
-
-    await loadProjects();
-
-    let rows='';
-
-    projects.forEach(p=>{
-
-rows += `
-<tr>
-...
-<td>
-   수정버튼
-   삭제버튼
-</td>
-</tr>`;
-
+    // 이벤트 등록
+    menuItems.forEach(item => {
+        item.addEventListener("click", () => {
+            const page = item.dataset.page;
+            setActive(item);
+            renderPage(page);
+        });
     });
 
-    document.getElementById('content').innerHTML=`
-    <div class="card">
-
-        <h2>프로젝트 등록</h2>
-
-        <input id="projectName" placeholder="프로젝트명">
-
-        <input id="customer" placeholder="고객사">
-
-        <input id="pm" placeholder="PM">
-
-        <select id="status">
-            <option>정상</option>
-            <option>지연</option>
-            <option>위험</option>
-        </select>
-
-        <button id="saveBtn">등록</button>
-
-        <table>
-            <tr>
-                <th>프로젝트</th>
-                <th>고객사</th>
-                <th>PM</th>
-                <th>관리</th>
-            </tr>
-
-            ${rows}
-
-        </table>
-
-    </div>`;
-
-    document.getElementById("saveBtn")
-        .addEventListener("click", save);
-}
-
-
-/* 기타 메뉴 */
-function showSchedule(){
-
-    document.getElementById('content').innerHTML=
-    '<div class="card"><h2>일정 관리</h2><p>EVT / DVT / PVT / MP 관리 영역</p></div>';
-
-}
-
-function showSupplier(){
-
-    document.getElementById('content').innerHTML=
-    '<div class="card"><h2>공급업체 관리</h2><table><tr><th>업체</th><th>등급</th></tr><tr><td>LVSUN</td><td>A</td></tr></table></div>';
-
-}
-
-function showIssue(){
-
-    document.getElementById('content').innerHTML=
-    '<div class="card"><h2>이슈 관리</h2><p>PCB 번인, 안전재고 등 관리</p></div>';
-
-}
-
-
-/* HTML onclick에서 사용할 수 있도록 등록 */
-window.showDashboard = showDashboard;
-window.showProject = showProject;
-window.showSchedule = showSchedule;
-window.showSupplier = showSupplier;
-window.showIssue = showIssue;
-window.editProject = editProject;
-window.removeProject = removeProject;
-
-/* 최초 실행 */
-showDashboard();
-
+    // 초기 화면
+    window.addEventListener("DOMContentLoaded", () => {
+        const first = menuItems[0];
+        setActive(first);
+        renderPage(first.dataset.page);
+    });
 </script>
 
 </body>
