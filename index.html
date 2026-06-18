@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>PMO SaaS System</title>
+<title>Enterprise PMO System</title>
 
 <style>
 body {
@@ -11,7 +11,7 @@ body {
     font-family: Arial;
     display:flex;
     height:100vh;
-    background:#f4f6f9;
+    background:#f5f6fa;
 }
 
 .sidebar {
@@ -25,7 +25,6 @@ body {
     padding:14px 18px;
     cursor:pointer;
 }
-
 .sidebar li:hover { background:#2c3f66; }
 .sidebar li.active { background:#00b894; }
 
@@ -36,10 +35,10 @@ body {
 }
 
 .card {
-    background:#fff;
+    background:white;
     padding:15px;
+    margin-bottom:12px;
     border-radius:10px;
-    margin-bottom:15px;
     box-shadow:0 2px 8px rgba(0,0,0,0.08);
 }
 
@@ -59,8 +58,8 @@ th { background:#f1f2f6; }
 
 button {
     padding:6px 10px;
-    cursor:pointer;
     margin:2px;
+    cursor:pointer;
 }
 
 /* GANTT */
@@ -78,6 +77,7 @@ button {
 
 .gantt-label {
     width:160px;
+    font-size:13px;
 }
 
 .gantt-track {
@@ -93,7 +93,6 @@ button {
     height:100%;
     background:#3498db;
     border-radius:6px;
-    cursor:grab;
 }
 </style>
 </head>
@@ -102,12 +101,13 @@ button {
 
 <div class="sidebar">
     <ul>
-        <li data-page="site">현장</li>
-        <li data-page="project">프로젝트</li>
-        <li data-page="gantt">간트차트</li>
-        <li data-page="intake">이슈</li>
-        <li data-page="workflow">워크플로우</li>
-        <li data-page="kpi">KPI</li>
+        <li data-page="dashboard">Dashboard</li>
+        <li data-page="site">Site</li>
+        <li data-page="project">Project</li>
+        <li data-page="gantt">Gantt</li>
+        <li data-page="issue">Issue</li>
+        <li data-page="workflow">Workflow</li>
+        <li data-page="log">Audit Log</li>
     </ul>
 </div>
 
@@ -123,7 +123,8 @@ import {
     addDoc,
     updateDoc,
     doc,
-    onSnapshot
+    onSnapshot,
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -151,163 +152,156 @@ const content = document.getElementById("content");
 const menuItems = document.querySelectorAll(".sidebar li");
 
 /* ================= REALTIME ================= */
-onSnapshot(sitesCol, s => {
-    sites = s.docs.map(d => ({ id:d.id, ...d.data() }));
-    render(currentPage);
-});
+onSnapshot(sitesCol, s => sites = s.docs.map(d => ({ id:d.id, ...d.data() })));
+onSnapshot(projectsCol, s => projects = s.docs.map(d => ({ id:d.id, ...d.data() })));
+onSnapshot(tasksCol, s => { tasks = s.docs.map(d => ({ id:d.id, ...d.data() })); render(currentPage); });
+onSnapshot(issuesCol, s => { issues = s.docs.map(d => ({ id:d.id, ...d.data() })); render(currentPage); });
 
-onSnapshot(projectsCol, s => {
-    projects = s.docs.map(d => ({ id:d.id, ...d.data() }));
-    render(currentPage);
-});
+/* ================= USER MOCK ================= */
+const user = "PM-USER";
 
-onSnapshot(tasksCol, s => {
-    tasks = s.docs.map(d => ({ id:d.id, ...d.data() }));
-    render(currentPage);
-});
-
-onSnapshot(issuesCol, s => {
-    issues = s.docs.map(d => ({ id:d.id, ...d.data() }));
-    render(currentPage);
-});
-
-/* ================= ACTION ================= */
+/* ================= ISSUE ================= */
 window.addIssue = async () => {
-    const title = prompt("이슈 제목");
+    const title = prompt("Issue Title");
     if(!title) return;
 
     await addDoc(issuesCol, {
         title,
         status:"New",
-        log:[{ time:new Date().toLocaleString(), action:"Created" }]
+        createdBy:user,
+        createdAt:serverTimestamp(),
+        log:[{
+            time:new Date().toLocaleString(),
+            action:"Created",
+            by:user
+        }]
     });
 };
 
 window.move = async (id, status) => {
     const issue = issues.find(i => i.id === id);
-    const ref = doc(db, "issues", id);
 
-    await updateDoc(ref, {
+    await updateDoc(doc(db,"issues",id), {
         status,
-        log:[...issue.log, { time:new Date().toLocaleString(), action:status }]
+        log:[...issue.log, {
+            time:new Date().toLocaleString(),
+            action:status,
+            by:user
+        }]
     });
 };
 
+/* ================= TASK ================= */
 window.addTask = async () => {
-    const name = prompt("Task 이름");
+    const name = prompt("Task Name");
     if(!name) return;
 
     await addDoc(tasksCol, {
         name,
         start:0,
-        duration:10
+        duration:10,
+        progress:0,
+        createdBy:user
     });
 };
 
-/* ================= GANTT DRAG ================= */
-function drag(bar, task) {
-    let down = false;
-    let startX = 0;
+/* ================= GANTT ================= */
+function drawGantt(task, index) {
+    return `
+        <div class="gantt-row">
+            <div class="gantt-label">
+                ${task.name} (${task.progress || 0}%)
+            </div>
 
-    bar.onmousedown = (e) => {
-        down = true;
-        startX = e.clientX;
-    };
-
-    window.onmousemove = async (e) => {
-        if(!down) return;
-
-        const dx = Math.round((e.clientX - startX) / 10);
-        task.start += dx;
-        startX = e.clientX;
-
-        render("gantt");
-    };
-
-    window.onmouseup = async () => {
-        if(!down) return;
-        down = false;
-
-        await updateDoc(doc(db,"tasks",task.id), {
-            start: task.start,
-            duration: task.duration
-        });
-    };
+            <div class="gantt-track">
+                <div class="gantt-bar"
+                    style="left:${task.start*10}px;width:${task.duration*10}px">
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 /* ================= RENDER ================= */
-let currentPage = "site";
+let currentPage = "dashboard";
 
 function render(page) {
     currentPage = page;
 
-    /* -------- SITE -------- */
-    if(page === "site") {
+    /* DASHBOARD */
+    if(page === "dashboard") {
         content.innerHTML = `
-            <div class="card"><h2>🏗 현장</h2></div>
-            <div class="card">총 현장: ${sites.length}</div>
+            <div class="card"><h2>📊 PMO Dashboard</h2></div>
+            <div class="card">Sites: ${sites.length}</div>
+            <div class="card">Tasks: ${tasks.length}</div>
+            <div class="card">Issues: ${issues.length}</div>
         `;
     }
 
-    /* -------- PROJECT -------- */
+    /* SITE */
+    else if(page === "site") {
+        content.innerHTML = `
+            <div class="card"><h2>🏗 Site Master</h2></div>
+
+            <table>
+                <tr><th>ID</th><th>Name</th><th>Status</th></tr>
+                ${sites.map(s => `
+                    <tr>
+                        <td>${s.id}</td>
+                        <td>${s.name || "-"}</td>
+                        <td>${s.status || "-"}</td>
+                    </tr>
+                `).join("")}
+            </table>
+        `;
+    }
+
+    /* PROJECT */
     else if(page === "project") {
         content.innerHTML = `
             <div class="card">
-                <h2>📁 프로젝트</h2>
-                <button onclick="addTask()">+ Task 추가</button>
+                <h2>📁 Project Tasks</h2>
+                <button onclick="addTask()">+ Task</button>
             </div>
 
             ${tasks.map(t => `
                 <div class="card">
-                    ${t.name}
+                    <b>${t.name}</b><br/>
+                    Progress: ${t.progress || 0}%
                 </div>
             `).join("")}
         `;
     }
 
-    /* -------- GANTT -------- */
+    /* GANTT */
     else if(page === "gantt") {
-
         content.innerHTML = `
-            <div class="card"><h2>📅 Gantt Chart (Realtime)</h2></div>
-
+            <div class="card"><h2>📅 Gantt Chart</h2></div>
             <div class="gantt">
-                ${tasks.map(t => `
-                    <div class="gantt-row">
-                        <div class="gantt-label">${t.name}</div>
-                        <div class="gantt-track">
-                            <div class="gantt-bar"
-                                style="left:${t.start*10}px;width:${t.duration*10}px">
-                            </div>
-                        </div>
-                    </div>
-                `).join("")}
+                ${tasks.map(drawGantt).join("")}
             </div>
         `;
-
-        document.querySelectorAll(".gantt-bar").forEach((b,i) => {
-            drag(b, tasks[i]);
-        });
     }
 
-    /* -------- ISSUE -------- */
-    else if(page === "intake") {
+    /* ISSUE */
+    else if(page === "issue") {
         content.innerHTML = `
             <div class="card">
-                <h2>📥 이슈</h2>
-                <button onclick="addIssue()">+ 추가</button>
+                <h2>📥 Issues</h2>
+                <button onclick="addIssue()">+ Issue</button>
             </div>
 
             ${issues.map(i => `
                 <div class="card">
                     <b>${i.title}</b><br/>
-                    ${i.status}
+                    Status: ${i.status}<br/>
+                    CreatedBy: ${i.createdBy || "-"}
                 </div>
             `).join("")}
         `;
     }
 
-    /* -------- WORKFLOW -------- */
+    /* WORKFLOW */
     else if(page === "workflow") {
         content.innerHTML = `
             <div class="card"><h2>🔄 Workflow</h2></div>
@@ -326,13 +320,17 @@ function render(page) {
         `;
     }
 
-    /* -------- KPI -------- */
-    else if(page === "kpi") {
+    /* LOG */
+    else if(page === "log") {
         content.innerHTML = `
-            <div class="card"><h2>📊 KPI</h2></div>
-            <div class="card">Issues: ${issues.length}</div>
-            <div class="card">Tasks: ${tasks.length}</div>
-            <div class="card">Sites: ${sites.length}</div>
+            <div class="card"><h2>🧾 Audit Log</h2></div>
+
+            ${issues.map(i => `
+                <div class="card">
+                    <b>${i.title}</b>
+                    <pre>${JSON.stringify(i.log || [], null, 2)}</pre>
+                </div>
+            `).join("")}
         `;
     }
 }
@@ -348,7 +346,7 @@ menuItems.forEach(m => {
 
 /* INIT */
 menuItems[0].classList.add("active");
-render("site");
+render("dashboard");
 
 </script>
 
