@@ -168,12 +168,12 @@ window.addSite = async function () {
     if(!name) return;
 
     const client = prompt("고객사");
-    const project = prompt("장비");
-    const project = prompt("수량");
-    const project = prompt("계약타입");
-    const project = prompt("계약일자");
-    const project = prompt("계약종료");
-    const project = prompt("유지보수 기간");
+    const equipment = prompt("장비");
+    const quantity = prompt("수량");
+    const contractType = prompt("계약타입");
+    const contractStart = prompt("계약일자");
+    const contractEnd = prompt("계약종료");
+    const maintenancePeriod = prompt("유지보수 기간");
     const pm = prompt("PM");
 
     await addDoc(siteCol, {
