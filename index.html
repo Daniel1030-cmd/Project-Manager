@@ -4,77 +4,223 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Project-Manager | PMO System</title>
+
 <style>
 body{font-family:Arial,sans-serif;margin:0;background:#f4f6f9}
 .header{background:#1f2937;color:#fff;padding:15px;font-size:22px;font-weight:bold}
 .container{display:flex}
 .sidebar{width:240px;background:#374151;color:#fff;min-height:100vh;padding:15px}
 .sidebar li{list-style:none;padding:10px;cursor:pointer}
+.sidebar li:hover{background:#4b5563}
 .content{flex:1;padding:20px}
 .card{background:#fff;padding:20px;border-radius:8px;margin-bottom:15px}
-table{width:100%;border-collapse:collapse}
+table{width:100%;border-collapse:collapse;margin-top:15px}
 th,td{border:1px solid #ddd;padding:8px}
-input,select,textarea{width:100%;padding:8px;margin:5px 0}
-button{padding:10px 15px}
+input,select{width:100%;padding:8px;margin:5px 0;box-sizing:border-box}
+button{
+    padding:10px 15px;
+    background:#2563eb;
+    color:#fff;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+}
+button:hover{
+    background:#1d4ed8;
+}
 </style>
 </head>
+
 <body>
+
 <div class="header">Project-Manager | PMO System</div>
+
 <div class="container">
-<div class="sidebar">
-<ul>
-<li onclick="showDashboard()">대시보드</li>
-<li onclick="showProject()">프로젝트 관리</li>
-<li onclick="showSchedule()">일정 관리</li>
-<li onclick="showSupplier()">공급업체 관리</li>
-<li onclick="showIssue()">이슈 관리</li>
-</ul>
+
+    <div class="sidebar">
+        <ul>
+            <li onclick="showDashboard()">대시보드</li>
+            <li onclick="showProject()">프로젝트 관리</li>
+            <li onclick="showSchedule()">일정 관리</li>
+            <li onclick="showSupplier()">공급업체 관리</li>
+            <li onclick="showIssue()">이슈 관리</li>
+        </ul>
+    </div>
+
+    <div class="content" id="content"></div>
+
 </div>
-<div class="content" id="content"></div>
-</div>
-<script>
-let projects=JSON.parse(localStorage.getItem('projects'))||[];
 
-function save(){
- const p={
-  name:projectName.value,
-  customer:customer.value,
-  pm:pm.value,
-  status:status.value
- };
- projects.push(p);
- localStorage.setItem('projects',JSON.stringify(projects));
- showProject();
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs
+}
+from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+
+/* Firebase 설정 */
+const firebaseConfig = {
+    apiKey: "AIzaSyBouCzxzCSpmCdVqVp9-h3zSR-jps4bNtM",
+    authDomain: "project-manager-79e25.firebaseapp.com",
+    projectId: "project-manager-79e25",
+    storageBucket: "project-manager-79e25.firebasestorage.app",
+    messagingSenderId: "808738416305",
+    appId: "1:808738416305:web:b366ad2258471790852490"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let projects = [];
+
+
+/* 프로젝트 불러오기 */
+async function loadProjects(){
+
+    projects = [];
+
+    const snapshot = await getDocs(
+        collection(db,"projects")
+    );
+
+    snapshot.forEach(doc=>{
+        projects.push(doc.data());
+    });
+
 }
 
-function showDashboard(){
- document.getElementById('content').innerHTML=`
- <div class="card">
- <h2>PM Dashboard</h2>
- <p>전체 프로젝트 : ${projects.length}</p>
- </div>`;
+
+/* 프로젝트 저장 */
+async function save(){
+
+    const p = {
+        name: document.getElementById("projectName").value,
+        customer: document.getElementById("customer").value,
+        pm: document.getElementById("pm").value,
+        status: document.getElementById("status").value
+    };
+
+    await addDoc(
+        collection(db,"projects"),
+        p
+    );
+
+    await showProject();
 }
 
-function showProject(){
- let rows='';
- projects.forEach(p=>rows+=`<tr><td>${p.name}</td><td>${p.customer}</td><td>${p.pm}</td><td>${p.status}</td></tr>`);
- document.getElementById('content').innerHTML=`
- <div class="card">
- <h2>프로젝트 등록</h2>
- <input id="projectName" placeholder="프로젝트명">
- <input id="customer" placeholder="고객사">
- <input id="pm" placeholder="PM">
- <select id="status"><option>정상</option><option>지연</option><option>위험</option></select>
- <button onclick="save()">등록</button>
- <table><tr><th>프로젝트</th><th>고객사</th><th>PM</th><th>상태</th></tr>${rows}</table>
- </div>`;
+
+/* 대시보드 */
+async function showDashboard(){
+
+    await loadProjects();
+
+    document.getElementById('content').innerHTML=`
+    <div class="card">
+        <h2>PM Dashboard</h2>
+        <p>전체 프로젝트 : ${projects.length}</p>
+    </div>`;
 }
 
-function showSchedule(){document.getElementById('content').innerHTML='<div class="card"><h2>일정 관리</h2><p>EVT / DVT / PVT / MP 관리 영역</p></div>';}
-function showSupplier(){document.getElementById('content').innerHTML='<div class="card"><h2>공급업체 관리</h2><table><tr><th>업체</th><th>등급</th></tr><tr><td>LVSUN</td><td>A</td></tr></table></div>';}
-function showIssue(){document.getElementById('content').innerHTML='<div class="card"><h2>이슈 관리</h2><p>PCB 번인, 안전재고 등 관리</p></div>';}
 
+/* 프로젝트 관리 */
+async function showProject(){
+
+    await loadProjects();
+
+    let rows='';
+
+    projects.forEach(p=>{
+
+        rows += `
+        <tr>
+            <td>${p.name}</td>
+            <td>${p.customer}</td>
+            <td>${p.pm}</td>
+            <td>${p.status}</td>
+        </tr>`;
+
+    });
+
+    document.getElementById('content').innerHTML=`
+    <div class="card">
+
+        <h2>프로젝트 등록</h2>
+
+        <input id="projectName" placeholder="프로젝트명">
+
+        <input id="customer" placeholder="고객사">
+
+        <input id="pm" placeholder="PM">
+
+        <select id="status">
+            <option>정상</option>
+            <option>지연</option>
+            <option>위험</option>
+        </select>
+
+        <button id="saveBtn">등록</button>
+
+        <table>
+            <tr>
+                <th>프로젝트</th>
+                <th>고객사</th>
+                <th>PM</th>
+                <th>상태</th>
+            </tr>
+
+            ${rows}
+
+        </table>
+
+    </div>`;
+
+    document.getElementById("saveBtn")
+        .addEventListener("click", save);
+}
+
+
+/* 기타 메뉴 */
+function showSchedule(){
+
+    document.getElementById('content').innerHTML=
+    '<div class="card"><h2>일정 관리</h2><p>EVT / DVT / PVT / MP 관리 영역</p></div>';
+
+}
+
+function showSupplier(){
+
+    document.getElementById('content').innerHTML=
+    '<div class="card"><h2>공급업체 관리</h2><table><tr><th>업체</th><th>등급</th></tr><tr><td>LVSUN</td><td>A</td></tr></table></div>';
+
+}
+
+function showIssue(){
+
+    document.getElementById('content').innerHTML=
+    '<div class="card"><h2>이슈 관리</h2><p>PCB 번인, 안전재고 등 관리</p></div>';
+
+}
+
+
+/* HTML onclick에서 사용할 수 있도록 등록 */
+window.showDashboard = showDashboard;
+window.showProject = showProject;
+window.showSchedule = showSchedule;
+window.showSupplier = showSupplier;
+window.showIssue = showIssue;
+
+
+/* 최초 실행 */
 showDashboard();
+
 </script>
+
 </body>
 </html>
