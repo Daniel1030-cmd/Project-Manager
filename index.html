@@ -226,17 +226,87 @@ window.addSite = async function () {
 };
 
 /* ================= TASK ================= */
-window.addTask = async function () {
-    const name = prompt("Task 이름");
-    if(!name) return;
+window.addProject = async function(){
 
-    await addDoc(taskCol, {
-        name,
-        start: 0,
-        duration: 10
+    const siteName = prompt("현장명");
+    if(!siteName) return;
+
+
+    const receiptDate = prompt("접수일자 YYYY-MM-DD");
+
+    const symptom = prompt("접수증상");
+
+    const manager = prompt("담당자");
+
+    const phone = prompt("연락처");
+
+    const pm = prompt("담당PM");
+
+
+    await addDoc(taskCol,{
+
+        siteName,
+        receiptDate,
+        symptom,
+        manager,
+        phone,
+        pm,
+
+        status:"접수",
+
+        createdAt:serverTimestamp(),
+
+        completedAt:null,
+
+        processTime:0
+
     });
-};
 
+
+    alert("Project 등록 완료");
+
+};
+window.completeProject = async function(id, createdAt){
+
+
+    const now = new Date();
+
+
+    let start = createdAt?.toDate();
+
+
+    let diff = 0;
+
+
+    if(start){
+
+        diff = Math.round(
+            (now-start)/(1000*60*60)
+        );
+
+    }
+
+
+    await updateDoc(
+        doc(db,"tasks",id),
+        {
+
+            status:"완료",
+
+            completedAt:serverTimestamp(),
+
+            processTime:diff
+
+        }
+    );
+
+
+    alert(
+        "완료 처리 : "+diff+" 시간"
+    );
+
+};
+    
 /* ================= ISSUE ================= */
 window.addIssue = async function () {
     const title = prompt("Issue");
@@ -337,16 +407,170 @@ function render(page) {
     `;
 }
 
-    else if(page === "project") {
-        content.innerHTML = `
-            <div class="card">
-                <h2>Project</h2>
-                <button onclick="addTask()">+ Task</button>
-            </div>
+    else if(page==="project"){
 
-            ${tasks.map(t => `<div class="card">${t.name}</div>`).join("")}
-        `;
-    }
+
+let total = tasks.length;
+
+
+let complete =
+tasks.filter(
+t=>t.status==="완료"
+).length;
+
+
+
+let avg =
+tasks.length
+?
+(
+tasks.reduce(
+(a,b)=>a+(b.processTime||0)
+,0)
+/tasks.length
+).toFixed(1)
+:0;
+
+
+
+content.innerHTML=`
+
+<div class="card">
+
+<h2>Project 접수관리</h2>
+
+<button onclick="addProject()">
++ 접수등록
+</button>
+
+
+</div>
+
+
+
+<div class="card">
+
+
+<h3>자동 집계</h3>
+
+
+<p>
+전체 접수 건수 :
+<b>${total}</b>
+</p>
+
+
+<p>
+처리 완료 건수 :
+<b>${complete}</b>
+</p>
+
+
+<p>
+전체 평균 처리시간 :
+<b>${avg} 시간</b>
+</p>
+
+
+</div>
+
+
+
+<div class="card">
+
+
+<table>
+
+
+<tr>
+
+<th>현장명</th>
+<th>접수일</th>
+<th>증상</th>
+<th>담당자</th>
+<th>연락처</th>
+<th>PM</th>
+<th>상태</th>
+<th>처리시간</th>
+<th>Action</th>
+
+</tr>
+
+
+
+${tasks.map(t=>`
+
+<tr>
+
+
+<td>${t.siteName||""}</td>
+
+<td>${t.receiptDate||""}</td>
+
+<td>${t.symptom||""}</td>
+
+<td>${t.manager||""}</td>
+
+<td>${t.phone||""}</td>
+
+<td>${t.pm||""}</td>
+
+
+<td>
+${t.status||""}
+</td>
+
+
+<td>
+${t.processTime||0} h
+</td>
+
+
+
+<td>
+
+
+${
+t.status!=="완료"
+
+?
+
+`
+<button onclick="
+completeProject(
+'${t.id}',
+tasks.find(x=>x.id=='${t.id}').createdAt
+)">
+완료
+</button>
+`
+
+:
+
+"완료됨"
+
+}
+
+
+</td>
+
+
+
+</tr>
+
+
+`).join("")}
+
+
+
+</table>
+
+</div>
+
+
+`;
+
+}
 
     else if(page === "gantt") {
         content.innerHTML = `
