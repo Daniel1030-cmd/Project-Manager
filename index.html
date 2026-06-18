@@ -60,7 +60,10 @@ import {
     getFirestore,
     collection,
     addDoc,
-    getDocs
+    getDocs,
+    doc,
+    updateDoc,
+    deleteDoc
 }
 from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
@@ -86,9 +89,12 @@ async function loadProjects(){
 
     projects = [];
 
-    const snapshot = await getDocs(
-        collection(db,"projects")
-    );
+snapshot.forEach(d=>{
+    projects.push({
+        id:d.id,
+        ...d.data()
+    });
+});
 
     snapshot.forEach(doc=>{
         projects.push(doc.data());
@@ -98,7 +104,13 @@ async function loadProjects(){
 
 
 /* 프로젝트 저장 */
-async function save(){
+async function removeProject(id){
+   ...
+}
+
+async function editProject(id){
+   ...
+}
 
     const p = {
         name: document.getElementById("projectName").value,
@@ -138,13 +150,14 @@ async function showProject(){
 
     projects.forEach(p=>{
 
-        rows += `
-        <tr>
-            <td>${p.name}</td>
-            <td>${p.customer}</td>
-            <td>${p.pm}</td>
-            <td>${p.status}</td>
-        </tr>`;
+rows += `
+<tr>
+...
+<td>
+   수정버튼
+   삭제버튼
+</td>
+</tr>`;
 
     });
 
@@ -172,7 +185,7 @@ async function showProject(){
                 <th>프로젝트</th>
                 <th>고객사</th>
                 <th>PM</th>
-                <th>상태</th>
+                <th>관리</th>
             </tr>
 
             ${rows}
@@ -215,7 +228,8 @@ window.showProject = showProject;
 window.showSchedule = showSchedule;
 window.showSupplier = showSupplier;
 window.showIssue = showIssue;
-
+window.editProject = editProject;
+window.removeProject = removeProject;
 
 /* 최초 실행 */
 showDashboard();
