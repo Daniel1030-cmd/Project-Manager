@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Firebase Project Manager</title>
+<title>Realtime PMO System</title>
 
 <style>
 body {
@@ -14,23 +14,20 @@ body {
     background:#f4f6f9;
 }
 
-/* SIDEBAR */
 .sidebar {
     width:240px;
     background:#1e2a44;
     color:white;
-    padding:20px 0;
+    padding-top:20px;
 }
 
 .sidebar li {
     padding:14px 18px;
     cursor:pointer;
 }
-
-.sidebar li:hover { background:#2c3e66; }
+.sidebar li:hover { background:#2c3f66; }
 .sidebar li.active { background:#00b894; }
 
-/* CONTENT */
 .content {
     flex:1;
     padding:20px;
@@ -42,53 +39,27 @@ body {
     padding:15px;
     border-radius:10px;
     margin-bottom:15px;
-    box-shadow:0 2px 6px rgba(0,0,0,0.08);
+    box-shadow:0 2px 8px rgba(0,0,0,0.08);
 }
 
-/* GANTT */
-.gantt {
-    background:#fff;
-    padding:15px;
-    border-radius:10px;
+table {
+    width:100%;
+    border-collapse: collapse;
+    background:white;
 }
 
-.gantt-row {
-    display:flex;
-    align-items:center;
-    margin-bottom:10px;
-}
-
-.gantt-label {
-    width:160px;
+th, td {
+    border:1px solid #ddd;
+    padding:8px;
     font-size:13px;
 }
 
-.gantt-track {
-    flex:1;
-    height:20px;
-    background:#eee;
-    position:relative;
-    border-radius:6px;
-}
+th { background:#f1f2f6; }
 
-.gantt-bar {
-    position:absolute;
-    height:100%;
-    background:#3498db;
-    border-radius:6px;
-    cursor:grab;
-}
-
-/* FORM */
-input, button {
-    padding:8px;
-    margin:5px 0;
-}
 button {
+    padding:6px 10px;
+    margin:2px;
     cursor:pointer;
-    background:#00b894;
-    color:white;
-    border:none;
 }
 </style>
 </head>
@@ -97,9 +68,10 @@ button {
 
 <div class="sidebar">
     <ul>
-        <li data-page="dashboard">대시보드</li>
-        <li data-page="gantt">간트차트</li>
-        <li data-page="project">프로젝트</li>
+        <li data-page="site">현장 마스터</li>
+        <li data-page="intake">이슈 접수</li>
+        <li data-page="workflow">워크플로우</li>
+        <li data-page="log">로그</li>
     </ul>
 </div>
 
@@ -107,209 +79,175 @@ button {
 
 <script type="module">
 
-/* ==============================
-   FIREBASE INIT (여기 수정 필수)
-============================== */
+/* ================= FIREBASE ================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
 import {
     getFirestore,
     collection,
     addDoc,
-    getDocs,
     updateDoc,
-    doc
+    doc,
+    onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_DOMAIN",
+    authDomain: "YOUR_AUTH_DOMAIN",
     projectId: "YOUR_PROJECT_ID"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const colRef = collection(db, "projects");
 
-/* ==============================
-   STATE
-============================== */
-let projects = [];
+/* COLLECTIONS */
+const sitesCol = collection(db, "sites");
+const issuesCol = collection(db, "issues");
+
+/* ================= STATE ================= */
+let sites = [];
+let issues = [];
 
 const content = document.getElementById("content");
 const menuItems = document.querySelectorAll(".sidebar li");
 
-/* ==============================
-   FIRESTORE LOAD
-============================== */
-async function loadProjects() {
-    const snap = await getDocs(colRef);
-    projects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-}
+/* ================= REALTIME SYNC ================= */
 
-/* ==============================
-   CREATE PROJECT
-============================== */
-async function createProject(name) {
-    await addDoc(colRef, {
-        name,
-        start: 0,
-        duration: 10
-    });
-    await refresh();
-}
-
-/* ==============================
-   UPDATE PROJECT
-============================== */
-async function updateProject(id, data) {
-    const ref = doc(db, "projects", id);
-    await updateDoc(ref, data);
-}
-
-/* ==============================
-   REFRESH
-============================== */
-async function refresh() {
-    await loadProjects();
+/* 🔥 SITE REALTIME */
+onSnapshot(sitesCol, (snap) => {
+    sites = snap.docs.map(d => ({ id:d.id, ...d.data() }));
     render(currentPage);
-}
+});
 
-/* ==============================
-   GANTT DRAG (Level 2)
-============================== */
-function enableDrag(bar, project) {
-    let isDown = false;
-    let startX = 0;
+/* 🔥 ISSUE REALTIME */
+onSnapshot(issuesCol, (snap) => {
+    issues = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    render(currentPage);
+});
 
-    bar.addEventListener("mousedown", (e) => {
-        isDown = true;
-        startX = e.clientX;
-        bar.style.opacity = 0.7;
+/* ================= CREATE ================= */
+window.addIssue = async function() {
+    const title = prompt("이슈 제목");
+    const site = sites[0]?.id;
+
+    if(!title) return;
+
+    await addDoc(issuesCol, {
+        site,
+        title,
+        status:"New",
+        log:[{ time:new Date().toLocaleString(), action:"Created" }]
     });
+};
 
-    window.addEventListener("mousemove", (e) => {
-        if(!isDown) return;
+/* ================= UPDATE ================= */
+window.move = async function(id, status) {
+    const ref = doc(db, "issues", id);
 
-        const dx = Math.round((e.clientX - startX) / 10);
+    const issue = issues.find(i => i.id === id);
 
-        project.start += dx;
-        startX = e.clientX;
-
-        render("gantt");
+    await updateDoc(ref, {
+        status,
+        log:[...issue.log, {
+            time:new Date().toLocaleString(),
+            action:status
+        }]
     });
+};
 
-    window.addEventListener("mouseup", async () => {
-        if(isDown) {
-            isDown = false;
-            bar.style.opacity = 1;
+/* ================= RENDER ================= */
+let currentPage = "site";
 
-            await updateProject(project.id, {
-                start: project.start,
-                duration: project.duration
-            });
-        }
-    });
-}
-
-/* ==============================
-   RENDER SYSTEM
-============================== */
-let currentPage = "dashboard";
-
-async function render(page) {
+function render(page) {
     currentPage = page;
 
-    if(page === "dashboard") {
+    /* -------- SITE -------- */
+    if(page === "site") {
         content.innerHTML = `
-            <div class="card"><h2>📊 Firebase PMS Dashboard</h2></div>
+            <div class="card"><h2>🏗 현장 실시간 목록</h2></div>
 
-            <div class="card">
-                <input id="pname" placeholder="새 프로젝트"/>
-                <button onclick="window.addProject()">추가</button>
-            </div>
-
-            <div class="card">
-                총 프로젝트: ${projects.length}
-            </div>
+            <table>
+                <tr>
+                    <th>ID</th><th>이름</th><th>상태</th>
+                </tr>
+                ${sites.map(s => `
+                    <tr>
+                        <td>${s.id}</td>
+                        <td>${s.name || "-"}</td>
+                        <td>${s.status || "-"}</td>
+                    </tr>
+                `).join("")}
+            </table>
         `;
     }
 
-    else if(page === "project") {
+    /* -------- ISSUE -------- */
+    else if(page === "intake") {
         content.innerHTML = `
-            <div class="card"><h2>📁 프로젝트 리스트</h2></div>
-            ${projects.map(p => `
+            <div class="card">
+                <h2>📥 이슈 접수 (Realtime)</h2>
+                <button onclick="addIssue()">+ 이슈 추가</button>
+            </div>
+
+            <table>
+                <tr><th>ID</th><th>현장</th><th>제목</th><th>상태</th></tr>
+                ${issues.map(i => `
+                    <tr>
+                        <td>${i.id}</td>
+                        <td>${i.site}</td>
+                        <td>${i.title}</td>
+                        <td>${i.status}</td>
+                    </tr>
+                `).join("")}
+            </table>
+        `;
+    }
+
+    /* -------- WORKFLOW -------- */
+    else if(page === "workflow") {
+        content.innerHTML = `
+            <div class="card"><h2>🔄 실시간 워크플로우</h2></div>
+
+            ${issues.map(i => `
                 <div class="card">
-                    <b>${p.name}</b><br/>
-                    start: ${p.start}, duration: ${p.duration}
+                    <b>${i.title}</b><br/>
+                    상태: ${i.status}<br/><br/>
+
+                    <button onclick="move('${i.id}','Assigned')">Assign</button>
+                    <button onclick="move('${i.id}','Analyzing')">Analyze</button>
+                    <button onclick="move('${i.id}','Resolved')">Resolve</button>
+                    <button onclick="move('${i.id}','Closed')">Close</button>
                 </div>
             `).join("")}
         `;
     }
 
-    else if(page === "gantt") {
-
-        let html = projects.map(p => {
-            const left = p.start * 10;
-            const width = p.duration * 10;
-
-            return `
-                <div class="gantt-row">
-                    <div class="gantt-label">${p.name}</div>
-                    <div class="gantt-track">
-                        <div class="gantt-bar"
-                             style="left:${left}px;width:${width}px"
-                             data-id="${p.id}">
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join("");
-
+    /* -------- LOG -------- */
+    else if(page === "log") {
         content.innerHTML = `
-            <div class="card"><h2>📅 Level 2 Gantt (Drag Enabled)</h2></div>
-            <div class="gantt">${html}</div>
-        `;
+            <div class="card"><h2>🧾 실시간 로그</h2></div>
 
-        // drag attach
-        document.querySelectorAll(".gantt-bar").forEach(bar => {
-            const project = projects.find(p => p.id === bar.dataset.id);
-            enableDrag(bar, project);
-        });
+            ${issues.map(i => `
+                <div class="card">
+                    <b>${i.title}</b>
+                    <pre>${JSON.stringify(i.log || [], null, 2)}</pre>
+                </div>
+            `).join("")}
+        `;
     }
 }
 
-/* ==============================
-   GLOBAL ACTIONS
-============================== */
-window.addProject = async function() {
-    const name = document.getElementById("pname").value;
-    if(!name) return;
-
-    await createProject(name);
-};
-
-/* ==============================
-   MENU
-============================== */
-menuItems.forEach(item => {
-    item.addEventListener("click", async () => {
+/* ================= MENU ================= */
+menuItems.forEach(m => {
+    m.addEventListener("click", () => {
         menuItems.forEach(i => i.classList.remove("active"));
-        item.classList.add("active");
-
-        await refresh();
-        render(item.dataset.page);
+        m.classList.add("active");
+        render(m.dataset.page);
     });
 });
 
-/* ==============================
-   INIT
-============================== */
-(async function init(){
-    await refresh();
-
-    menuItems[0].classList.add("active");
-    render("dashboard");
-})();
+/* INIT */
+menuItems[0].classList.add("active");
+render("site");
 
 </script>
 
