@@ -266,44 +266,84 @@ window.addProject = async function(){
     alert("Project 등록 완료");
 
 };
-window.completeProject = async function(id, createdAt){
+window.completeProject = async function(id){
+
+    try {
+
+        // 현재 데이터 찾기
+        const target = tasks.find(t => t.id === id);
 
 
-    const now = new Date();
+        if(!target){
+            alert("데이터 없음");
+            return;
+        }
 
 
-    let start = createdAt?.toDate();
+        let startTime;
 
 
-    let diff = 0;
+        if(target.createdAt){
 
-
-    if(start){
-
-        diff = Math.round(
-            (now-start)/(1000*60*60)
-        );
-
-    }
-
-
-    await updateDoc(
-        doc(db,"tasks",id),
-        {
-
-            status:"완료",
-
-            completedAt:serverTimestamp(),
-
-            processTime:diff
+            startTime = target.createdAt.toDate();
 
         }
-    );
+        else{
+
+            startTime = new Date();
+
+        }
 
 
-    alert(
-        "완료 처리 : "+diff+" 시간"
-    );
+
+        const endTime = new Date();
+
+
+
+        // 시간 차이 계산
+        const diffHour =
+        Math.round(
+            (endTime - startTime)
+            /
+            (1000*60*60)
+        );
+
+
+
+        await updateDoc(
+            doc(db,"tasks",id),
+            {
+
+
+                status:"완료",
+
+
+                completedAt:
+                serverTimestamp(),
+
+
+                processTime:
+                diffHour
+
+            }
+        );
+
+
+
+        alert(
+            "완료 처리됨\n처리시간 : "
+            +diffHour+" 시간"
+        );
+
+
+    }
+    catch(err){
+
+        console.error(err);
+
+        alert("완료 처리 실패");
+
+    }
 
 };
     
@@ -536,11 +576,7 @@ t.status!=="완료"
 ?
 
 `
-<button onclick="
-completeProject(
-'${t.id}',
-tasks.find(x=>x.id=='${t.id}').createdAt
-)">
+<button onclick="completeProject('${t.id}')">
 완료
 </button>
 `
