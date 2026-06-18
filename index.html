@@ -348,15 +348,63 @@ window.completeProject = async function(id){
 };
     
 /* ================= ISSUE ================= */
-window.addIssue = async function () {
-    const title = prompt("Issue");
-    if(!title) return;
+window.addIssue = async function(){
 
-    await addDoc(issueCol, {
-        title,
-        status: "New",
-        createdAt: serverTimestamp()
+
+    const siteName =
+    prompt("현장명");
+
+    if(!siteName) return;
+
+
+
+    const content =
+    prompt("이슈 내용");
+
+
+
+    const type =
+    prompt(
+    "유형 입력\n기술 / 일정 / 자재 / 고객"
+    );
+
+
+
+    const reporter =
+    prompt("등록자");
+
+
+
+    const actionPlan =
+    prompt("추후 조치 계획");
+
+
+
+    await addDoc(issueCol,{
+
+        siteName,
+
+        content,
+
+        type,
+
+        reporter,
+
+        actionPlan,
+
+
+        status:"Open",
+
+
+        createdAt:
+        serverTimestamp()
+
     });
+
+
+
+    alert("Issue 등록 완료");
+
 };
 
 /* ================= KPI ================= */
@@ -970,20 +1018,138 @@ h
 
 }
 
-    else if(page === "issue") {
-        content.innerHTML = `
-            <div class="card">
-                <h2>Issues</h2>
-                <button onclick="addIssue()">+ Issue</button>
-            </div>
+   else if(page === "issue") {
 
-            ${issues.map(i => `
-                <div class="card">${i.title}</div>
-            `).join("")}
-        `;
-    }
+
+
+content.innerHTML=`
+
+
+<div class="card">
+
+<h2>Issue Management</h2>
+
+
+<button onclick="addIssue()">
++ Issue 등록
+</button>
+
+
+</div>
+
+
+
+<div class="card">
+
+
+<table>
+
+
+<tr>
+
+<th>현장명</th>
+
+<th>이슈내용</th>
+
+<th>유형</th>
+
+<th>등록자</th>
+
+<th>조치계획</th>
+
+<th>Status</th>
+
+<th>등록일</th>
+
+
+</tr>
+
+
+
+${
+issues.map(i=>`
+
+
+<tr>
+
+
+<td>
+${i.siteName || ""}
+</td>
+
+
+
+<td>
+${i.content || ""}
+</td>
+
+
+
+<td>
+
+${i.type || ""}
+
+</td>
+
+
+
+
+<td>
+
+${i.reporter || ""}
+
+</td>
+
+
+
+
+<td>
+
+${i.actionPlan || ""}
+
+</td>
+
+
+
+<td>
+
+${i.status || ""}
+
+</td>
+
+
+
+<td>
+
+${
+i.createdAt
+?
+i.createdAt.toDate()
+.toLocaleDateString()
+:""
 }
 
+</td>
+
+
+
+</tr>
+
+
+`).join("")
+}
+
+
+
+</table>
+
+
+</div>
+
+
+`;
+
+}
 /* ================= MENU ================= */
 menu.forEach(m => {
     m.onclick = () => {
