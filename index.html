@@ -126,13 +126,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* ================= COLLECTION (중요: sites 통일) ================= */
+/* ================= COLLECTION ================= */
 const siteCol = collection(db, "site");
 const taskCol = collection(db, "tasks");
 const issueCol = collection(db, "issues");
 
 /* ================= STATE ================= */
-let site = [];
+let sites = [];
 let tasks = [];
 let issues = [];
 let current = "dashboard";
@@ -144,21 +144,21 @@ const user = "PM";
 
 /* ================= REALTIME ================= */
 onSnapshot(siteCol, snap => {
-    site = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    sites = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     render(current);
 });
 
 onSnapshot(taskCol, snap => {
-    tasks = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     render(current);
 });
 
 onSnapshot(issueCol, snap => {
-    issues = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    issues = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     render(current);
 });
 
-/* ================= SITE ADD ================= */
+/* ================= SITE CREATE ================= */
 window.addSite = async function () {
 
     const name = prompt("현장명");
@@ -173,15 +173,17 @@ window.addSite = async function () {
         client,
         project,
         pm,
-        status:"준비",
-        risk:"Low",
+        status: "준비",
+        risk: "Low",
         createdAt: serverTimestamp()
     });
 };
 
-/* ================= SITE STATUS ================= */
-window.updateSitetatus = async function(id, status) {
-    await updateDoc(doc(db,"site",id), { status });
+/* ================= SITE STATUS UPDATE (FIXED) ================= */
+window.updateSiteStatus = async function(id, status) {
+    await updateDoc(doc(db,"site",id), {
+        status
+    });
 };
 
 /* ================= TASK ================= */
@@ -191,8 +193,8 @@ window.addTask = async function () {
 
     await addDoc(taskCol, {
         name,
-        start:0,
-        duration:10
+        start: 0,
+        duration: 10
     });
 };
 
@@ -203,14 +205,14 @@ window.addIssue = async function () {
 
     await addDoc(issueCol, {
         title,
-        status:"New",
+        status: "New",
         createdAt: serverTimestamp()
     });
 };
 
 /* ================= KPI ================= */
 function kpi() {
-    const closed = issues.filter(i => i.status==="Closed").length;
+    const closed = issues.filter(i => i.status === "Closed").length;
     return {
         total: issues.length,
         rate: issues.length ? (closed/issues.length*100).toFixed(1) : 0
@@ -234,18 +236,18 @@ function ganttRow(t) {
 function render(page) {
     current = page;
 
-    if(page==="dashboard") {
-        const kk = kpi();
+    if(page === "dashboard") {
+        const k = kpi();
         content.innerHTML = `
             <div class="card"><h2>PMO Dashboard</h2></div>
-            <div class="card">Site: ${site.length}</div>
+            <div class="card">Sites: ${sites.length}</div>
             <div class="card">Tasks: ${tasks.length}</div>
             <div class="card">Issues: ${issues.length}</div>
-            <div class="card">Close Rate: ${kk.rate}%</div>
+            <div class="card">Close Rate: ${k.rate}%</div>
         `;
     }
 
-    else if(page==="site") {
+    else if(page === "site") {
         content.innerHTML = `
             <div class="card">
                 <h2>Site Master</h2>
@@ -264,18 +266,18 @@ function render(page) {
                         <th>Action</th>
                     </tr>
 
-                    ${site.map(s=>`
+                    ${sites.map(s => `
                         <tr>
                             <td>${s.id}</td>
-                            <td>${s.name||""}</td>
-                            <td>${s.client||""}</td>
-                            <td>${s.project||""}</td>
-                            <td>${s.pm||""}</td>
-                            <td>${s.status||""}</td>
+                            <td>${s.name || ""}</td>
+                            <td>${s.client || ""}</td>
+                            <td>${s.project || ""}</td>
+                            <td>${s.pm || ""}</td>
+                            <td>${s.status || ""}</td>
                             <td>
-                                <button onclick="updateSitetatus('${s.id}','진행')">진행</button>
-                                <button onclick="updateSitetatus('${s.id}','보류')">보류</button>
-                                <button onclick="updateSitetatus('${s.id}','완료')">완료</button>
+                                <button onclick="updateSiteStatus('${s.id}','진행')">진행</button>
+                                <button onclick="updateSiteStatus('${s.id}','보류')">보류</button>
+                                <button onclick="updateSiteStatus('${s.id}','완료')">완료</button>
                             </td>
                         </tr>
                     `).join("")}
@@ -284,18 +286,18 @@ function render(page) {
         `;
     }
 
-    else if(page==="project") {
+    else if(page === "project") {
         content.innerHTML = `
             <div class="card">
                 <h2>Project</h2>
                 <button onclick="addTask()">+ Task</button>
             </div>
 
-            ${tasks.map(t=>`<div class="card">${t.name}</div>`).join("")}
+            ${tasks.map(t => `<div class="card">${t.name}</div>`).join("")}
         `;
     }
 
-    else if(page==="gantt") {
+    else if(page === "gantt") {
         content.innerHTML = `
             <div class="card"><h2>Gantt</h2></div>
             <div class="card">
@@ -304,14 +306,14 @@ function render(page) {
         `;
     }
 
-    else if(page==="issue") {
+    else if(page === "issue") {
         content.innerHTML = `
             <div class="card">
                 <h2>Issues</h2>
                 <button onclick="addIssue()">+ Issue</button>
             </div>
 
-            ${issues.map(i=>`
+            ${issues.map(i => `
                 <div class="card">${i.title}</div>
             `).join("")}
         `;
@@ -319,9 +321,9 @@ function render(page) {
 }
 
 /* ================= MENU ================= */
-menu.forEach(m=>{
-    m.onclick=()=>{
-        menu.forEach(x=>x.classList.remove("active"));
+menu.forEach(m => {
+    m.onclick = () => {
+        menu.forEach(x => x.classList.remove("active"));
         m.classList.add("active");
         render(m.dataset.page);
     };
