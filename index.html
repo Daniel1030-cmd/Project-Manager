@@ -95,7 +95,7 @@ button {
         <li data-page="dashboard">Dashboard</li>
         <li data-page="site">Site</li>
         <li data-page="project">Project</li>
-        <li data-page="statistics">Statistics</li>
+        <li data-page="gantt">Gantt</li>
         <li data-page="issue">Issue</li>
     </ul>
 </div>
@@ -348,68 +348,24 @@ window.completeProject = async function(id){
 };
     
 /* ================= ISSUE ================= */
-window.addIssue = async function(){
+window.addIssue = async function () {
+    const title = prompt("Issue");
+    if(!title) return;
 
-
-    const siteName =
-    prompt("현장명");
-
-    if(!siteName) return;
-
-
-
-    const content =
-    prompt("이슈 내용");
-
-
-
-    const type =
-    prompt(
-    "유형 입력\n기술 / 일정 / 자재 / 고객"
-    );
-
-
-
-    const reporter =
-    prompt("등록자");
-
-
-
-    const actionPlan =
-    prompt("추후 조치 계획");
-
-
-
-    await addDoc(issueCol,{
-
-    siteName,
-
-    content,
-
-    type,
-
-    reporter,
-
-    actionPlan,
-
-    createdAt:
-    serverTimestamp()
-
-});
-
-
-    alert("Issue 등록 완료");
-
+    await addDoc(issueCol, {
+        title,
+        status: "New",
+        createdAt: serverTimestamp()
+    });
 };
 
 /* ================= KPI ================= */
 function kpi() {
-
+    const closed = issues.filter(i => i.status === "Closed").length;
     return {
         total: issues.length,
-        rate: 0
+        rate: issues.length ? (closed/issues.length*100).toFixed(1) : 0
     };
-
 }
 
 /* ================= GANTT ================= */
@@ -459,7 +415,7 @@ function render(page) {
                     <th>계약종료</th>
                     <th>유지보수기간</th>
                     <th>PM</th>
-                    <th>status</th>
+                    <th>Status</th>
                     <th>Action</th>
                 </tr>
 
@@ -652,494 +608,29 @@ t.status!=="완료"
 
 }
 
-else if(page==="statistics"){
+    else if(page === "gantt") {
+        content.innerHTML = `
+            <div class="card"><h2>Gantt</h2></div>
+            <div class="card">
+                ${tasks.map(ganttRow).join("")}
+            </div>
+        `;
+    }
 
+    else if(page === "issue") {
+        content.innerHTML = `
+            <div class="card">
+                <h2>Issues</h2>
+                <button onclick="addIssue()">+ Issue</button>
+            </div>
 
-
-function getDate(v){
-
-    if(!v) return null;
-
-    if(v.toDate)
-        return v.toDate();
-
-    return new Date(v);
-
+            ${issues.map(i => `
+                <div class="card">${i.title}</div>
+            `).join("")}
+        `;
+    }
 }
 
-
-
-function filterData(type){
-
-
-    const now=new Date();
-
-
-    return tasks.filter(t=>{
-
-
-        const d=getDate(t.createdAt);
-
-        if(!d) return false;
-
-
-
-        if(type==="day"){
-
-            return d.toDateString()
-            ===now.toDateString();
-
-        }
-
-
-
-        if(type==="week"){
-
-
-            const one =
-            new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            now.getDate()-7
-            );
-
-
-            return d>=one;
-
-        }
-
-
-
-        if(type==="month"){
-
-
-            return (
-            d.getMonth()
-            ===now.getMonth()
-            &&
-            d.getFullYear()
-            ===now.getFullYear()
-            );
-
-        }
-
-
-
-    });
-
-
-}
-
-
-
-
-function completeCount(data){
-
-return data.filter(
-x=>x.status==="완료"
-).length;
-
-}
-
-
-
-
-function avgTime(data){
-
-if(data.length===0)
-return 0;
-
-
-return (
-
-data.reduce(
-(a,b)=>
-a+(b.processTime||0)
-,0)
-
-/
-
-data.length
-
-).toFixed(1);
-
-
-}
-
-
-
-
-
-let day =
-filterData("day");
-
-
-let week =
-filterData("week");
-
-
-let month =
-filterData("month");
-
-
-
-
-
-/* 현장별 통계 */
-
-let siteMap={};
-
-
-
-tasks.forEach(t=>{
-
-
-const name=t.siteName||"미등록";
-
-
-if(!siteMap[name]){
-
-
-siteMap[name]={
-
-total:0,
-
-complete:0,
-
-time:0
-
-};
-
-
-}
-
-
-
-siteMap[name].total++;
-
-
-
-if(t.status==="완료")
-siteMap[name].complete++;
-
-
-
-siteMap[name].time +=
-t.processTime||0;
-
-
-
-});
-
-
-
-
-
-content.innerHTML=`
-
-<div class="card">
-
-
-<h2>
-Project Statistics
-</h2>
-
-
-</div>
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-Period Analysis
-</h3>
-
-
-<table>
-
-
-<tr>
-
-<th>Period</th>
-
-<th>Received</th>
-
-<th>Completed</th>
-
-<th>Avg Process Time</th>
-
-
-</tr>
-
-
-
-
-<tr>
-
-<td>Daily</td>
-
-<td>${day.length}</td>
-
-<td>${completeCount(day)}</td>
-
-<td>${avgTime(day)} h</td>
-
-
-</tr>
-
-
-
-
-<tr>
-
-<td>Weekly</td>
-
-<td>${week.length}</td>
-
-<td>${completeCount(week)}</td>
-
-<td>${avgTime(week)} h</td>
-
-
-</tr>
-
-
-
-
-<tr>
-
-<td>Monthly</td>
-
-<td>${month.length}</td>
-
-<td>${completeCount(month)}</td>
-
-<td>${avgTime(month)} h</td>
-
-
-</tr>
-
-
-
-</table>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-Site Performance
-</h3>
-
-
-
-<table>
-
-
-<tr>
-
-<th>Site</th>
-
-<th>Total</th>
-
-<th>Completed</th>
-
-<th>Avg Time</th>
-
-</tr>
-
-
-
-
-${
-Object.keys(siteMap)
-.map(k=>{
-
-
-let s=siteMap[k];
-
-
-return `
-
-<tr>
-
-<td>${k}</td>
-
-<td>${s.total}</td>
-
-<td>${s.complete}</td>
-
-<td>
-
-${
-(s.time/s.total).toFixed(1)
-}
-
-h
-
-</td>
-
-
-</tr>
-
-
-`;
-
-})
-.join("")
-
-}
-
-
-
-</table>
-
-
-</div>
-
-
-`;
-
-}
-
-   else if(page === "issue") {
-
-
-
-content.innerHTML=`
-
-
-<div class="card">
-
-<h2>Issue Management</h2>
-
-
-<button onclick="addIssue()">
-+ Issue 등록
-</button>
-
-
-</div>
-
-
-
-<div class="card">
-
-
-<table>
-
-
-<tr>
-
-<th>현장명</th>
-
-<th>이슈내용</th>
-
-<th>유형</th>
-
-<th>등록자</th>
-
-<th>조치계획</th>
-
-<th>등록일</th>
-
-
-</tr>
-
-
-
-${
-issues.map(i=>`
-
-
-<tr>
-
-
-<td>
-${i.siteName || ""}
-</td>
-
-
-
-<td>
-${i.content || ""}
-</td>
-
-
-
-<td>
-
-${i.type || ""}
-
-</td>
-
-
-
-
-<td>
-
-${i.reporter || ""}
-
-</td>
-
-
-
-
-<td>
-
-${i.actionPlan || ""}
-
-</td>
-
-
-
-
-
-
-
-<td>
-
-${
-i.createdAt
-?
-i.createdAt.toDate()
-.toLocaleDateString()
-:""
-}
-
-</td>
-
-
-
-</tr>
-
-
-`).join("")
-}
-
-
-
-</table>
-
-
-</div>
-
-
-`;
-
-}
 /* ================= MENU ================= */
 menu.forEach(m => {
     m.onclick = () => {
