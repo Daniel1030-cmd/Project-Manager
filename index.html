@@ -259,49 +259,56 @@ function render(page) {
         `;
     }
 
-    else if(page === "site") {
-        content.innerHTML = `
-            <div class="card">
-                <h2>Site Master</h2>
-                <button onclick="addSite()">+ Site</button>
-            </div>
+   else if(page === "site") {
+    content.innerHTML = `
+        <div class="card">
+            <h2>Site Master</h2>
+            <button onclick="addSite()">+ Site</button>
+        </div>
 
-            <div class="card">
-                <table>
+        <div class="card">
+            <table>
+                <tr>
+                    <th>현장명</th>
+                    <th>고객사</th>
+                    <th>장비</th>
+                    <th>수량</th>
+                    <th>계약타입</th>
+                    <th>계약일자</th>
+                    <th>계약종료</th>
+                    <th>유지보수기간</th>
+                    <th>PM</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+
+                ${site.map(s => `
                     <tr>
-                        <th>고객사</th>
-                        <th>장비</th>
-                        <th>수량</th>
-                        <th>계약타입</th>
-                        <th>계약일자</th>
-                        <th>계약종료</th>
-                        <th>유지보수 기간</th>
-                        <th>PM</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
+                        <td>${s.name || ""}</td>
+                        <td>${s.client || ""}</td>
+                        <td>${s.equipment || ""}</td>
+                        <td>${s.quantity || ""}</td>
+                        <td>${s.contractType || ""}</td>
+                        <td>${s.contractStart || ""}</td>
+                        <td>${s.contractEnd || ""}</td>
+                        <td>${s.maintenancePeriod || ""}</td>
+                        <td>${s.pm || ""}</td>
+                        <td>${s.status || ""}</td>
+                        <td>
+                            <button onclick="updateSiteStatus('${s.id}','진행')">
+                                진행
+                            </button>
 
-                    ${site.map(s => `
-                        <tr>
-                            <td>${s.고객사 || ""}</td>
-                            <td>${s.장비 || ""}</td>
-                            <td>${s.수량 || ""}</td>
-                            <td>${s.계약타입 || ""}</td>
-                            <td>${s.계약일자 || ""}</td>
-                            <td>${s.계약종료 || ""}</td>
-                            <td>${s.유지보수 기간 || ""}</td>
-                            <td>${s.PM || ""}</td>
-                            <td>${s.status || ""}</td>
-                            <td>
-                                <button onclick="updateSitetatus('${s.id}','진행')">진행</button>
-                                <button onclick="updateSitetatus('${s.id}','만료')">만료</button>
-                            </td>
-                        </tr>
-                    `).join("")}
-                </table>
-            </div>
-        `;
-    }
+                            <button onclick="updateSiteStatus('${s.id}','만료')">
+                                만료
+                            </button>
+                        </td>
+                    </tr>
+                `).join("")}
+            </table>
+        </div>
+    `;
+}
 
     else if(page === "project") {
         content.innerHTML = `
