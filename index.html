@@ -382,25 +382,20 @@ window.addIssue = async function(){
 
     await addDoc(issueCol,{
 
-        siteName,
+    siteName,
 
-        content,
+    content,
 
-        type,
+    type,
 
-        reporter,
+    reporter,
 
-        actionPlan,
+    actionPlan,
 
+    createdAt:
+    serverTimestamp()
 
-        status:"Open",
-
-
-        createdAt:
-        serverTimestamp()
-
-    });
-
+});
 
 
     alert("Issue 등록 완료");
@@ -409,7 +404,6 @@ window.addIssue = async function(){
 
 /* ================= KPI ================= */
 function kpi() {
-    const closed = issues.filter(i => i.status === "Closed").length;
     return {
         total: issues.length,
         rate: issues.length ? (closed/issues.length*100).toFixed(1) : 0
@@ -463,7 +457,6 @@ function render(page) {
                     <th>계약종료</th>
                     <th>유지보수기간</th>
                     <th>PM</th>
-                    <th>Status</th>
                     <th>Action</th>
                 </tr>
 
@@ -1111,11 +1104,7 @@ ${i.actionPlan || ""}
 
 
 
-<td>
 
-${i.status || ""}
-
-</td>
 
 
 
