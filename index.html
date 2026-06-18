@@ -269,10 +269,13 @@ function render(page) {
             <div class="card">
                 <table>
                     <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Client</th>
-                        <th>Project</th>
+                        <th>고객사</th>
+                        <th>장비</th>
+                        <th>수량</th>
+                        <th>계약타입</th>
+                        <th>계약일자</th>
+                        <th>계약종료</th>
+                        <th>유지보수 기간</th>
                         <th>PM</th>
                         <th>Status</th>
                         <th>Action</th>
@@ -280,16 +283,18 @@ function render(page) {
 
                     ${site.map(s => `
                         <tr>
-                            <td>${s.id}</td>
-                            <td>${s.name || ""}</td>
-                            <td>${s.client || ""}</td>
-                            <td>${s.project || ""}</td>
-                            <td>${s.pm || ""}</td>
+                            <td>${s.고객사 || ""}</td>
+                            <td>${s.장비 || ""}</td>
+                            <td>${s.수량 || ""}</td>
+                            <td>${s.계약타입 || ""}</td>
+                            <td>${s.계약일자 || ""}</td>
+                            <td>${s.계약종료 || ""}</td>
+                            <td>${s.유지보수 기간 || ""}</td>
+                            <td>${s.PM || ""}</td>
                             <td>${s.status || ""}</td>
                             <td>
                                 <button onclick="updateSitetatus('${s.id}','진행')">진행</button>
-                                <button onclick="updateSitetatus('${s.id}','보류')">보류</button>
-                                <button onclick="updateSitetatus('${s.id}','완료')">완료</button>
+                                <button onclick="updateSitetatus('${s.id}','만료')">만료</button>
                             </td>
                         </tr>
                     `).join("")}
