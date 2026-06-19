@@ -224,7 +224,28 @@ window.addSite = async function () {
     }
 
 };
+window.updateIssueStatus = async function(id,status){
 
+    try{
+
+        await updateDoc(
+            doc(db,"issues",id),
+            {
+                status:status
+            }
+        );
+
+        alert("이슈 상태 변경 완료");
+
+    }catch(err){
+
+        console.error(err);
+
+        alert("상태 변경 실패");
+
+    }
+
+};
 /* ================= TASK ================= */
 window.addProject = async function(){
 
@@ -349,15 +370,49 @@ window.completeProject = async function(id){
     
 /* ================= ISSUE ================= */
 window.addIssue = async function () {
-    const title = prompt("Issue");
-    if(!title) return;
 
-    await addDoc(issueCol, {
-        title,
-        status: "New",
-        createdAt: serverTimestamp()
-    });
-};
+    try {
+
+        const siteName = prompt("현장명");
+        if(!siteName) return;
+
+        const type = prompt(
+`유형 입력
+
+기술
+일정
+자재
+고객`
+        );
+
+        const content = prompt("이슈 내용");
+
+        const writer = prompt("등록자");
+
+        await addDoc(issueCol, {
+
+            siteName,
+            type,
+            content,
+            writer,
+
+            status : "Open",
+
+            createdAt : serverTimestamp()
+
+        });
+
+        alert("이슈 등록 완료");
+
+    } catch(err){
+
+        console.error(err);
+
+        alert("등록 실패");
+
+    }
+
+}
 
 /* ================= KPI ================= */
 function kpi() {
@@ -971,17 +1026,82 @@ h
 }
 
     else if(page === "issue") {
-        content.innerHTML = `
-            <div class="card">
-                <h2>Issues</h2>
-                <button onclick="addIssue()">+ Issue</button>
-            </div>
 
-            ${issues.map(i => `
-                <div class="card">${i.title}</div>
-            `).join("")}
-        `;
-    }
+content.innerHTML = `
+
+<div class="card">
+
+    <h2>Issue Management</h2>
+
+    <button onclick="addIssue()">
+        + Issue 등록
+    </button>
+
+</div>
+
+<div class="card">
+
+<table>
+
+<tr>
+
+    <th>현장명</th>
+    <th>유형</th>
+    <th>이슈내용</th>
+    <th>등록자</th>
+    <th>상태</th>
+    <th>Action</th>
+
+</tr>
+
+${issues.map(i=>`
+
+<tr>
+
+    <td>${i.siteName||""}</td>
+
+    <td>${i.type||""}</td>
+
+    <td>${i.content||""}</td>
+
+    <td>${i.writer||""}</td>
+
+    <td>${i.status||""}</td>
+
+    <td>
+
+        <button onclick="
+        updateIssueStatus(
+        '${i.id}',
+        'In Progress'
+        )">
+
+        진행
+
+        </button>
+
+        <button onclick="
+        updateIssueStatus(
+        '${i.id}',
+        'Closed'
+        )">
+
+        완료
+
+        </button>
+
+    </td>
+
+</tr>
+
+`).join("")}
+
+</table>
+
+</div>
+
+`;
+
 }
 
 /* ================= MENU ================= */
