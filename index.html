@@ -349,30 +349,14 @@ window.completeProject = async function(id){
     
 /* ================= ISSUE ================= */
 window.addIssue = async function () {
-
-    const siteName = prompt("현장명");
-    if(!siteName) return;
-
-    const type = prompt("유형 (기술 / 일정 / 자재 / 고객)");
-    if(!type) return;
-
-    const content = prompt("이슈내용");
-    if(!content) return;
-
-    const writer = prompt("등록자");
-    if(!writer) return;
+    const title = prompt("Issue");
+    if(!title) return;
 
     await addDoc(issueCol, {
-        siteName,
-        type,
-        content,
-        writer,
-        status: "등록",
+        title,
+        status: "New",
         createdAt: serverTimestamp()
     });
-
-    alert("이슈 등록 완료");
-
 };
 
 /* ================= KPI ================= */
@@ -984,56 +968,20 @@ h
 
 `;
 
-} // statistics 끝
+}
 
     else if(page === "issue") {
+        content.innerHTML = `
+            <div class="card">
+                <h2>Issues</h2>
+                <button onclick="addIssue()">+ Issue</button>
+            </div>
 
-    content.innerHTML = `
-
-        <div class="card">
-            <h2>Issue Management</h2>
-
-            <button onclick="addIssue()">
-                + Issue 등록
-            </button>
-        </div>
-
-        <div class="card">
-
-            <table>
-
-                <tr>
-                    <th>현장명</th>
-                    <th>유형</th>
-                    <th>이슈내용</th>
-                    <th>등록자</th>
-                    <th>상태</th>
-                </tr>
-
-                ${issues.map(i => `
-
-                    <tr>
-
-                        <td>${i.siteName || ""}</td>
-
-                        <td>${i.type || ""}</td>
-
-                        <td>${i.content || ""}</td>
-
-                        <td>${i.writer || ""}</td>
-
-                        <td>${i.status || ""}</td>
-
-                    </tr>
-
-                `).join("")}
-
-            </table>
-
-        </div>
-
-    `;
-
+            ${issues.map(i => `
+                <div class="card">${i.title}</div>
+            `).join("")}
+        `;
+    }
 }
 
 /* ================= MENU ================= */
