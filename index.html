@@ -224,28 +224,7 @@ window.addSite = async function () {
     }
 
 };
-window.updateIssueStatus = async function(id,status){
 
-    try{
-
-        await updateDoc(
-            doc(db,"issues",id),
-            {
-                status:status
-            }
-        );
-
-        alert("이슈 상태 변경 완료");
-
-    }catch(err){
-
-        console.error(err);
-
-        alert("상태 변경 실패");
-
-    }
-
-};
 /* ================= TASK ================= */
 window.addProject = async function(){
 
@@ -371,48 +350,30 @@ window.completeProject = async function(id){
 /* ================= ISSUE ================= */
 window.addIssue = async function () {
 
-    try {
+    const siteName = prompt("현장명");
+    if(!siteName) return;
 
-        const siteName = prompt("현장명");
-        if(!siteName) return;
+    const type = prompt("유형 (기술 / 일정 / 자재 / 고객)");
+    if(!type) return;
 
-        const type = prompt(
-`유형 입력
+    const content = prompt("이슈내용");
+    if(!content) return;
 
-기술
-일정
-자재
-고객`
-        );
+    const writer = prompt("등록자");
+    if(!writer) return;
 
-        const content = prompt("이슈 내용");
+    await addDoc(issueCol, {
+        siteName,
+        type,
+        content,
+        writer,
+        status: "등록",
+        createdAt: serverTimestamp()
+    });
 
-        const writer = prompt("등록자");
+    alert("이슈 등록 완료");
 
-        await addDoc(issueCol, {
-
-            siteName,
-            type,
-            content,
-            writer,
-
-            status : "Open",
-
-            createdAt : serverTimestamp()
-
-        });
-
-        alert("이슈 등록 완료");
-
-    } catch(err){
-
-        console.error(err);
-
-        alert("등록 실패");
-
-    }
-
-}
+};
 
 /* ================= KPI ================= */
 function kpi() {
@@ -665,14 +626,19 @@ t.status!=="완료"
 
 else if(page==="statistics"){
 
-    content.innerHTML = `
-        <div class="card">
-            <h2>Statistics</h2>
-            <p>통계 기능 준비중</p>
-        </div>
-    `;
+
+
+function getDate(v){
+
+    if(!v) return null;
+
+    if(v.toDate)
+        return v.toDate();
+
+    return new Date(v);
 
 }
+
 
 
 function filterData(type){
@@ -1022,68 +988,54 @@ h
 
     else if(page === "issue") {
 
-content.innerHTML = `
+    content.innerHTML = `
 
-<div class="card">
+        <div class="card">
+            <h2>Issue Management</h2>
 
-<h2>Issue Management</h2>
+            <button onclick="addIssue()">
+                + Issue 등록
+            </button>
+        </div>
 
-<button onclick="addIssue()">
-+ Issue 등록
-</button>
+        <div class="card">
 
-</div>
+            <table>
 
-<div class="card">
+                <tr>
+                    <th>현장명</th>
+                    <th>유형</th>
+                    <th>이슈내용</th>
+                    <th>등록자</th>
+                    <th>상태</th>
+                </tr>
 
-<table>
+                ${issues.map(i => `
 
-<tr>
-<th>현장명</th>
-<th>유형</th>
-<th>이슈내용</th>
-<th>등록자</th>
-<th>상태</th>
-<th>Action</th>
-</tr>
+                    <tr>
 
-${issues.map(i => `
+                        <td>${i.siteName || ""}</td>
 
-<tr>
+                        <td>${i.type || ""}</td>
 
-<td>${i.siteName || ""}</td>
+                        <td>${i.content || ""}</td>
 
-<td>${i.type || ""}</td>
+                        <td>${i.writer || ""}</td>
 
-<td>${i.content || ""}</td>
+                        <td>${i.status || ""}</td>
 
-<td>${i.writer || ""}</td>
+                    </tr>
 
-<td>${i.status || ""}</td>
+                `).join("")}
 
-<td>
+            </table>
 
-<button onclick="updateIssueStatus('${i.id}','In Progress')">
-진행
-</button>
-
-<button onclick="updateIssueStatus('${i.id}','Closed')">
-완료
-</button>
-
-</td>
-
-</tr>
-
-`).join("")}
-
-</table>
-
-</div>
+        </div>
 
     `;
 
 }
+
 /* ================= MENU ================= */
 menu.forEach(m => {
     m.onclick = () => {
