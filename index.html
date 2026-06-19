@@ -1031,11 +1031,11 @@ content.innerHTML = `
 
 <div class="card">
 
-    <h2>Issue Management</h2>
+<h2>Issue Management</h2>
 
-    <button onclick="addIssue()">
-        + Issue 등록
-    </button>
+<button onclick="addIssue()">
++ Issue 등록
+</button>
 
 </div>
 
@@ -1044,53 +1044,39 @@ content.innerHTML = `
 <table>
 
 <tr>
-
-    <th>현장명</th>
-    <th>유형</th>
-    <th>이슈내용</th>
-    <th>등록자</th>
-    <th>상태</th>
-    <th>Action</th>
-
+<th>현장명</th>
+<th>유형</th>
+<th>이슈내용</th>
+<th>등록자</th>
+<th>상태</th>
+<th>Action</th>
 </tr>
 
-${issues.map(i=>`
+${issues.map(i => `
 
 <tr>
 
-    <td>${i.siteName||""}</td>
+<td>${i.siteName || ""}</td>
 
-    <td>${i.type||""}</td>
+<td>${i.type || ""}</td>
 
-    <td>${i.content||""}</td>
+<td>${i.content || ""}</td>
 
-    <td>${i.writer||""}</td>
+<td>${i.writer || ""}</td>
 
-    <td>${i.status||""}</td>
+<td>${i.status || ""}</td>
 
-    <td>
+<td>
 
-        <button onclick="
-        updateIssueStatus(
-        '${i.id}',
-        'In Progress'
-        )">
+<button onclick="updateIssueStatus('${i.id}','In Progress')">
+진행
+</button>
 
-        진행
+<button onclick="updateIssueStatus('${i.id}','Closed')">
+완료
+</button>
 
-        </button>
-
-        <button onclick="
-        updateIssueStatus(
-        '${i.id}',
-        'Closed'
-        )">
-
-        완료
-
-        </button>
-
-    </td>
+</td>
 
 </tr>
 
