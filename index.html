@@ -665,8 +665,14 @@ t.status!=="완료"
 
 else if(page==="statistics"){
 
-}
+    content.innerHTML = `
+        <div class="card">
+            <h2>Statistics</h2>
+            <p>통계 기능 준비중</p>
+        </div>
+    `;
 
+}
 
 
 function filterData(type){
@@ -1075,10 +1081,9 @@ ${issues.map(i => `
 
 </div>
 
-`;
+    `;
 
 }
-
 /* ================= MENU ================= */
 menu.forEach(m => {
     m.onclick = () => {
