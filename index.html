@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<title>PMO System</title>
+<title>danielProjectManager</title>
 
 <style>
 :root{
@@ -57,6 +57,16 @@ body{
     letter-spacing:.3px;
     border-bottom:1px solid rgba(255,255,255,.08);
     margin-bottom:8px;
+}
+
+.sidebar .brand .url{
+    display:block;
+    font-size:11px;
+    font-weight:500;
+    color:var(--accent);
+    margin-top:4px;
+    letter-spacing:.2px;
+    font-family:"SF Mono",Consolas,Menlo,monospace;
 }
 
 .sidebar ul{ list-style:none; margin:0; padding:0; }
@@ -355,7 +365,7 @@ button:focus-visible, li:focus-visible{ outline:2px solid var(--accent); outline
 
     <!-- Desktop sidebar -->
     <nav class="sidebar" id="sidebar">
-        <div class="brand">📋 PMO System</div>
+        <div class="brand">📋 danielProjectManager<span class="url">danielprojectmanager.app</span></div>
         <ul id="sidebarMenu">
             <li data-page="dashboard"><span class="ic">🏠</span>Dashboard</li>
             <li data-page="site"><span class="ic">🏗️</span>Site</li>
@@ -509,11 +519,12 @@ function openForm({ title, fields, onSubmit }){
                     ${
                         f.type === "select"
                         ? `<select id="f_${f.key}" name="${f.key}">
+                            <option value="">선택해주세요</option>
                             ${f.options.map(o => `<option value="${esc(o)}">${esc(o)}</option>`).join("")}
                            </select>`
-                        : `<input id="f_${f.key}" name="${f.key}" type="${f.type || "text"}" autocomplete="off" />`
+                        : `<input id="f_${f.key}" name="${f.key}" type="${f.type || "text"}" autocomplete="off" placeholder="${esc(f.placeholder || "")}" />`
                     }
-                    <div class="err">필수 입력 항목입니다</div>
+                    <div class="err">${esc(f.errorMsg || "필수 입력 항목입니다")}</div>
                 </div>
             `).join("")}
             <div class="modal-actions">
@@ -572,6 +583,28 @@ function openForm({ title, fields, onSubmit }){
 }
 
 /* ================= SITE ================= */
+function siteNameOptions(){
+    return site.map(s => s.name).filter(Boolean);
+}
+
+function requireSitesRegistered(){
+    if(site.length === 0){
+        showToast("먼저 Site Master에서 현장을 등록해주세요", true);
+        return false;
+    }
+    return true;
+}
+
+function noSitesBanner(){
+    return `
+        <div class="card" style="background:#fff8e8; border-color:#f5dca0;">
+            <div style="font-size:13.5px; color:#9c6b07;">
+                ⚠️ 등록된 현장이 없습니다. <strong>Site</strong> 메뉴에서 현장을 먼저 등록해주세요.
+            </div>
+        </div>
+    `;
+}
+
 window.openAddSite = function(){
     openForm({
         title: "신규 현장 등록",
@@ -610,10 +643,12 @@ window.updateSiteStatus = async function(id, status){
 
 /* ================= PROJECT (TASK) ================= */
 window.openAddProject = function(){
+    if(!requireSitesRegistered()) return;
+
     openForm({
         title: "신규 접수 등록",
         fields: [
-            { key:"siteName", label:"현장명", required:true },
+            { key:"siteName", label:"현장명", type:"select", options:siteNameOptions(), required:true, errorMsg:"현장을 선택해주세요" },
             { key:"receiptDate", label:"접수일자", type:"date", required:true },
             { key:"symptom", label:"접수증상", required:true },
             { key:"manager", label:"담당자" },
@@ -659,15 +694,25 @@ window.completeProject = async function(id){
 };
 
 /* ================= ISSUE ================= */
+const ISSUE_TYPES = ["기술", "일정", "자재", "고객"];
+
 window.openAddIssue = function(){
+    if(!requireSitesRegistered()) return;
+
     openForm({
         title: "이슈 등록",
         fields: [
-            { key:"title", label:"이슈 내용", required:true }
+            { key:"siteName", label:"현장명", type:"select", options:siteNameOptions(), required:true, errorMsg:"현장을 선택해주세요" },
+            { key:"issueType", label:"유형", type:"select", options:ISSUE_TYPES, required:true, errorMsg:"유형을 선택해주세요" },
+            { key:"title", label:"이슈 내용", required:true },
+            { key:"reporter", label:"등록자", required:true }
         ],
         onSubmit: async (data) => {
             await addDoc(issueCol, {
+                siteName: data.siteName,
+                issueType: data.issueType,
                 title: data.title,
+                reporter: data.reporter,
                 status: "New",
                 createdAt: serverTimestamp()
             });
@@ -708,6 +753,10 @@ function taskBadge(status){
 function issueBadge(status){
     const map = { "New":"new", "Closed":"done" };
     return `<span class="badge ${map[status] || "new"}">${esc(status || "New")}</span>`;
+}
+function issueTypeBadge(type){
+    const map = { "기술":"progress", "일정":"received", "자재":"ready", "고객":"new" };
+    return `<span class="badge ${map[type] || "ready"}">${esc(type || "-")}</span>`;
 }
 
 /* ================= GANTT (utility, used in Project detail-less summary) ================= */
@@ -825,6 +874,8 @@ function renderProject(){
             <h2 style="margin:0;">Project 접수관리</h2>
             <button class="primary" onclick="openAddProject()">+ 접수 등록</button>
         </div>
+
+        ${site.length === 0 ? noSitesBanner() : ""}
 
         <div class="kpi-grid">
             <div class="kpi"><div class="num">${total}</div><div class="label">전체 접수 건수</div></div>
@@ -1014,6 +1065,8 @@ function renderIssue(){
             <h2 style="margin:0;">Issues</h2>
             <button class="primary" onclick="openAddIssue()">+ 이슈 등록</button>
         </div>
+
+        ${site.length === 0 ? noSitesBanner() : ""}
     `;
 
     if(issues.length === 0){
@@ -1024,9 +1077,16 @@ function renderIssue(){
     const issueCards = issues.map(i => `
         <div class="row-card">
             <div class="rc-head">
-                <div class="rc-title">${esc(i.title)}</div>
-                ${issueBadge(i.status)}
+                <div>
+                    <div class="rc-title">${esc(i.title)}</div>
+                    <div style="margin-top:4px; display:flex; gap:5px; flex-wrap:wrap;">
+                        ${issueTypeBadge(i.issueType)}
+                        ${issueBadge(i.status)}
+                    </div>
+                </div>
             </div>
+            <div class="rc-field"><span>현장명</span><span>${esc(i.siteName) || "-"}</span></div>
+            <div class="rc-field"><span>등록자</span><span>${esc(i.reporter) || "-"}</span></div>
             <div class="rc-field"><span>등록일</span><span>${fmtDate(i.createdAt)}</span></div>
             <div class="rc-actions">
                 <button class="sm ghost" onclick="toggleIssueStatus('${i.id}','${esc(i.status)}')">
