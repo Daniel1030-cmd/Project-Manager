@@ -2,105 +2,395 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 <title>PMO System</title>
 
 <style>
-body {
+:root{
+    --navy:#1e2a44;
+    --navy-light:#2c3f66;
+    --accent:#00b894;
+    --accent-dark:#00a07e;
+    --blue:#3498db;
+    --bg:#f5f6fa;
+    --card:#ffffff;
+    --border:#e3e6ec;
+    --text:#2d3436;
+    --text-dim:#7a7f8c;
+    --danger:#e74c3c;
+    --warn:#f39c12;
+    --radius:12px;
+}
+
+*{ box-sizing:border-box; }
+
+body{
     margin:0;
-    font-family: Arial;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
     display:flex;
-    height:100vh;
-    background:#f5f6fa;
+    min-height:100vh;
+    -webkit-tap-highlight-color:transparent;
 }
 
-.sidebar {
-    width:260px;
-    background:#1e2a44;
-    color:white;
-    padding-top:20px;
-}
-
-.sidebar li {
-    padding:14px;
-    cursor:pointer;
-}
-
-.sidebar li:hover { background:#2c3f66; }
-.sidebar li.active { background:#00b894; }
-
-.content {
-    flex:1;
-    padding:20px;
-    overflow:auto;
-}
-
-.card {
-    background:white;
-    padding:15px;
-    margin-bottom:10px;
-    border-radius:10px;
-    box-shadow:0 2px 6px rgba(0,0,0,0.08);
-}
-
-table {
+/* ============ LAYOUT SHELL ============ */
+.app{
+    display:flex;
     width:100%;
-    border-collapse:collapse;
-    background:white;
+    min-height:100vh;
 }
 
-th, td {
-    border:1px solid #ddd;
-    padding:8px;
-    font-size:13px;
+/* Sidebar: desktop = fixed left rail, mobile = bottom tab bar */
+.sidebar{
+    width:240px;
+    flex-shrink:0;
+    background:var(--navy);
+    color:#fff;
+    padding:20px 0;
 }
 
-th { background:#f1f2f6; }
-
-button {
-    padding:5px 10px;
-    margin:2px;
-    cursor:pointer;
-}
-
-/* GANTT */
-.gantt-row {
-    display:flex;
+.sidebar .brand{
+    padding:0 18px 18px;
+    font-size:17px;
+    font-weight:700;
+    letter-spacing:.3px;
+    border-bottom:1px solid rgba(255,255,255,.08);
     margin-bottom:8px;
 }
 
-.gantt-label {
-    width:200px;
+.sidebar ul{ list-style:none; margin:0; padding:0; }
+
+.sidebar li{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:13px 18px;
+    cursor:pointer;
+    font-size:14px;
+    color:rgba(255,255,255,.82);
+    transition:background .15s;
+    user-select:none;
 }
 
-.gantt-track {
+.sidebar li .ic{ font-size:16px; width:20px; text-align:center; }
+.sidebar li:hover{ background:var(--navy-light); }
+.sidebar li.active{ background:var(--accent); color:#fff; font-weight:600; }
+
+.content{
     flex:1;
-    height:14px;
-    background:#eee;
-    position:relative;
+    padding:20px 22px 90px;
+    overflow-y:auto;
+    min-width:0;
 }
 
-.gantt-bar {
-    position:absolute;
-    height:100%;
-    background:#3498db;
+.topbar{ display:none; } /* shown on mobile only */
+
+/* ============ CARDS ============ */
+.card{
+    background:var(--card);
+    padding:16px 18px;
+    margin-bottom:14px;
+    border-radius:var(--radius);
+    box-shadow:0 1px 3px rgba(0,0,0,.06);
+    border:1px solid var(--border);
 }
+
+.card h2{ margin:0 0 4px; font-size:19px; }
+.card h3{ margin:0 0 10px; font-size:15px; color:var(--text); }
+.card-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+}
+.kpi{
+    background:var(--card);
+    border-radius:var(--radius);
+    border:1px solid var(--border);
+    padding:16px;
+    text-align:left;
+}
+.kpi .num{ font-size:26px; font-weight:700; color:var(--navy); }
+.kpi .label{ font-size:12.5px; color:var(--text-dim); margin-top:4px; }
+.kpi.accent .num{ color:var(--accent-dark); }
+
+/* ============ BUTTONS ============ */
+button{
+    padding:8px 14px;
+    margin:2px;
+    cursor:pointer;
+    border:none;
+    border-radius:8px;
+    background:var(--navy);
+    color:#fff;
+    font-size:13px;
+    font-weight:600;
+    transition:opacity .15s, transform .1s;
+}
+button:hover{ opacity:.88; }
+button:active{ transform:scale(.97); }
+button.primary{ background:var(--accent); }
+button.danger{ background:var(--danger); }
+button.ghost{
+    background:transparent;
+    color:var(--navy);
+    border:1px solid var(--border);
+}
+button.sm{ padding:6px 10px; font-size:12px; }
+button:disabled{ opacity:.45; cursor:not-allowed; }
+
+/* ============ TABLE (desktop) / CARD LIST (mobile) ============ */
+.table-wrap{ overflow-x:auto; }
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:var(--card);
+    font-size:13px;
+}
+th, td{
+    border-bottom:1px solid var(--border);
+    padding:10px 8px;
+    text-align:left;
+    white-space:nowrap;
+}
+th{ background:#f1f2f6; font-weight:700; color:var(--text-dim); font-size:12px; text-transform:uppercase; letter-spacing:.3px; }
+tr:hover td{ background:#fafbfc; }
+
+.row-cards{ display:none; }
+.row-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:14px;
+    margin-bottom:10px;
+}
+.row-card .rc-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:8px;
+    margin-bottom:8px;
+}
+.row-card .rc-title{ font-weight:700; font-size:14.5px; }
+.row-card .rc-field{
+    display:flex;
+    justify-content:space-between;
+    font-size:13px;
+    padding:4px 0;
+    border-top:1px dashed var(--border);
+}
+.row-card .rc-field span:first-child{ color:var(--text-dim); }
+.row-card .rc-actions{ margin-top:10px; display:flex; gap:6px; flex-wrap:wrap; }
+
+/* status badges */
+.badge{
+    display:inline-block;
+    padding:3px 9px;
+    border-radius:20px;
+    font-size:11.5px;
+    font-weight:700;
+}
+.badge.ready{ background:#eef1f7; color:#576174; }
+.badge.progress{ background:#e8f6f0; color:var(--accent-dark); }
+.badge.expired{ background:#fde9e8; color:var(--danger); }
+.badge.received{ background:#fff4e0; color:#b9770e; }
+.badge.done{ background:#e8f6f0; color:var(--accent-dark); }
+.badge.new{ background:#e6f0fb; color:#2471a3; }
+
+.empty-state{
+    text-align:center;
+    padding:36px 20px;
+    color:var(--text-dim);
+    font-size:13.5px;
+}
+
+/* ============ GANTT ============ */
+.gantt-row{ display:flex; align-items:center; margin-bottom:10px; }
+.gantt-label{ width:160px; font-size:12.5px; flex-shrink:0; padding-right:8px; }
+.gantt-track{ flex:1; height:14px; background:#eee; position:relative; border-radius:7px; overflow:hidden; }
+.gantt-bar{ position:absolute; height:100%; background:var(--blue); border-radius:7px; }
+
+/* ============ MODAL FORM (replaces window.prompt chains) ============ */
+.modal-overlay{
+    position:fixed; inset:0;
+    background:rgba(0,0,0,.45);
+    display:flex; align-items:center; justify-content:center;
+    padding:16px;
+    z-index:1000;
+}
+.modal-overlay.hidden{ display:none; }
+.modal{
+    background:#fff;
+    border-radius:var(--radius);
+    width:100%;
+    max-width:440px;
+    max-height:88vh;
+    overflow-y:auto;
+    padding:20px;
+}
+.modal h3{ margin:0 0 14px; font-size:17px; }
+.field{ margin-bottom:12px; }
+.field label{ display:block; font-size:12.5px; font-weight:600; color:var(--text-dim); margin-bottom:5px; }
+.field input, .field select{
+    width:100%;
+    padding:10px 11px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    font-size:14px;
+    font-family:inherit;
+    background:#fff;
+}
+.field input:focus, .field select:focus{ outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent); }
+.field .err{ color:var(--danger); font-size:12px; margin-top:4px; display:none; }
+.field.invalid input{ border-color:var(--danger); }
+.field.invalid .err{ display:block; }
+.modal-actions{ display:flex; gap:8px; justify-content:flex-end; margin-top:16px; }
+
+/* toast */
+.toast{
+    position:fixed;
+    bottom:100px;
+    left:50%;
+    transform:translateX(-50%) translateY(10px);
+    background:var(--navy);
+    color:#fff;
+    padding:11px 18px;
+    border-radius:30px;
+    font-size:13.5px;
+    box-shadow:0 4px 14px rgba(0,0,0,.2);
+    opacity:0;
+    transition:opacity .25s, transform .25s;
+    z-index:1100;
+    pointer-events:none;
+    max-width:88vw;
+    text-align:center;
+}
+.toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+.toast.error{ background:var(--danger); }
+
+/* ============ MOBILE ============ */
+@media (max-width:780px){
+    .app{ flex-direction:column; }
+
+    .topbar{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        background:var(--navy);
+        color:#fff;
+        padding:14px 16px;
+        font-weight:700;
+        font-size:16px;
+        position:sticky;
+        top:0;
+        z-index:50;
+    }
+
+    .sidebar{
+        display:none;
+    }
+
+    /* bottom tab bar */
+    .tabbar{
+        display:flex;
+        position:fixed;
+        bottom:0; left:0; right:0;
+        background:var(--navy);
+        z-index:100;
+        box-shadow:0 -2px 10px rgba(0,0,0,.15);
+        padding-bottom:env(safe-area-inset-bottom);
+    }
+    .tabbar li{
+        flex:1;
+        text-align:center;
+        padding:9px 2px 8px;
+        color:rgba(255,255,255,.65);
+        font-size:11px;
+        cursor:pointer;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        gap:3px;
+    }
+    .tabbar li .ic{ font-size:19px; }
+    .tabbar li.active{ color:var(--accent); }
+
+    .content{ padding:14px 12px 84px; }
+
+    .kpi-grid{ grid-template-columns:repeat(2,1fr); }
+
+    .card{ padding:14px; }
+
+    /* switch table -> card list */
+    .table-wrap table{ display:none; }
+    .row-cards{ display:block; }
+
+    .card-row{ flex-direction:column; align-items:stretch; }
+    .card-row button{ width:100%; }
+
+    .modal{ max-width:100%; border-radius:14px 14px 0 0; align-self:flex-end; }
+    .modal-overlay{ align-items:flex-end; padding:0; }
+}
+
+@media (min-width:781px){
+    .tabbar{ display:none; }
+}
+
+/* focus visibility for a11y */
+button:focus-visible, li:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
 </style>
 </head>
 
 <body>
 
-<div class="sidebar">
-    <ul>
-        <li data-page="dashboard">Dashboard</li>
-        <li data-page="site">Site</li>
-        <li data-page="project">Project</li>
-        <li data-page="statistics">Statistics</li>
-        <li data-page="issue">Issue</li>
+<div class="app">
+
+    <!-- Desktop sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="brand">📋 PMO System</div>
+        <ul id="sidebarMenu">
+            <li data-page="dashboard"><span class="ic">🏠</span>Dashboard</li>
+            <li data-page="site"><span class="ic">🏗️</span>Site</li>
+            <li data-page="project"><span class="ic">🛠️</span>Project</li>
+            <li data-page="statistics"><span class="ic">📊</span>Statistics</li>
+            <li data-page="issue"><span class="ic">⚠️</span>Issue</li>
+        </ul>
+    </nav>
+
+    <div style="flex:1; min-width:0; display:flex; flex-direction:column;">
+        <!-- Mobile top bar -->
+        <div class="topbar">
+            <span id="topbarTitle">Dashboard</span>
+            <span style="font-size:13px; opacity:.8;">PM</span>
+        </div>
+
+        <main class="content" id="content"></main>
+    </div>
+
+    <!-- Mobile bottom tab bar -->
+    <ul class="tabbar" id="tabbarMenu">
+        <li data-page="dashboard"><span class="ic">🏠</span>Home</li>
+        <li data-page="site"><span class="ic">🏗️</span>Site</li>
+        <li data-page="project"><span class="ic">🛠️</span>Project</li>
+        <li data-page="statistics"><span class="ic">📊</span>Stats</li>
+        <li data-page="issue"><span class="ic">⚠️</span>Issue</li>
     </ul>
 </div>
 
-<div class="content" id="content"></div>
+<!-- Modal root -->
+<div class="modal-overlay hidden" id="modalOverlay">
+    <div class="modal" id="modalBody"></div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script type="module">
 
@@ -129,9 +419,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* ================= COLLECTION ================= */
-const siteCol = collection(db, "site");
-const taskCol = collection(db, "tasks");
+/* ================= COLLECTIONS ================= */
+const siteCol  = collection(db, "site");
+const taskCol  = collection(db, "tasks");
 const issueCol = collection(db, "issues");
 
 /* ================= STATE ================= */
@@ -141,860 +431,651 @@ let issues = [];
 let current = "dashboard";
 
 const content = document.getElementById("content");
-const menu = document.querySelectorAll(".sidebar li");
+const PAGE_TITLES = {
+    dashboard: "Dashboard",
+    site: "Site",
+    project: "Project",
+    statistics: "Statistics",
+    issue: "Issue"
+};
 
-const user = "PM";
+/* ================= UTIL: escaping (XSS guard) ================= */
+function esc(v){
+    if(v === null || v === undefined) return "";
+    return String(v)
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+}
 
-/* ================= REALTIME ================= */
+/* ================= UTIL: toast ================= */
+let toastTimer = null;
+function showToast(msg, isError=false){
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.className = "toast show" + (isError ? " error" : "");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 2400);
+}
+
+/* ================= UTIL: date helpers ================= */
+function getDate(v){
+    if(!v) return null;
+    if(typeof v.toDate === "function") return v.toDate();
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? null : d;
+}
+
+function fmtDate(v){
+    const d = getDate(v);
+    if(!d) return "-";
+    return d.toLocaleDateString("ko-KR", { year:"numeric", month:"2-digit", day:"2-digit" });
+}
+
+/* ================= REALTIME LISTENERS ================= */
 onSnapshot(siteCol, snap => {
     site = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     render(current);
-});
+}, err => { console.error(err); showToast("Site 데이터 로드 실패", true); });
 
 onSnapshot(taskCol, snap => {
     tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     render(current);
-});
+}, err => { console.error(err); showToast("Project 데이터 로드 실패", true); });
 
 onSnapshot(issueCol, snap => {
     issues = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     render(current);
-});
+}, err => { console.error(err); showToast("Issue 데이터 로드 실패", true); });
 
-/* ================= SITE CREATE ================= */
-window.addSite = async function () {
+/* ================= MODAL FORM ENGINE ================= */
+/*
+  Replaces chained window.prompt() calls with a single accessible modal
+  that supports required fields, simple validation, and select inputs.
+  fields: [{ key, label, type:'text'|'date'|'select', required, options }]
+*/
+const overlay = document.getElementById("modalOverlay");
+const modalBody = document.getElementById("modalBody");
 
-    try {
+function openForm({ title, fields, onSubmit }){
+    modalBody.innerHTML = `
+        <h3>${esc(title)}</h3>
+        <form id="dynForm">
+            ${fields.map(f => `
+                <div class="field" data-key="${f.key}">
+                    <label for="f_${f.key}">${esc(f.label)}${f.required ? " *" : ""}</label>
+                    ${
+                        f.type === "select"
+                        ? `<select id="f_${f.key}" name="${f.key}">
+                            ${f.options.map(o => `<option value="${esc(o)}">${esc(o)}</option>`).join("")}
+                           </select>`
+                        : `<input id="f_${f.key}" name="${f.key}" type="${f.type || "text"}" autocomplete="off" />`
+                    }
+                    <div class="err">필수 입력 항목입니다</div>
+                </div>
+            `).join("")}
+            <div class="modal-actions">
+                <button type="button" class="ghost" id="cancelBtn">취소</button>
+                <button type="submit" class="primary" id="submitBtn">저장</button>
+            </div>
+        </form>
+    `;
 
-        const name = prompt("현장명");
-        if(!name) return;
+    overlay.classList.remove("hidden");
+    document.getElementById("f_" + fields[0].key)?.focus();
 
-        const client = prompt("고객사");
-        const equipment = prompt("장비");
-        const quantity = prompt("수량");
-        const contractType = prompt("계약타입");
-        const contractStart = prompt("계약일자");
-        const contractEnd = prompt("계약종료");
-        const maintenancePeriod = prompt("유지보수 기간");
-        const pm = prompt("PM");
+    function close(){
+        overlay.classList.add("hidden");
+        document.getElementById("dynForm")?.removeEventListener("submit", handleSubmit);
+    }
 
-        const docRef = await addDoc(siteCol, {
-            name,
-            client,
-            equipment,
-            quantity,
-            contractType,
-            contractStart,
-            contractEnd,
-            maintenancePeriod,
-            pm,
-            status: "준비",
-            risk: "Low",
-            createdAt: serverTimestamp()
+    document.getElementById("cancelBtn").onclick = close;
+    overlay.onclick = (e) => { if(e.target === overlay) close(); };
+
+    function handleSubmit(e){
+        e.preventDefault();
+        const data = {};
+        let valid = true;
+
+        fields.forEach(f => {
+            const el = document.getElementById("f_" + f.key);
+            const val = el.value.trim();
+            const wrap = el.closest(".field");
+            if(f.required && !val){
+                wrap.classList.add("invalid");
+                valid = false;
+            } else {
+                wrap.classList.remove("invalid");
+            }
+            data[f.key] = val;
         });
 
-        console.log("저장 성공:", docRef.id);
-        alert("저장 완료");
+        if(!valid) return;
 
-    } catch(err) {
+        const submitBtn = document.getElementById("submitBtn");
+        submitBtn.disabled = true;
+        submitBtn.textContent = "저장 중...";
 
-        console.error(err);
-        alert("저장 실패");
-
-    }
-};
-    window.updateSiteStatus = async function(id, status) {
-
-    try {
-
-        await updateDoc(
-            doc(db,"site",id),
-            {
-                status: status
-            }
-        );
-
-        alert("상태 변경 완료");
-
-    } catch(err) {
-
-        console.error(err);
-        alert("상태 변경 실패");
-
+        Promise.resolve(onSubmit(data))
+            .then(() => { close(); })
+            .catch(err => {
+                console.error(err);
+                showToast("저장 실패: 다시 시도해주세요", true);
+                submitBtn.disabled = false;
+                submitBtn.textContent = "저장";
+            });
     }
 
-};
+    document.getElementById("dynForm").addEventListener("submit", handleSubmit);
+}
 
-/* ================= TASK ================= */
-window.addProject = async function(){
-
-    const siteName = prompt("현장명");
-    if(!siteName) return;
-
-
-    const receiptDate = prompt("접수일자 YYYY-MM-DD");
-
-    const symptom = prompt("접수증상");
-
-    const manager = prompt("담당자");
-
-    const phone = prompt("연락처");
-
-    const pm = prompt("담당PM");
-
-
-    await addDoc(taskCol,{
-
-        siteName,
-        receiptDate,
-        symptom,
-        manager,
-        phone,
-        pm,
-
-        status:"접수",
-
-        createdAt:serverTimestamp(),
-
-        completedAt:null,
-
-        processTime:0
-
+/* ================= SITE ================= */
+window.openAddSite = function(){
+    openForm({
+        title: "신규 현장 등록",
+        fields: [
+            { key:"name", label:"현장명", required:true },
+            { key:"client", label:"고객사", required:true },
+            { key:"equipment", label:"장비" },
+            { key:"quantity", label:"수량", type:"number" },
+            { key:"contractType", label:"계약타입", type:"select", options:["신규","유지보수","연장"] },
+            { key:"contractStart", label:"계약일자", type:"date" },
+            { key:"contractEnd", label:"계약종료", type:"date" },
+            { key:"maintenancePeriod", label:"유지보수 기간" },
+            { key:"pm", label:"PM", required:true }
+        ],
+        onSubmit: async (data) => {
+            await addDoc(siteCol, {
+                ...data,
+                status: "준비",
+                risk: "Low",
+                createdAt: serverTimestamp()
+            });
+            showToast("현장이 등록되었습니다");
+        }
     });
-
-
-    alert("Project 등록 완료");
-
 };
+
+window.updateSiteStatus = async function(id, status){
+    try{
+        await updateDoc(doc(db,"site",id), { status });
+        showToast(`상태가 "${status}"로 변경되었습니다`);
+    } catch(err){
+        console.error(err);
+        showToast("상태 변경 실패", true);
+    }
+};
+
+/* ================= PROJECT (TASK) ================= */
+window.openAddProject = function(){
+    openForm({
+        title: "신규 접수 등록",
+        fields: [
+            { key:"siteName", label:"현장명", required:true },
+            { key:"receiptDate", label:"접수일자", type:"date", required:true },
+            { key:"symptom", label:"접수증상", required:true },
+            { key:"manager", label:"담당자" },
+            { key:"phone", label:"연락처", type:"tel" },
+            { key:"pm", label:"담당 PM" }
+        ],
+        onSubmit: async (data) => {
+            await addDoc(taskCol, {
+                ...data,
+                status: "접수",
+                createdAt: serverTimestamp(),
+                completedAt: null,
+                processTime: 0
+            });
+            showToast("접수가 등록되었습니다");
+        }
+    });
+};
+
 window.completeProject = async function(id){
-
-    try {
-
-        // 현재 데이터 찾기
+    try{
         const target = tasks.find(t => t.id === id);
-
-
         if(!target){
-            alert("데이터 없음");
+            showToast("데이터를 찾을 수 없습니다", true);
             return;
         }
 
-
-        let startTime;
-
-
-        if(target.createdAt){
-
-            startTime = target.createdAt.toDate();
-
-        }
-        else{
-
-            startTime = new Date();
-
-        }
-
-
-
+        const startTime = target.createdAt ? getDate(target.createdAt) : new Date();
         const endTime = new Date();
+        const diffHour = Math.max(0, Math.round((endTime - startTime) / (1000*60*60)));
 
+        await updateDoc(doc(db,"tasks",id), {
+            status: "완료",
+            completedAt: serverTimestamp(),
+            processTime: diffHour
+        });
 
-
-        // 시간 차이 계산
-        const diffHour =
-        Math.round(
-            (endTime - startTime)
-            /
-            (1000*60*60)
-        );
-
-
-
-        await updateDoc(
-            doc(db,"tasks",id),
-            {
-
-
-                status:"완료",
-
-
-                completedAt:
-                serverTimestamp(),
-
-
-                processTime:
-                diffHour
-
-            }
-        );
-
-
-
-        alert(
-            "완료 처리됨\n처리시간 : "
-            +diffHour+" 시간"
-        );
-
-
-    }
-    catch(err){
-
+        showToast(`완료 처리됨 · 처리시간 ${diffHour}시간`);
+    } catch(err){
         console.error(err);
-
-        alert("완료 처리 실패");
-
+        showToast("완료 처리 실패", true);
     }
-
 };
-    
-/* ================= ISSUE ================= */
-window.addIssue = async function () {
-    const title = prompt("Issue");
-    if(!title) return;
 
-    await addDoc(issueCol, {
-        title,
-        status: "New",
-        createdAt: serverTimestamp()
+/* ================= ISSUE ================= */
+window.openAddIssue = function(){
+    openForm({
+        title: "이슈 등록",
+        fields: [
+            { key:"title", label:"이슈 내용", required:true }
+        ],
+        onSubmit: async (data) => {
+            await addDoc(issueCol, {
+                title: data.title,
+                status: "New",
+                createdAt: serverTimestamp()
+            });
+            showToast("이슈가 등록되었습니다");
+        }
     });
+};
+
+window.toggleIssueStatus = async function(id, current){
+    const next = current === "Closed" ? "New" : "Closed";
+    try{
+        await updateDoc(doc(db,"issues",id), { status: next });
+        showToast(`이슈 상태: ${next}`);
+    } catch(err){
+        console.error(err);
+        showToast("이슈 상태 변경 실패", true);
+    }
 };
 
 /* ================= KPI ================= */
-function kpi() {
+function kpi(){
     const closed = issues.filter(i => i.status === "Closed").length;
     return {
         total: issues.length,
-        rate: issues.length ? (closed/issues.length*100).toFixed(1) : 0
+        rate: issues.length ? (closed/issues.length*100).toFixed(1) : "0.0"
     };
 }
 
-/* ================= GANTT ================= */
-function ganttRow(t) {
+/* ================= BADGE HELPERS ================= */
+function siteBadge(status){
+    const map = { "준비":"ready", "진행":"progress", "만료":"expired" };
+    return `<span class="badge ${map[status] || "ready"}">${esc(status || "준비")}</span>`;
+}
+function taskBadge(status){
+    const map = { "접수":"received", "완료":"done" };
+    return `<span class="badge ${map[status] || "received"}">${esc(status || "접수")}</span>`;
+}
+function issueBadge(status){
+    const map = { "New":"new", "Closed":"done" };
+    return `<span class="badge ${map[status] || "new"}">${esc(status || "New")}</span>`;
+}
+
+/* ================= GANTT (utility, used in Project detail-less summary) ================= */
+function ganttRow(t){
     return `
         <div class="gantt-row">
-            <div class="gantt-label">${t.name}</div>
+            <div class="gantt-label">${esc(t.name)}</div>
             <div class="gantt-track">
-                <div class="gantt-bar"
-                style="left:${(t.start||0)*10}px;width:${(t.duration||10)*10}px"></div>
+                <div class="gantt-bar" style="left:${(t.start||0)*10}px;width:${Math.max(4,(t.duration||10)*10)}px"></div>
             </div>
         </div>
     `;
 }
 
-/* ================= RENDER ================= */
-function render(page) {
-    current = page;
-
-    if(page === "dashboard") {
-        const k = kpi();
-        content.innerHTML = `
-            <div class="card"><h2>PMO Dashboard</h2></div>
-            <div class="card">Site: ${site.length}</div>
-            <div class="card">Tasks: ${tasks.length}</div>
-            <div class="card">Issues: ${issues.length}</div>
-            <div class="card">Close Rate: ${k.rate}%</div>
-        `;
-    }
-
-   else if(page === "site") {
+/* ================= RENDER: DASHBOARD ================= */
+function renderDashboard(){
+    const k = kpi();
     content.innerHTML = `
         <div class="card">
-            <h2>Site Master</h2>
-            <button onclick="addSite()">+ Site</button>
+            <h2>PMO Dashboard</h2>
+            <div style="color:var(--text-dim); font-size:13px;">전체 현장/접수/이슈 현황 요약</div>
         </div>
 
-        <div class="card">
-            <table>
-                <tr>
-                    <th>현장명</th>
-                    <th>고객사</th>
-                    <th>장비</th>
-                    <th>수량</th>
-                    <th>계약타입</th>
-                    <th>계약일자</th>
-                    <th>계약종료</th>
-                    <th>유지보수기간</th>
-                    <th>PM</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-
-                ${site.map(s => `
-                    <tr>
-                        <td>${s.name || ""}</td>
-                        <td>${s.client || ""}</td>
-                        <td>${s.equipment || ""}</td>
-                        <td>${s.quantity || ""}</td>
-                        <td>${s.contractType || ""}</td>
-                        <td>${s.contractStart || ""}</td>
-                        <td>${s.contractEnd || ""}</td>
-                        <td>${s.maintenancePeriod || ""}</td>
-                        <td>${s.pm || ""}</td>
-                        <td>${s.status || ""}</td>
-                        <td>
-                            <button onclick="updateSiteStatus('${s.id}','진행')">
-                                진행
-                            </button>
-
-                            <button onclick="updateSiteStatus('${s.id}','만료')">
-                                만료
-                            </button>
-                        </td>
-                    </tr>
-                `).join("")}
-            </table>
+        <div class="kpi-grid">
+            <div class="kpi"><div class="num">${site.length}</div><div class="label">전체 현장</div></div>
+            <div class="kpi"><div class="num">${tasks.length}</div><div class="label">전체 접수</div></div>
+            <div class="kpi"><div class="num">${issues.length}</div><div class="label">전체 이슈</div></div>
+            <div class="kpi accent"><div class="num">${k.rate}%</div><div class="label">이슈 종결률</div></div>
         </div>
     `;
 }
 
-    else if(page==="project"){
+/* ================= RENDER: SITE ================= */
+function renderSite(){
+    const headerCard = `
+        <div class="card card-row">
+            <h2 style="margin:0;">Site Master</h2>
+            <button class="primary" onclick="openAddSite()">+ 현장 등록</button>
+        </div>
+    `;
 
+    if(site.length === 0){
+        content.innerHTML = headerCard + `<div class="card"><div class="empty-state">등록된 현장이 없습니다.<br>위 버튼으로 첫 현장을 등록해보세요.</div></div>`;
+        return;
+    }
 
-let total = tasks.length;
+    const tableRows = site.map(s => `
+        <tr>
+            <td>${esc(s.name)}</td>
+            <td>${esc(s.client)}</td>
+            <td>${esc(s.equipment)}</td>
+            <td>${esc(s.quantity)}</td>
+            <td>${esc(s.contractType)}</td>
+            <td>${esc(s.contractStart)}</td>
+            <td>${esc(s.contractEnd)}</td>
+            <td>${esc(s.maintenancePeriod)}</td>
+            <td>${esc(s.pm)}</td>
+            <td>${siteBadge(s.status)}</td>
+            <td>
+                <button class="sm ghost" onclick="updateSiteStatus('${s.id}','진행')">진행</button>
+                <button class="sm danger" onclick="updateSiteStatus('${s.id}','만료')">만료</button>
+            </td>
+        </tr>
+    `).join("");
 
+    const cardRows = site.map(s => `
+        <div class="row-card">
+            <div class="rc-head">
+                <div class="rc-title">${esc(s.name)}</div>
+                ${siteBadge(s.status)}
+            </div>
+            <div class="rc-field"><span>고객사</span><span>${esc(s.client) || "-"}</span></div>
+            <div class="rc-field"><span>장비</span><span>${esc(s.equipment) || "-"}</span></div>
+            <div class="rc-field"><span>수량</span><span>${esc(s.quantity) || "-"}</span></div>
+            <div class="rc-field"><span>계약타입</span><span>${esc(s.contractType) || "-"}</span></div>
+            <div class="rc-field"><span>계약기간</span><span>${esc(s.contractStart) || "-"} ~ ${esc(s.contractEnd) || "-"}</span></div>
+            <div class="rc-field"><span>유지보수</span><span>${esc(s.maintenancePeriod) || "-"}</span></div>
+            <div class="rc-field"><span>PM</span><span>${esc(s.pm) || "-"}</span></div>
+            <div class="rc-actions">
+                <button class="sm ghost" onclick="updateSiteStatus('${s.id}','진행')">진행으로 변경</button>
+                <button class="sm danger" onclick="updateSiteStatus('${s.id}','만료')">만료 처리</button>
+            </div>
+        </div>
+    `).join("");
 
-let complete =
-tasks.filter(
-t=>t.status==="완료"
-).length;
-
-
-
-let avg =
-tasks.length
-?
-(
-tasks.reduce(
-(a,b)=>a+(b.processTime||0)
-,0)
-/tasks.length
-).toFixed(1)
-:0;
-
-
-
-content.innerHTML=`
-
-<div class="card">
-
-<h2>Project 접수관리</h2>
-
-<button onclick="addProject()">
-+ 접수등록
-</button>
-
-
-</div>
-
-
-
-<div class="card">
-
-
-<h3>자동 집계</h3>
-
-
-<p>
-전체 접수 건수 :
-<b>${total}</b>
-</p>
-
-
-<p>
-처리 완료 건수 :
-<b>${complete}</b>
-</p>
-
-
-<p>
-전체 평균 처리시간 :
-<b>${avg} 시간</b>
-</p>
-
-
-</div>
-
-
-
-<div class="card">
-
-
-<table>
-
-
-<tr>
-
-<th>현장명</th>
-<th>접수일</th>
-<th>증상</th>
-<th>담당자</th>
-<th>연락처</th>
-<th>PM</th>
-<th>상태</th>
-<th>처리시간</th>
-<th>Action</th>
-
-</tr>
-
-
-
-${tasks.map(t=>`
-
-<tr>
-
-
-<td>${t.siteName||""}</td>
-
-<td>${t.receiptDate||""}</td>
-
-<td>${t.symptom||""}</td>
-
-<td>${t.manager||""}</td>
-
-<td>${t.phone||""}</td>
-
-<td>${t.pm||""}</td>
-
-
-<td>
-${t.status||""}
-</td>
-
-
-<td>
-${t.processTime||0} h
-</td>
-
-
-
-<td>
-
-
-${
-t.status!=="완료"
-
-?
-
-`
-<button onclick="completeProject('${t.id}')">
-완료
-</button>
-`
-
-:
-
-"완료됨"
-
+    content.innerHTML = headerCard + `
+        <div class="card">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>현장명</th><th>고객사</th><th>장비</th><th>수량</th>
+                            <th>계약타입</th><th>계약일자</th><th>계약종료</th>
+                            <th>유지보수기간</th><th>PM</th><th>Status</th><th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>${tableRows}</tbody>
+                </table>
+            </div>
+            <div class="row-cards">${cardRows}</div>
+        </div>
+    `;
 }
 
+/* ================= RENDER: PROJECT ================= */
+function renderProject(){
+    const total = tasks.length;
+    const complete = tasks.filter(t => t.status === "완료").length;
+    const avg = tasks.length
+        ? (tasks.reduce((a,b) => a + (b.processTime || 0), 0) / tasks.length).toFixed(1)
+        : "0.0";
 
-</td>
+    const headerCard = `
+        <div class="card card-row">
+            <h2 style="margin:0;">Project 접수관리</h2>
+            <button class="primary" onclick="openAddProject()">+ 접수 등록</button>
+        </div>
 
+        <div class="kpi-grid">
+            <div class="kpi"><div class="num">${total}</div><div class="label">전체 접수 건수</div></div>
+            <div class="kpi"><div class="num">${complete}</div><div class="label">처리 완료 건수</div></div>
+            <div class="kpi accent"><div class="num">${avg}h</div><div class="label">평균 처리시간</div></div>
+        </div>
+    `;
 
+    if(tasks.length === 0){
+        content.innerHTML = headerCard + `<div class="card"><div class="empty-state">접수된 항목이 없습니다.</div></div>`;
+        return;
+    }
 
-</tr>
+    const tableRows = tasks.map(t => `
+        <tr>
+            <td>${esc(t.siteName)}</td>
+            <td>${esc(t.receiptDate)}</td>
+            <td>${esc(t.symptom)}</td>
+            <td>${esc(t.manager)}</td>
+            <td>${esc(t.phone)}</td>
+            <td>${esc(t.pm)}</td>
+            <td>${taskBadge(t.status)}</td>
+            <td>${t.processTime || 0}h</td>
+            <td>${t.status !== "완료" ? `<button class="sm primary" onclick="completeProject('${t.id}')">완료</button>` : "완료됨"}</td>
+        </tr>
+    `).join("");
 
+    const cardRows = tasks.map(t => `
+        <div class="row-card">
+            <div class="rc-head">
+                <div class="rc-title">${esc(t.siteName) || "미등록 현장"}</div>
+                ${taskBadge(t.status)}
+            </div>
+            <div class="rc-field"><span>접수일</span><span>${esc(t.receiptDate) || "-"}</span></div>
+            <div class="rc-field"><span>증상</span><span>${esc(t.symptom) || "-"}</span></div>
+            <div class="rc-field"><span>담당자</span><span>${esc(t.manager) || "-"}</span></div>
+            <div class="rc-field"><span>연락처</span><span>${esc(t.phone) || "-"}</span></div>
+            <div class="rc-field"><span>PM</span><span>${esc(t.pm) || "-"}</span></div>
+            <div class="rc-field"><span>처리시간</span><span>${t.processTime || 0}h</span></div>
+            <div class="rc-actions">
+                ${t.status !== "완료" ? `<button class="sm primary" onclick="completeProject('${t.id}')">완료 처리</button>` : `<span style="color:var(--text-dim); font-size:13px;">처리 완료됨</span>`}
+            </div>
+        </div>
+    `).join("");
 
-`).join("")}
-
-
-
-</table>
-
-</div>
-
-
-`;
-
+    content.innerHTML = headerCard + `
+        <div class="card">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>현장명</th><th>접수일</th><th>증상</th><th>담당자</th>
+                            <th>연락처</th><th>PM</th><th>상태</th><th>처리시간</th><th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>${tableRows}</tbody>
+                </table>
+            </div>
+            <div class="row-cards">${cardRows}</div>
+        </div>
+    `;
 }
 
-else if(page==="statistics"){
-
-
-
-function getDate(v){
-
-    if(!v) return null;
-
-    if(v.toDate)
-        return v.toDate();
-
-    return new Date(v);
-
-}
-
-
-
-function filterData(type){
-
-
-    const now=new Date();
-
-
-    return tasks.filter(t=>{
-
-
-        const d=getDate(t.createdAt);
-
+/* ================= RENDER: STATISTICS ================= */
+function filterByPeriod(type){
+    const now = new Date();
+    return tasks.filter(t => {
+        const d = getDate(t.createdAt);
         if(!d) return false;
 
-
-
-        if(type==="day"){
-
-            return d.toDateString()
-            ===now.toDateString();
-
+        if(type === "day"){
+            return d.toDateString() === now.toDateString();
         }
-
-
-
-        if(type==="week"){
-
-
-            const one =
-            new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            now.getDate()-7
-            );
-
-
-            return d>=one;
-
+        if(type === "week"){
+            const weekAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+            return d >= weekAgo;
         }
-
-
-
-        if(type==="month"){
-
-
-            return (
-            d.getMonth()
-            ===now.getMonth()
-            &&
-            d.getFullYear()
-            ===now.getFullYear()
-            );
-
+        if(type === "month"){
+            return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
         }
-
-
-
+        return false;
     });
-
-
 }
-
-
-
 
 function completeCount(data){
-
-return data.filter(
-x=>x.status==="완료"
-).length;
-
+    return data.filter(x => x.status === "완료").length;
 }
-
-
-
 
 function avgTime(data){
-
-if(data.length===0)
-return 0;
-
-
-return (
-
-data.reduce(
-(a,b)=>
-a+(b.processTime||0)
-,0)
-
-/
-
-data.length
-
-).toFixed(1);
-
-
+    if(data.length === 0) return "0.0";
+    return (data.reduce((a,b) => a + (b.processTime || 0), 0) / data.length).toFixed(1);
 }
 
+function renderStatistics(){
+    const day = filterByPeriod("day");
+    const week = filterByPeriod("week");
+    const month = filterByPeriod("month");
 
+    const siteMap = {};
+    tasks.forEach(t => {
+        const name = t.siteName || "미등록";
+        if(!siteMap[name]){
+            siteMap[name] = { total:0, complete:0, time:0 };
+        }
+        siteMap[name].total++;
+        if(t.status === "완료") siteMap[name].complete++;
+        siteMap[name].time += (t.processTime || 0);
+    });
 
+    const periodRows = [
+        ["Daily", day],
+        ["Weekly", week],
+        ["Monthly", month]
+    ].map(([label, data]) => `
+        <tr>
+            <td>${label}</td>
+            <td>${data.length}</td>
+            <td>${completeCount(data)}</td>
+            <td>${avgTime(data)}h</td>
+        </tr>
+    `).join("");
 
+    const sitePerfRows = Object.keys(siteMap).map(k => {
+        const s = siteMap[k];
+        const avg = s.total > 0 ? (s.time / s.total).toFixed(1) : "0.0";
+        return `
+            <tr>
+                <td>${esc(k)}</td>
+                <td>${s.total}</td>
+                <td>${s.complete}</td>
+                <td>${avg}h</td>
+            </tr>
+        `;
+    }).join("");
 
-let day =
-filterData("day");
+    const sitePerfCards = Object.keys(siteMap).map(k => {
+        const s = siteMap[k];
+        const avg = s.total > 0 ? (s.time / s.total).toFixed(1) : "0.0";
+        return `
+            <div class="row-card">
+                <div class="rc-head"><div class="rc-title">${esc(k)}</div></div>
+                <div class="rc-field"><span>전체 건수</span><span>${s.total}</span></div>
+                <div class="rc-field"><span>완료 건수</span><span>${s.complete}</span></div>
+                <div class="rc-field"><span>평균 처리시간</span><span>${avg}h</span></div>
+            </div>
+        `;
+    }).join("");
 
+    content.innerHTML = `
+        <div class="card">
+            <h2 style="margin:0;">Project Statistics</h2>
+        </div>
 
-let week =
-filterData("week");
+        <div class="card">
+            <h3>Period Analysis</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Period</th><th>Received</th><th>Completed</th><th>Avg Time</th></tr></thead>
+                    <tbody>${periodRows}</tbody>
+                </table>
+            </div>
+        </div>
 
+        <div class="card">
+            <h3>Site Performance</h3>
+            ${
+                Object.keys(siteMap).length === 0
+                ? `<div class="empty-state">집계할 데이터가 없습니다.</div>`
+                : `
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>Site</th><th>Total</th><th>Completed</th><th>Avg Time</th></tr></thead>
+                            <tbody>${sitePerfRows}</tbody>
+                        </table>
+                    </div>
+                    <div class="row-cards">${sitePerfCards}</div>
+                  `
+            }
+        </div>
+    `;
+}
 
-let month =
-filterData("month");
+/* ================= RENDER: ISSUE ================= */
+function renderIssue(){
+    const headerCard = `
+        <div class="card card-row">
+            <h2 style="margin:0;">Issues</h2>
+            <button class="primary" onclick="openAddIssue()">+ 이슈 등록</button>
+        </div>
+    `;
 
+    if(issues.length === 0){
+        content.innerHTML = headerCard + `<div class="card"><div class="empty-state">등록된 이슈가 없습니다.</div></div>`;
+        return;
+    }
 
+    const issueCards = issues.map(i => `
+        <div class="row-card">
+            <div class="rc-head">
+                <div class="rc-title">${esc(i.title)}</div>
+                ${issueBadge(i.status)}
+            </div>
+            <div class="rc-field"><span>등록일</span><span>${fmtDate(i.createdAt)}</span></div>
+            <div class="rc-actions">
+                <button class="sm ghost" onclick="toggleIssueStatus('${i.id}','${esc(i.status)}')">
+                    ${i.status === "Closed" ? "다시 열기" : "종결 처리"}
+                </button>
+            </div>
+        </div>
+    `).join("");
 
+    content.innerHTML = headerCard + issueCards;
+}
 
-
-/* 현장별 통계 */
-
-let siteMap={};
-
-
-
-tasks.forEach(t=>{
-
-
-const name=t.siteName||"미등록";
-
-
-if(!siteMap[name]){
-
-
-siteMap[name]={
-
-total:0,
-
-complete:0,
-
-time:0
-
+/* ================= ROUTER ================= */
+const renderers = {
+    dashboard: renderDashboard,
+    site: renderSite,
+    project: renderProject,
+    statistics: renderStatistics,
+    issue: renderIssue
 };
 
-
+function render(page){
+    current = page;
+    document.getElementById("topbarTitle").textContent = PAGE_TITLES[page] || page;
+    (renderers[page] || renderDashboard)();
 }
 
-
-
-siteMap[name].total++;
-
-
-
-if(t.status==="완료")
-siteMap[name].complete++;
-
-
-
-siteMap[name].time +=
-t.processTime||0;
-
-
-
-});
-
-
-
-
-
-content.innerHTML=`
-
-<div class="card">
-
-
-<h2>
-Project Statistics
-</h2>
-
-
-</div>
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-Period Analysis
-</h3>
-
-
-<table>
-
-
-<tr>
-
-<th>Period</th>
-
-<th>Received</th>
-
-<th>Completed</th>
-
-<th>Avg Process Time</th>
-
-
-</tr>
-
-
-
-
-<tr>
-
-<td>Daily</td>
-
-<td>${day.length}</td>
-
-<td>${completeCount(day)}</td>
-
-<td>${avgTime(day)} h</td>
-
-
-</tr>
-
-
-
-
-<tr>
-
-<td>Weekly</td>
-
-<td>${week.length}</td>
-
-<td>${completeCount(week)}</td>
-
-<td>${avgTime(week)} h</td>
-
-
-</tr>
-
-
-
-
-<tr>
-
-<td>Monthly</td>
-
-<td>${month.length}</td>
-
-<td>${completeCount(month)}</td>
-
-<td>${avgTime(month)} h</td>
-
-
-</tr>
-
-
-
-</table>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-Site Performance
-</h3>
-
-
-
-<table>
-
-
-<tr>
-
-<th>Site</th>
-
-<th>Total</th>
-
-<th>Completed</th>
-
-<th>Avg Time</th>
-
-</tr>
-
-
-
-
-${
-Object.keys(siteMap)
-.map(k=>{
-
-
-let s=siteMap[k];
-
-
-return `
-
-<tr>
-
-<td>${k}</td>
-
-<td>${s.total}</td>
-
-<td>${s.complete}</td>
-
-<td>
-
-${
-(s.time/s.total).toFixed(1)
+/* ================= NAVIGATION (sidebar + tabbar share logic) ================= */
+function setActiveMenu(page){
+    document.querySelectorAll("#sidebarMenu li, #tabbarMenu li").forEach(li => {
+        li.classList.toggle("active", li.dataset.page === page);
+    });
 }
 
-h
-
-</td>
-
-
-</tr>
-
-
-`;
-
-})
-.join("")
-
+function bindMenu(selector){
+    document.querySelectorAll(selector).forEach(li => {
+        li.onclick = () => {
+            setActiveMenu(li.dataset.page);
+            render(li.dataset.page);
+            content.scrollTop = 0;
+        };
+    });
 }
 
-
-
-</table>
-
-
-</div>
-
-
-`;
-
-}
-
-    else if(page === "issue") {
-        content.innerHTML = `
-            <div class="card">
-                <h2>Issues</h2>
-                <button onclick="addIssue()">+ Issue</button>
-            </div>
-
-            ${issues.map(i => `
-                <div class="card">${i.title}</div>
-            `).join("")}
-        `;
-    }
-}
-
-/* ================= MENU ================= */
-menu.forEach(m => {
-    m.onclick = () => {
-        menu.forEach(x => x.classList.remove("active"));
-        m.classList.add("active");
-        render(m.dataset.page);
-    };
-});
+bindMenu("#sidebarMenu li");
+bindMenu("#tabbarMenu li");
 
 /* INIT */
-menu[0].classList.add("active");
+setActiveMenu("dashboard");
 render("dashboard");
 
 </script>
