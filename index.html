@@ -3,7 +3,26 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<title>danielProjectManager</title>
+<title>PMO System</title>
+<meta name="description" content="현장, 프로젝트 접수, 이슈를 한 곳에서 관리하는 PMO System입니다."/>
+
+<!-- Favicon (inline SVG, no external file needed) -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA5NiA5NiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYWNjZW50R3JhZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwMGQ0YTQiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMDBhMDdlIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHJ4PSIyMCIgZmlsbD0idXJsKCNhY2NlbnRHcmFkKSIvPgogIDxyZWN0IHg9IjIyIiB5PSIyMCIgd2lkdGg9IjE0IiBoZWlnaHQ9IjU2IiByeD0iNSIgZmlsbD0iI2ZmZmZmZiIvPgogIDxyZWN0IHg9IjQ0IiB5PSIzMiIgd2lkdGg9IjE0IiBoZWlnaHQ9IjQ0IiByeD0iNSIgZmlsbD0iI2ZmZmZmZiIgb3BhY2l0eT0iMC44NSIvPgogIDxyZWN0IHg9IjY2IiB5PSI0NCIgd2lkdGg9IjE0IiBoZWlnaHQ9IjMyIiByeD0iNSIgZmlsbD0iI2ZmZmZmZiIgb3BhY2l0eT0iMC42NSIvPgo8L3N2Zz4K"/>
+
+<!-- Open Graph (link share preview card) -->
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="PMO System"/>
+<meta property="og:description" content="현장, 프로젝트 접수, 이슈를 한 곳에서 관리하세요."/>
+<meta property="og:image" content="https://pmosystem.io/assets/og-image.png"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:url" content="https://pmosystem.io"/>
+
+<!-- Twitter / Kakao share card -->
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="PMO System"/>
+<meta name="twitter:description" content="현장, 프로젝트 접수, 이슈를 한 곳에서 관리하세요."/>
+<meta name="twitter:image" content="https://pmosystem.io/assets/og-image.png"/>
 
 <style>
 :root{
@@ -57,14 +76,30 @@ body{
     letter-spacing:.3px;
     border-bottom:1px solid rgba(255,255,255,.08);
     margin-bottom:8px;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:8px;
+}
+
+.sidebar .brand .logo-mark{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:30px;
+    height:30px;
+    border-radius:8px;
+    background:linear-gradient(135deg, #00d4a4, #00a07e);
+    flex-shrink:0;
 }
 
 .sidebar .brand .url{
     display:block;
+    width:100%;
     font-size:11px;
     font-weight:500;
     color:var(--accent);
-    margin-top:4px;
+    margin-top:2px;
     letter-spacing:.2px;
     font-family:"SF Mono",Consolas,Menlo,monospace;
 }
@@ -114,6 +149,55 @@ body{
     justify-content:space-between;
     gap:10px;
     flex-wrap:wrap;
+}
+
+/* ============ SEARCH BOX ============ */
+.search-wrap{
+    position:relative;
+    margin-bottom:14px;
+}
+.search-wrap .search-ic{
+    position:absolute;
+    left:13px;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:14px;
+    color:var(--text-dim);
+    pointer-events:none;
+}
+.search-wrap input{
+    width:100%;
+    padding:11px 14px 11px 36px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    font-size:14px;
+    font-family:inherit;
+    background:#fff;
+}
+.search-wrap input:focus{
+    outline:2px solid var(--accent);
+    outline-offset:1px;
+    border-color:var(--accent);
+}
+.search-wrap .clear-btn{
+    position:absolute;
+    right:8px;
+    top:50%;
+    transform:translateY(-50%);
+    background:none;
+    border:none;
+    color:var(--text-dim);
+    font-size:13px;
+    padding:4px 8px;
+    margin:0;
+    cursor:pointer;
+    display:none;
+}
+.search-wrap.has-value .clear-btn{ display:inline-block; }
+.search-meta{
+    font-size:12.5px;
+    color:var(--text-dim);
+    margin:-4px 0 12px 2px;
 }
 
 .kpi-grid{
@@ -365,7 +449,18 @@ button:focus-visible, li:focus-visible{ outline:2px solid var(--accent); outline
 
     <!-- Desktop sidebar -->
     <nav class="sidebar" id="sidebar">
-        <div class="brand">📋 danielProjectManager<span class="url">danielprojectmanager.app</span></div>
+        <div class="brand">
+            <span class="logo-mark" aria-hidden="true">
+                <svg viewBox="0 0 96 96" width="22" height="22">
+                    <rect x="0" y="0" width="96" height="96" rx="20" fill="currentColor" opacity="0"/>
+                    <rect x="22" y="20" width="14" height="56" rx="5" fill="#ffffff"/>
+                    <rect x="44" y="32" width="14" height="44" rx="5" fill="#ffffff" opacity="0.85"/>
+                    <rect x="66" y="44" width="14" height="32" rx="5" fill="#ffffff" opacity="0.65"/>
+                </svg>
+            </span>
+            PMO System
+            <span class="url">pmosystem.io</span>
+        </div>
         <ul id="sidebarMenu">
             <li data-page="dashboard"><span class="ic">🏠</span>Dashboard</li>
             <li data-page="site"><span class="ic">🏗️</span>Site</li>
@@ -439,6 +534,9 @@ let site = [];
 let tasks = [];
 let issues = [];
 let current = "dashboard";
+
+// per-page search query (kept in memory so it survives re-renders from realtime updates)
+let searchQuery = { site:"", project:"", issue:"" };
 
 const content = document.getElementById("content");
 const PAGE_TITLES = {
@@ -603,6 +701,66 @@ function noSitesBanner(){
             </div>
         </div>
     `;
+}
+
+/* ================= SEARCH BOX (shared across Site / Project / Issue) ================= */
+function searchBox(pageKey, placeholder){
+    const val = searchQuery[pageKey] || "";
+    return `
+        <div class="search-wrap${val ? " has-value" : ""}" id="searchWrap_${pageKey}">
+            <span class="search-ic">🔍</span>
+            <input
+                type="text"
+                id="searchInput_${pageKey}"
+                value="${esc(val)}"
+                placeholder="${esc(placeholder)}"
+                oninput="onSearchInput('${pageKey}', this.value)"
+            />
+            <button type="button" class="clear-btn" onclick="clearSearch('${pageKey}')">✕</button>
+        </div>
+    `;
+}
+
+// Maps a page key to the function that re-renders ONLY its results container.
+// IMPORTANT: this must never touch or recreate the <input> element itself —
+// re-rendering the input mid-typing breaks Korean (and other IME) character
+// composition, since the browser loses the in-progress jamo composition state.
+const searchResultRenderers = {
+    site: renderSiteResults,
+    project: renderProjectResults,
+    issue: renderIssueResults
+};
+
+window.onSearchInput = function(pageKey, value){
+    searchQuery[pageKey] = value;
+
+    // toggle the clear (x) button visibility without rebuilding the input
+    const wrap = document.getElementById("searchWrap_" + pageKey);
+    if(wrap) wrap.classList.toggle("has-value", !!value);
+
+    // only the results list is rebuilt — the search input is left untouched
+    (searchResultRenderers[pageKey] || function(){})();
+};
+
+window.clearSearch = function(pageKey){
+    searchQuery[pageKey] = "";
+    const input = document.getElementById("searchInput_" + pageKey);
+    if(input) input.value = "";
+    const wrap = document.getElementById("searchWrap_" + pageKey);
+    if(wrap) wrap.classList.remove("has-value");
+    (searchResultRenderers[pageKey] || function(){})();
+    input?.focus();
+};
+
+function matchesQuery(query, fields){
+    if(!query) return true;
+    const q = query.trim().toLowerCase();
+    if(!q) return true;
+    return fields.some(f => String(f || "").toLowerCase().includes(q));
+}
+
+function noResultsState(query){
+    return `<div class="empty-state">"${esc(query)}"에 대한 검색 결과가 없습니다.</div>`;
 }
 
 window.openAddSite = function(){
@@ -790,20 +948,22 @@ function renderDashboard(){
 }
 
 /* ================= RENDER: SITE ================= */
-function renderSite(){
-    const headerCard = `
-        <div class="card card-row">
-            <h2 style="margin:0;">Site Master</h2>
-            <button class="primary" onclick="openAddSite()">+ 현장 등록</button>
-        </div>
-    `;
+function renderSiteResults(){
+    const q = searchQuery.site;
+    const filtered = site.filter(s => matchesQuery(q, [s.name, s.client, s.equipment, s.pm, s.contractType]));
 
-    if(site.length === 0){
-        content.innerHTML = headerCard + `<div class="card"><div class="empty-state">등록된 현장이 없습니다.<br>위 버튼으로 첫 현장을 등록해보세요.</div></div>`;
+    const resultsArea = document.getElementById("siteResultsArea");
+    const metaArea = document.getElementById("siteSearchMeta");
+    if(!resultsArea) return;
+
+    if(metaArea) metaArea.textContent = q ? `${filtered.length}건 검색됨` : "";
+
+    if(filtered.length === 0){
+        resultsArea.innerHTML = noResultsState(q);
         return;
     }
 
-    const tableRows = site.map(s => `
+    const tableRows = filtered.map(s => `
         <tr>
             <td>${esc(s.name)}</td>
             <td>${esc(s.client)}</td>
@@ -822,7 +982,7 @@ function renderSite(){
         </tr>
     `).join("");
 
-    const cardRows = site.map(s => `
+    const cardRows = filtered.map(s => `
         <div class="row-card">
             <div class="rc-head">
                 <div class="rc-title">${esc(s.name)}</div>
@@ -842,26 +1002,111 @@ function renderSite(){
         </div>
     `).join("");
 
-    content.innerHTML = headerCard + `
-        <div class="card">
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>현장명</th><th>고객사</th><th>장비</th><th>수량</th>
-                            <th>계약타입</th><th>계약일자</th><th>계약종료</th>
-                            <th>유지보수기간</th><th>PM</th><th>Status</th><th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>${tableRows}</tbody>
-                </table>
-            </div>
-            <div class="row-cards">${cardRows}</div>
+    resultsArea.innerHTML = `
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>현장명</th><th>고객사</th><th>장비</th><th>수량</th>
+                        <th>계약타입</th><th>계약일자</th><th>계약종료</th>
+                        <th>유지보수기간</th><th>PM</th><th>Status</th><th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>${tableRows}</tbody>
+            </table>
         </div>
+        <div class="row-cards">${cardRows}</div>
     `;
 }
 
+function renderSite(){
+    const headerCard = `
+        <div class="card card-row">
+            <h2 style="margin:0;">Site Master</h2>
+            <button class="primary" onclick="openAddSite()">+ 현장 등록</button>
+        </div>
+    `;
+
+    if(site.length === 0){
+        content.innerHTML = headerCard + `<div class="card"><div class="empty-state">등록된 현장이 없습니다.<br>위 버튼으로 첫 현장을 등록해보세요.</div></div>`;
+        return;
+    }
+
+    content.innerHTML = headerCard + `
+        <div class="card">
+            ${searchBox("site", "현장명, 고객사, 장비, PM으로 검색")}
+            <div class="search-meta" id="siteSearchMeta"></div>
+            <div id="siteResultsArea"></div>
+        </div>
+    `;
+
+    renderSiteResults();
+}
+
 /* ================= RENDER: PROJECT ================= */
+function renderProjectResults(){
+    const q = searchQuery.project;
+    const filtered = tasks.filter(t => matchesQuery(q, [t.siteName, t.symptom, t.manager, t.phone, t.pm]));
+
+    const resultsArea = document.getElementById("projectResultsArea");
+    const metaArea = document.getElementById("projectSearchMeta");
+    if(!resultsArea) return;
+
+    if(metaArea) metaArea.textContent = q ? `${filtered.length}건 검색됨` : "";
+
+    if(filtered.length === 0){
+        resultsArea.innerHTML = noResultsState(q);
+        return;
+    }
+
+    const tableRows = filtered.map(t => `
+        <tr>
+            <td>${esc(t.siteName)}</td>
+            <td>${esc(t.receiptDate)}</td>
+            <td>${esc(t.symptom)}</td>
+            <td>${esc(t.manager)}</td>
+            <td>${esc(t.phone)}</td>
+            <td>${esc(t.pm)}</td>
+            <td>${taskBadge(t.status)}</td>
+            <td>${t.processTime || 0}h</td>
+            <td>${t.status !== "완료" ? `<button class="sm primary" onclick="completeProject('${t.id}')">완료</button>` : "완료됨"}</td>
+        </tr>
+    `).join("");
+
+    const cardRows = filtered.map(t => `
+        <div class="row-card">
+            <div class="rc-head">
+                <div class="rc-title">${esc(t.siteName) || "미등록 현장"}</div>
+                ${taskBadge(t.status)}
+            </div>
+            <div class="rc-field"><span>접수일</span><span>${esc(t.receiptDate) || "-"}</span></div>
+            <div class="rc-field"><span>증상</span><span>${esc(t.symptom) || "-"}</span></div>
+            <div class="rc-field"><span>담당자</span><span>${esc(t.manager) || "-"}</span></div>
+            <div class="rc-field"><span>연락처</span><span>${esc(t.phone) || "-"}</span></div>
+            <div class="rc-field"><span>PM</span><span>${esc(t.pm) || "-"}</span></div>
+            <div class="rc-field"><span>처리시간</span><span>${t.processTime || 0}h</span></div>
+            <div class="rc-actions">
+                ${t.status !== "완료" ? `<button class="sm primary" onclick="completeProject('${t.id}')">완료 처리</button>` : `<span style="color:var(--text-dim); font-size:13px;">처리 완료됨</span>`}
+            </div>
+        </div>
+    `).join("");
+
+    resultsArea.innerHTML = `
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>현장명</th><th>접수일</th><th>증상</th><th>담당자</th>
+                        <th>연락처</th><th>PM</th><th>상태</th><th>처리시간</th><th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>${tableRows}</tbody>
+            </table>
+        </div>
+        <div class="row-cards">${cardRows}</div>
+    `;
+}
+
 function renderProject(){
     const total = tasks.length;
     const complete = tasks.filter(t => t.status === "완료").length;
@@ -889,54 +1134,15 @@ function renderProject(){
         return;
     }
 
-    const tableRows = tasks.map(t => `
-        <tr>
-            <td>${esc(t.siteName)}</td>
-            <td>${esc(t.receiptDate)}</td>
-            <td>${esc(t.symptom)}</td>
-            <td>${esc(t.manager)}</td>
-            <td>${esc(t.phone)}</td>
-            <td>${esc(t.pm)}</td>
-            <td>${taskBadge(t.status)}</td>
-            <td>${t.processTime || 0}h</td>
-            <td>${t.status !== "완료" ? `<button class="sm primary" onclick="completeProject('${t.id}')">완료</button>` : "완료됨"}</td>
-        </tr>
-    `).join("");
-
-    const cardRows = tasks.map(t => `
-        <div class="row-card">
-            <div class="rc-head">
-                <div class="rc-title">${esc(t.siteName) || "미등록 현장"}</div>
-                ${taskBadge(t.status)}
-            </div>
-            <div class="rc-field"><span>접수일</span><span>${esc(t.receiptDate) || "-"}</span></div>
-            <div class="rc-field"><span>증상</span><span>${esc(t.symptom) || "-"}</span></div>
-            <div class="rc-field"><span>담당자</span><span>${esc(t.manager) || "-"}</span></div>
-            <div class="rc-field"><span>연락처</span><span>${esc(t.phone) || "-"}</span></div>
-            <div class="rc-field"><span>PM</span><span>${esc(t.pm) || "-"}</span></div>
-            <div class="rc-field"><span>처리시간</span><span>${t.processTime || 0}h</span></div>
-            <div class="rc-actions">
-                ${t.status !== "완료" ? `<button class="sm primary" onclick="completeProject('${t.id}')">완료 처리</button>` : `<span style="color:var(--text-dim); font-size:13px;">처리 완료됨</span>`}
-            </div>
-        </div>
-    `).join("");
-
     content.innerHTML = headerCard + `
         <div class="card">
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>현장명</th><th>접수일</th><th>증상</th><th>담당자</th>
-                            <th>연락처</th><th>PM</th><th>상태</th><th>처리시간</th><th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>${tableRows}</tbody>
-                </table>
-            </div>
-            <div class="row-cards">${cardRows}</div>
+            ${searchBox("project", "현장명, 증상, 담당자, 연락처로 검색")}
+            <div class="search-meta" id="projectSearchMeta"></div>
+            <div id="projectResultsArea"></div>
         </div>
     `;
+
+    renderProjectResults();
 }
 
 /* ================= RENDER: STATISTICS ================= */
@@ -1059,22 +1265,22 @@ function renderStatistics(){
 }
 
 /* ================= RENDER: ISSUE ================= */
-function renderIssue(){
-    const headerCard = `
-        <div class="card card-row">
-            <h2 style="margin:0;">Issues</h2>
-            <button class="primary" onclick="openAddIssue()">+ 이슈 등록</button>
-        </div>
+function renderIssueResults(){
+    const q = searchQuery.issue;
+    const filtered = issues.filter(i => matchesQuery(q, [i.title, i.siteName, i.reporter, i.issueType]));
 
-        ${site.length === 0 ? noSitesBanner() : ""}
-    `;
+    const resultsArea = document.getElementById("issueResultsArea");
+    const metaArea = document.getElementById("issueSearchMeta");
+    if(!resultsArea) return;
 
-    if(issues.length === 0){
-        content.innerHTML = headerCard + `<div class="card"><div class="empty-state">등록된 이슈가 없습니다.</div></div>`;
+    if(metaArea) metaArea.textContent = q ? `${filtered.length}건 검색됨` : "";
+
+    if(filtered.length === 0){
+        resultsArea.innerHTML = `<div class="card">${noResultsState(q)}</div>`;
         return;
     }
 
-    const issueCards = issues.map(i => `
+    resultsArea.innerHTML = filtered.map(i => `
         <div class="row-card">
             <div class="rc-head">
                 <div>
@@ -1095,8 +1301,33 @@ function renderIssue(){
             </div>
         </div>
     `).join("");
+}
 
-    content.innerHTML = headerCard + issueCards;
+function renderIssue(){
+    const headerCard = `
+        <div class="card card-row">
+            <h2 style="margin:0;">Issues</h2>
+            <button class="primary" onclick="openAddIssue()">+ 이슈 등록</button>
+        </div>
+
+        ${site.length === 0 ? noSitesBanner() : ""}
+    `;
+
+    if(issues.length === 0){
+        content.innerHTML = headerCard + `<div class="card"><div class="empty-state">등록된 이슈가 없습니다.</div></div>`;
+        return;
+    }
+
+    const searchSection = `
+        <div class="card">
+            ${searchBox("issue", "현장명, 이슈 내용, 등록자, 유형으로 검색")}
+            <div class="search-meta" id="issueSearchMeta"></div>
+        </div>
+    `;
+
+    content.innerHTML = headerCard + searchSection + `<div id="issueResultsArea"></div>`;
+
+    renderIssueResults();
 }
 
 /* ================= ROUTER ================= */
