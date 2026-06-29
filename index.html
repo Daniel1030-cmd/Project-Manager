@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<title>PMO System</title>
+<title>성주로봇 PMO System</title>
 <meta name="description" content="현장, 프로젝트 접수, 이슈를 한 곳에서 관리하는 PMO System입니다."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -298,6 +298,8 @@ input, select{ font-family:inherit; }
 .kpi-card.c-blue::before{ background:var(--blue); }
 .kpi-card.c-amber::before{ background:var(--amber); }
 .kpi-card.c-violet::before{ background:var(--violet); }
+.kpi-card.c-green::before{ background:#059669; }
+.kpi-card.c-green .kpi-num{ color:#059669; }
 .kpi-eyebrow{
   font-size:11px;
   font-weight:600;
@@ -954,6 +956,8 @@ input, select{ font-family:inherit; }
     gap:10px;
     margin-bottom:16px;
   }
+  /* 5열 kpi는 모바일에서 2+3 배치 */
+  .kpi-grid.kpi-5{ grid-template-columns:repeat(3,1fr); }
   .kpi-num{ font-size:24px; }
 
   .page-head{
@@ -1456,7 +1460,12 @@ function renderSiteResults(){
 _renderers.site=renderSiteResults;
 
 function renderSite(){
-  const total=site.length, progress=site.filter(s=>s.status==="진행").length, expired=site.filter(s=>s.status==="만료").length;
+  const total    = site.length;
+  const progress = site.filter(s=>s.status==="진행").length;
+  const expired  = site.filter(s=>s.status==="만료").length;
+  const rental   = site.filter(s=>s.contractType==="렌탈").length;
+  const sale     = site.filter(s=>s.contractType==="판매").length;
+
   $content.innerHTML=`
     <div class="page-head">
       <div class="page-head-left">
@@ -1467,10 +1476,12 @@ function renderSite(){
         <button class="btn btn-primary" onclick="_openAddSite()">+ 현장 등록</button>
       </div>
     </div>
-    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
-      ${kpiHtml(total,"전체 현장","c-teal")}
-      ${kpiHtml(progress,"진행 중","c-blue")}
-      ${kpiHtml(expired,"만료","c-amber")}
+    <div class="kpi-grid" style="grid-template-columns:repeat(5,1fr);">
+      ${kpiHtml(total,   "전체 현장", "c-teal")}
+      ${kpiHtml(progress,"진행 중",   "c-blue")}
+      ${kpiHtml(expired, "만료",      "c-amber")}
+      ${kpiHtml(rental,  "렌탈",      "c-violet")}
+      ${kpiHtml(sale,    "판매",      "c-green")}
     </div>
     ${!site.length?`<div class="card"><div class="card-body">${empty("🏗️","등록된 현장이 없습니다","+ 현장 등록 버튼으로 첫 현장을 추가해보세요")}</div></div>`:`
     <div class="card">
