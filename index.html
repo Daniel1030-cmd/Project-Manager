@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<title>성주로봇 PMO System</title>
+<title>PMO System</title>
 <meta name="description" content="현장, 프로젝트 접수, 이슈를 한 곳에서 관리하는 PMO System입니다."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -13,7 +13,6 @@
    DESIGN TOKENS
 ════════════════════════════════════ */
 :root{
-  /* Palette — slate-blue authority, teal signal, clean neutrals */
   --ink:       #0f172a;
   --ink-2:     #1e293b;
   --ink-3:     #334155;
@@ -36,33 +35,36 @@
   --rose-lt:   #ffe4e6;
   --violet:    #7c3aed;
   --violet-lt: #ede9fe;
+  --green:     #16a34a;
+  --green-lt:  #dcfce7;
   --slate:     #475569;
   --slate-lt:  #f1f5f9;
 
-  /* Sidebar */
+  /* AS 유/무상 컬러 */
+  --paid:      #dc2626;
+  --paid-lt:   #fee2e2;
+  --free:      #0d9488;
+  --free-lt:   #ccfbf1;
+  --warn:      #d97706;
+  --warn-lt:   #fffbeb;
+
   --sidebar-bg:    #0f172a;
   --sidebar-hover: #1e293b;
   --sidebar-active:#0d9488;
 
-  /* Radius */
   --r-sm: 6px;
   --r:    10px;
   --r-lg: 14px;
   --r-xl: 20px;
 
-  /* Shadow */
   --sh-xs: 0 1px 2px rgba(15,23,42,.06);
   --sh-sm: 0 1px 4px rgba(15,23,42,.08), 0 0 0 1px rgba(15,23,42,.04);
   --sh-md: 0 4px 12px rgba(15,23,42,.10), 0 0 0 1px rgba(15,23,42,.05);
   --sh-lg: 0 8px 28px rgba(15,23,42,.14), 0 0 0 1px rgba(15,23,42,.06);
 
-  /* Sidebar width */
   --sidebar-w: 220px;
 }
 
-/* ════════════════════════════════════
-   RESET + BASE
-════════════════════════════════════ */
 *, *::before, *::after{ box-sizing:border-box; margin:0; padding:0; }
 
 body{
@@ -76,25 +78,13 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 
-button{
-  font-family:inherit;
-  cursor:pointer;
-  border:none;
-  outline:none;
-  transition:all .15s ease;
-}
+button{ font-family:inherit; cursor:pointer; border:none; outline:none; transition:all .15s ease; }
 button:focus-visible{ box-shadow:0 0 0 3px rgba(13,148,136,.35); }
 input, select{ font-family:inherit; }
 
-/* ════════════════════════════════════
-   LAYOUT
-════════════════════════════════════ */
-.app{
-  display:flex;
-  min-height:100vh;
-}
+/* ════ LAYOUT ════ */
+.app{ display:flex; min-height:100vh; }
 
-/* ── Sidebar ── */
 .sidebar{
   width:var(--sidebar-w);
   flex-shrink:0;
@@ -108,9 +98,7 @@ input, select{ font-family:inherit; }
 }
 
 .sidebar-brand{
-  display:flex;
-  align-items:center;
-  gap:10px;
+  display:flex; align-items:center; gap:10px;
   padding:22px 18px 18px;
   border-bottom:1px solid rgba(255,255,255,.07);
 }
@@ -122,408 +110,164 @@ input, select{ font-family:inherit; }
   flex-shrink:0;
 }
 .brand-icon svg{ display:block; }
-.brand-text{
-  flex:1; min-width:0;
-}
-.brand-name{
-  font-size:14px;
-  font-weight:700;
-  color:#fff;
-  letter-spacing:-.2px;
-  line-height:1.2;
-}
-.brand-url{
-  font-size:10.5px;
-  color:var(--teal);
-  letter-spacing:.4px;
-  font-weight:500;
-  margin-top:1px;
-}
+.brand-text{ flex:1; min-width:0; }
+.brand-name{ font-size:14px; font-weight:700; color:#fff; letter-spacing:-.2px; line-height:1.2; }
+.brand-url{ font-size:10.5px; color:var(--teal); letter-spacing:.4px; font-weight:500; margin-top:1px; }
 
-.sidebar-nav{
-  flex:1;
-  padding:10px 10px;
-  overflow-y:auto;
-}
+.sidebar-nav{ flex:1; padding:10px; overflow-y:auto; }
 .sidebar-nav ul{ list-style:none; }
 .sidebar-section{
-  font-size:10px;
-  font-weight:700;
-  letter-spacing:.8px;
-  color:rgba(255,255,255,.28);
-  text-transform:uppercase;
+  font-size:10px; font-weight:700; letter-spacing:.8px;
+  color:rgba(255,255,255,.28); text-transform:uppercase;
   padding:14px 8px 6px;
 }
 .nav-item{
-  display:flex;
-  align-items:center;
-  gap:9px;
-  padding:9px 10px;
-  border-radius:var(--r);
-  cursor:pointer;
-  color:rgba(255,255,255,.62);
-  font-size:13.5px;
-  font-weight:500;
+  display:flex; align-items:center; gap:9px;
+  padding:9px 10px; border-radius:var(--r);
+  cursor:pointer; color:rgba(255,255,255,.62);
+  font-size:13.5px; font-weight:500;
   transition:background .15s, color .15s;
   user-select:none;
 }
-.nav-item .nav-ic{
-  width:20px;
-  text-align:center;
-  font-size:15px;
-  flex-shrink:0;
-}
-.nav-item:hover{
-  background:var(--sidebar-hover);
-  color:rgba(255,255,255,.9);
-}
-.nav-item.active{
-  background:var(--teal);
-  color:#fff;
-  font-weight:600;
-}
+.nav-item .nav-ic{ width:20px; text-align:center; font-size:15px; flex-shrink:0; }
+.nav-item:hover{ background:var(--sidebar-hover); color:rgba(255,255,255,.9); }
+.nav-item.active{ background:var(--teal); color:#fff; font-weight:600; }
 
-.sidebar-footer{
-  padding:14px 18px;
-  border-top:1px solid rgba(255,255,255,.07);
-  font-size:11px;
-  color:rgba(255,255,255,.25);
-}
+.sidebar-footer{ padding:14px 18px; border-top:1px solid rgba(255,255,255,.07); font-size:11px; color:rgba(255,255,255,.25); }
 
-/* ── Main ── */
-.main{
-  flex:1;
-  margin-left:var(--sidebar-w);
-  display:flex;
-  flex-direction:column;
-  min-width:0;
-  min-height:100vh;
-}
+.main{ flex:1; margin-left:var(--sidebar-w); display:flex; flex-direction:column; min-width:0; min-height:100vh; }
 
-/* ── Topbar ── */
 .topbar{
-  height:58px;
-  background:var(--surface);
-  border-bottom:1px solid var(--line);
-  display:flex;
-  align-items:center;
-  padding:0 24px;
-  gap:12px;
-  position:sticky;
-  top:0;
-  z-index:100;
+  height:58px; background:var(--surface); border-bottom:1px solid var(--line);
+  display:flex; align-items:center; padding:0 24px; gap:12px;
+  position:sticky; top:0; z-index:100;
 }
-.topbar-title{
-  font-size:15px;
-  font-weight:700;
-  color:var(--ink);
-  flex:1;
-}
-.topbar-breadcrumb{
-  font-size:12px;
-  color:var(--ink-5);
-  display:flex;
-  align-items:center;
-  gap:5px;
-}
+.topbar-title{ font-size:15px; font-weight:700; color:var(--ink); flex:1; }
+.topbar-breadcrumb{ font-size:12px; color:var(--ink-5); display:flex; align-items:center; gap:5px; }
 
-/* ── Content ── */
-.content{
-  flex:1;
-  padding:24px 26px 40px;
-  overflow-y:auto;
-}
+.content{ flex:1; padding:24px 26px 40px; overflow-y:auto; }
 
-/* Mobile topbar */
 .m-topbar{ display:none; }
 
-/* ════════════════════════════════════
-   PAGE HEADER
-════════════════════════════════════ */
+/* ════ PAGE HEADER ════ */
 .page-head{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:16px;
-  margin-bottom:24px;
-  flex-wrap:wrap;
+  display:flex; align-items:flex-start; justify-content:space-between;
+  gap:16px; margin-bottom:24px; flex-wrap:wrap;
 }
-.page-head-left{}
-.page-title{
-  font-size:22px;
-  font-weight:700;
-  color:var(--ink);
-  letter-spacing:-.4px;
-  line-height:1.2;
-}
-.page-subtitle{
-  font-size:13px;
-  color:var(--ink-4);
-  margin-top:3px;
-}
-.page-actions{
-  display:flex;
-  gap:8px;
-  align-items:center;
-  flex-wrap:wrap;
-}
+.page-title{ font-size:22px; font-weight:700; color:var(--ink); letter-spacing:-.4px; line-height:1.2; }
+.page-subtitle{ font-size:13px; color:var(--ink-4); margin-top:3px; }
+.page-actions{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
 
-/* ════════════════════════════════════
-   KPI GRID
-════════════════════════════════════ */
-.kpi-grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:14px;
-  margin-bottom:24px;
-}
+/* ════ KPI GRID ════ */
+.kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
 .kpi-card{
-  background:var(--surface);
-  border:1px solid var(--line);
-  border-radius:var(--r-lg);
-  padding:18px 20px;
-  box-shadow:var(--sh-xs);
-  position:relative;
-  overflow:hidden;
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--r-lg); padding:18px 20px;
+  box-shadow:var(--sh-xs); position:relative; overflow:hidden;
 }
 .kpi-card::before{
-  content:'';
-  position:absolute;
-  top:0; left:0;
+  content:''; position:absolute; top:0; left:0;
   width:3px; height:100%;
-  background:var(--line);
-  border-radius:3px 0 0 3px;
+  background:var(--line); border-radius:3px 0 0 3px;
 }
 .kpi-card.c-teal::before{ background:var(--teal); }
 .kpi-card.c-blue::before{ background:var(--blue); }
 .kpi-card.c-amber::before{ background:var(--amber); }
 .kpi-card.c-violet::before{ background:var(--violet); }
-.kpi-card.c-green::before{ background:#059669; }
-.kpi-card.c-green .kpi-num{ color:#059669; }
-.kpi-eyebrow{
-  font-size:11px;
-  font-weight:600;
-  text-transform:uppercase;
-  letter-spacing:.6px;
-  color:var(--ink-5);
-  margin-bottom:8px;
-}
-.kpi-num{
-  font-size:30px;
-  font-weight:700;
-  color:var(--ink);
-  line-height:1;
-  letter-spacing:-1px;
-}
-.kpi-card.c-teal .kpi-num{ color:var(--teal-dk); }
+.kpi-card.c-rose::before{ background:var(--rose); }
+.kpi-card.c-green::before{ background:var(--green); }
+.kpi-eyebrow{ font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.6px; color:var(--ink-5); margin-bottom:8px; }
+.kpi-num{ font-size:30px; font-weight:700; color:var(--ink); line-height:1; letter-spacing:-1px; }
+.kpi-card.c-teal  .kpi-num{ color:var(--teal-dk); }
 .kpi-card.c-blue  .kpi-num{ color:var(--blue); }
 .kpi-card.c-amber .kpi-num{ color:var(--amber); }
-.kpi-card.c-violet .kpi-num{ color:var(--violet); }
-.kpi-sub{
-  font-size:12px;
-  color:var(--ink-5);
-  margin-top:4px;
-}
+.kpi-card.c-violet.kpi-num{ color:var(--violet); }
+.kpi-card.c-rose  .kpi-num{ color:var(--rose); }
+.kpi-card.c-green .kpi-num{ color:var(--green); }
+.kpi-sub{ font-size:12px; color:var(--ink-5); margin-top:4px; }
 
-/* ════════════════════════════════════
-   CARD
-════════════════════════════════════ */
-.card{
-  background:var(--surface);
-  border:1px solid var(--line);
-  border-radius:var(--r-lg);
-  box-shadow:var(--sh-xs);
-  margin-bottom:16px;
-}
+/* ════ CARD ════ */
+.card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--sh-xs); margin-bottom:16px; }
 .card-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:16px 20px;
-  border-bottom:1px solid var(--line);
-  gap:12px;
-  flex-wrap:wrap;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 20px; border-bottom:1px solid var(--line);
+  gap:12px; flex-wrap:wrap;
 }
-.card-title{
-  font-size:14px;
-  font-weight:700;
-  color:var(--ink);
-}
-.card-body{
-  padding:20px;
-}
+.card-title{ font-size:14px; font-weight:700; color:var(--ink); }
+.card-body{ padding:20px; }
 .card-body-flush{ padding:0; }
 
-/* ════════════════════════════════════
-   BUTTONS
-════════════════════════════════════ */
+/* ════ BUTTONS ════ */
 .btn{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  padding:8px 16px;
-  border-radius:var(--r);
-  font-size:13px;
-  font-weight:600;
-  line-height:1;
-  border:none;
-  cursor:pointer;
-  white-space:nowrap;
+  display:inline-flex; align-items:center; gap:6px;
+  padding:8px 16px; border-radius:var(--r);
+  font-size:13px; font-weight:600; line-height:1;
+  border:none; cursor:pointer; white-space:nowrap;
   transition:all .15s ease;
 }
-.btn-primary{
-  background:var(--teal);
-  color:#fff;
-  box-shadow:0 1px 3px rgba(13,148,136,.35);
-}
+.btn-primary{ background:var(--teal); color:#fff; box-shadow:0 1px 3px rgba(13,148,136,.35); }
 .btn-primary:hover{ background:var(--teal-dk); box-shadow:0 2px 6px rgba(13,148,136,.45); }
-.btn-secondary{
-  background:var(--surface);
-  color:var(--ink-3);
-  border:1px solid var(--line);
-  box-shadow:var(--sh-xs);
-}
+.btn-secondary{ background:var(--surface); color:var(--ink-3); border:1px solid var(--line); box-shadow:var(--sh-xs); }
 .btn-secondary:hover{ background:var(--bg-2); border-color:var(--ink-5); }
-.btn-ghost{
-  background:transparent;
-  color:var(--ink-4);
-  padding:6px 10px;
-}
+.btn-ghost{ background:transparent; color:var(--ink-4); padding:6px 10px; }
 .btn-ghost:hover{ background:var(--bg-2); color:var(--ink); }
-.btn-sm{
-  padding:5px 10px;
-  font-size:12px;
-  border-radius:var(--r-sm);
-}
+.btn-sm{ padding:5px 10px; font-size:12px; border-radius:var(--r-sm); }
 .btn-icon{
-  padding:7px;
-  border-radius:var(--r-sm);
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  background:transparent;
-  color:var(--ink-4);
-  border:1px solid var(--line);
+  padding:7px; border-radius:var(--r-sm);
+  display:inline-flex; align-items:center; justify-content:center;
+  background:transparent; color:var(--ink-4); border:1px solid var(--line);
 }
 .btn-icon:hover{ background:var(--bg-2); color:var(--ink); }
 .btn-icon.edit:hover{ background:var(--blue-lt); color:var(--blue); border-color:rgba(37,99,235,.2); }
 .btn:disabled{ opacity:.45; cursor:not-allowed; }
 .btn:active:not(:disabled){ transform:scale(.97); }
 
-/* ════════════════════════════════════
-   SEARCH
-════════════════════════════════════ */
-.search-bar{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-bottom:16px;
-}
-.search-wrap{
-  position:relative;
-  flex:1;
-  max-width:360px;
-}
-.search-ic{
-  position:absolute;
-  left:11px; top:50%;
-  transform:translateY(-50%);
-  font-size:14px;
-  color:var(--ink-5);
-  pointer-events:none;
-}
+/* ════ SEARCH ════ */
+.search-bar{ display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+.search-wrap{ position:relative; flex:1; max-width:360px; }
+.search-ic{ position:absolute; left:11px; top:50%; transform:translateY(-50%); font-size:14px; color:var(--ink-5); pointer-events:none; }
 .search-wrap input{
-  width:100%;
-  padding:9px 34px 9px 34px;
-  border:1px solid var(--line);
-  border-radius:var(--r);
-  font-size:13.5px;
-  background:var(--surface);
-  color:var(--ink);
-  box-shadow:var(--sh-xs);
-  transition:border-color .15s, box-shadow .15s;
+  width:100%; padding:9px 34px 9px 34px;
+  border:1px solid var(--line); border-radius:var(--r);
+  font-size:13.5px; background:var(--surface); color:var(--ink);
+  box-shadow:var(--sh-xs); transition:border-color .15s, box-shadow .15s;
 }
 .search-wrap input::placeholder{ color:var(--ink-5); }
-.search-wrap input:focus{
-  outline:none;
-  border-color:var(--teal);
-  box-shadow:0 0 0 3px rgba(13,148,136,.12);
-}
+.search-wrap input:focus{ outline:none; border-color:var(--teal); box-shadow:0 0 0 3px rgba(13,148,136,.12); }
 .search-clear{
-  position:absolute;
-  right:8px; top:50%;
-  transform:translateY(-50%);
-  background:none; border:none;
-  color:var(--ink-5); font-size:12px;
-  padding:3px 6px; cursor:pointer;
-  display:none;
-  border-radius:4px;
+  position:absolute; right:8px; top:50%; transform:translateY(-50%);
+  background:none; border:none; color:var(--ink-5); font-size:12px;
+  padding:3px 6px; cursor:pointer; display:none; border-radius:4px;
 }
 .search-clear:hover{ background:var(--bg-2); color:var(--ink); }
 .search-wrap.has-val .search-clear{ display:inline-flex; }
-.search-meta{
-  font-size:12px;
-  color:var(--ink-5);
-  margin-bottom:12px;
-  min-height:16px;
-}
+.search-meta{ font-size:12px; color:var(--ink-5); margin-bottom:12px; min-height:16px; }
 
-/* ════════════════════════════════════
-   TABLE (desktop)
-════════════════════════════════════ */
+/* ════ TABLE ════ */
 .tbl-wrap{ overflow-x:auto; }
-.tbl{
-  width:100%;
-  border-collapse:collapse;
-  font-size:13px;
-}
+.tbl{ width:100%; border-collapse:collapse; font-size:13px; }
 .tbl th{
-  background:var(--bg);
-  border-bottom:2px solid var(--line);
-  padding:10px 14px;
-  text-align:left;
-  font-size:11px;
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:.5px;
-  color:var(--ink-4);
-  white-space:nowrap;
+  background:var(--bg); border-bottom:2px solid var(--line);
+  padding:10px 14px; text-align:left;
+  font-size:11px; font-weight:700; text-transform:uppercase;
+  letter-spacing:.5px; color:var(--ink-4); white-space:nowrap;
 }
 .tbl td{
-  padding:12px 14px;
-  border-bottom:1px solid var(--line);
-  color:var(--ink-2);
-  white-space:nowrap;
-  vertical-align:middle;
+  padding:12px 14px; border-bottom:1px solid var(--line);
+  color:var(--ink-2); white-space:nowrap; vertical-align:middle;
 }
 .tbl tbody tr:last-child td{ border-bottom:none; }
 .tbl tbody tr:hover td{ background:var(--bg); }
-.tbl .td-actions{
-  display:flex;
-  gap:5px;
-  align-items:center;
-}
+.tbl .td-actions{ display:flex; gap:5px; align-items:center; }
 
-/* ════════════════════════════════════
-   BADGES
-════════════════════════════════════ */
+/* ════ BADGES ════ */
 .badge{
-  display:inline-flex;
-  align-items:center;
-  gap:4px;
-  padding:3px 9px;
-  border-radius:30px;
-  font-size:11.5px;
-  font-weight:600;
-  white-space:nowrap;
-  letter-spacing:.1px;
+  display:inline-flex; align-items:center; gap:4px;
+  padding:3px 9px; border-radius:30px;
+  font-size:11.5px; font-weight:600; white-space:nowrap; letter-spacing:.1px;
 }
-.badge-dot{
-  width:5px; height:5px;
-  border-radius:50%;
-  background:currentColor;
-  opacity:.7;
-}
+.badge-dot{ width:5px; height:5px; border-radius:50%; background:currentColor; opacity:.7; }
+
 /* status */
 .b-ready   { background:#f1f5f9; color:#475569; }
 .b-progress{ background:var(--teal-lt); color:var(--teal-dk); }
@@ -531,470 +275,252 @@ input, select{ font-family:inherit; }
 .b-received{ background:var(--amber-lt); color:var(--amber); }
 .b-done    { background:var(--teal-lt); color:var(--teal-dk); }
 .b-new     { background:var(--blue-lt); color:var(--blue); }
+
 /* contract type */
 .b-rental  { background:var(--violet-lt); color:var(--violet); }
 .b-sale    { background:#ecfdf5; color:#059669; }
 .b-maint   { background:var(--blue-lt); color:var(--blue); }
 .b-renew   { background:var(--amber-lt); color:var(--amber); }
 
-/* ════════════════════════════════════
-   MOBILE CARDS (accordion)
-════════════════════════════════════ */
-.mc-list{ display:none; }
+/* ════ AS 유/무상 배지 ════ */
+.b-paid{
+  background:var(--paid-lt);
+  color:var(--paid);
+  font-weight:700;
+  border:1px solid rgba(220,38,38,.15);
+}
+.b-free{
+  background:var(--free-lt);
+  color:var(--free);
+  font-weight:700;
+  border:1px solid rgba(13,148,136,.15);
+}
+/* 만료 임박 경고 (30일 이내) */
+.b-warn-soon{
+  background:var(--warn-lt);
+  color:var(--warn);
+  font-weight:700;
+  border:1px solid rgba(217,119,6,.2);
+}
 
+/* ════ 유지보수 만료일 표시 ════ */
+.maint-exp{
+  font-size:11px;
+  color:var(--ink-5);
+  margin-top:2px;
+  display:block;
+}
+.maint-exp.soon{ color:var(--warn); font-weight:600; }
+.maint-exp.expired{ color:var(--rose); font-weight:600; }
+
+/* ════ MOBILE CARDS ════ */
+.mc-list{ display:none; }
 .mc{
-  background:var(--surface);
-  border:1px solid var(--line);
-  border-radius:var(--r-lg);
-  margin-bottom:10px;
-  box-shadow:var(--sh-xs);
-  overflow:hidden;
-  transition:box-shadow .2s;
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--r-lg); margin-bottom:10px;
+  box-shadow:var(--sh-xs); overflow:hidden; transition:box-shadow .2s;
 }
 .mc:focus-within{ box-shadow:var(--sh-sm); }
-
 .mc-head{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:14px 16px;
-  cursor:pointer;
-  user-select:none;
-  background:var(--surface);
-  -webkit-tap-highlight-color:transparent;
+  display:flex; align-items:center; gap:10px;
+  padding:14px 16px; cursor:pointer; user-select:none;
+  background:var(--surface); -webkit-tap-highlight-color:transparent;
 }
 .mc-head:active{ background:var(--bg); }
-
-.mc-title{
-  flex:1;
-  min-width:0;
-}
-.mc-name{
-  font-size:14.5px;
-  font-weight:700;
-  color:var(--ink);
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.mc-sub{
-  font-size:11.5px;
-  color:var(--ink-4);
-  margin-top:2px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.mc-badges{
-  display:flex;
-  gap:5px;
-  flex-shrink:0;
-  align-items:center;
-  flex-wrap:wrap;
-  justify-content:flex-end;
-}
-.mc-chevron{
-  color:var(--ink-5);
-  flex-shrink:0;
-  transition:transform .22s ease;
-  font-size:11px;
-}
+.mc-title{ flex:1; min-width:0; }
+.mc-name{ font-size:14.5px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mc-sub{ font-size:11.5px; color:var(--ink-4); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mc-badges{ display:flex; gap:5px; flex-shrink:0; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+.mc-chevron{ color:var(--ink-5); flex-shrink:0; transition:transform .22s ease; font-size:11px; }
 .mc-chevron.open{ transform:rotate(180deg); }
-
-.mc-body{
-  max-height:0;
-  overflow:hidden;
-  transition:max-height .3s cubic-bezier(.4,0,.2,1);
-}
-.mc-body.open{ max-height:700px; }
-
+.mc-body{ max-height:0; overflow:hidden; transition:max-height .3s cubic-bezier(.4,0,.2,1); }
+.mc-body.open{ max-height:800px; }
 .mc-divider{ border:none; border-top:1px solid var(--line); }
-
 .mc-fields{ padding:12px 16px 6px; }
 .mc-field{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  padding:7px 0;
-  border-bottom:1px dashed var(--line);
-  gap:10px;
-  font-size:13.5px;
+  display:flex; justify-content:space-between; align-items:flex-start;
+  padding:7px 0; border-bottom:1px dashed var(--line); gap:10px; font-size:13.5px;
 }
 .mc-field:last-child{ border-bottom:none; }
-.mc-label{
-  color:var(--ink-5);
-  font-size:12px;
-  font-weight:600;
-  white-space:nowrap;
-  min-width:72px;
-  flex-shrink:0;
-  padding-top:1px;
-}
-.mc-val{
-  color:var(--ink-2);
-  text-align:right;
-  word-break:break-word;
-  font-size:13.5px;
-}
-
+.mc-label{ color:var(--ink-5); font-size:12px; font-weight:600; white-space:nowrap; min-width:72px; flex-shrink:0; padding-top:1px; }
+.mc-val{ color:var(--ink-2); text-align:right; word-break:break-word; font-size:13.5px; }
 .mc-actions{
-  display:flex;
-  gap:8px;
-  padding:10px 16px 14px;
-  background:var(--bg);
-  border-top:1px solid var(--line);
-  flex-wrap:wrap;
+  display:flex; gap:8px; padding:10px 16px 14px;
+  background:var(--bg); border-top:1px solid var(--line); flex-wrap:wrap;
 }
 .mc-actions .btn{ flex:1; justify-content:center; }
 
-/* ════════════════════════════════════
-   EMPTY STATE
-════════════════════════════════════ */
-.empty{
-  text-align:center;
-  padding:52px 24px;
-  color:var(--ink-4);
-}
+/* ════ EMPTY STATE ════ */
+.empty{ text-align:center; padding:52px 24px; color:var(--ink-4); }
 .empty-icon{ font-size:38px; margin-bottom:12px; opacity:.5; }
 .empty-title{ font-size:15px; font-weight:600; color:var(--ink-3); margin-bottom:6px; }
 .empty-body{ font-size:13px; line-height:1.6; }
 
-/* ════════════════════════════════════
-   MODAL
-════════════════════════════════════ */
+/* ════ MODAL ════ */
 .modal-overlay{
   position:fixed; inset:0;
   background:rgba(15,23,42,.55);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  z-index:500;
-  backdrop-filter:blur(3px);
-  -webkit-backdrop-filter:blur(3px);
+  display:flex; align-items:center; justify-content:center;
+  padding:20px; z-index:500;
+  backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);
 }
 .modal-overlay.hidden{ display:none; }
-
 .modal{
-  background:var(--surface);
-  border-radius:var(--r-xl);
-  width:100%;
-  max-width:480px;
-  max-height:90vh;
-  overflow-y:auto;
-  box-shadow:var(--sh-lg);
+  background:var(--surface); border-radius:var(--r-xl);
+  width:100%; max-width:480px; max-height:90vh;
+  overflow-y:auto; box-shadow:var(--sh-lg);
   animation:modalIn .2s ease;
 }
 @keyframes modalIn{
   from{ opacity:0; transform:scale(.96) translateY(6px); }
   to  { opacity:1; transform:scale(1) translateY(0); }
 }
-
 .modal-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:20px 22px 16px;
-  border-bottom:1px solid var(--line);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:20px 22px 16px; border-bottom:1px solid var(--line);
 }
-.modal-title{
-  font-size:16px;
-  font-weight:700;
-  color:var(--ink);
-}
+.modal-title{ font-size:16px; font-weight:700; color:var(--ink); }
 .modal-close{
-  background:none;
-  border:none;
-  font-size:18px;
-  color:var(--ink-4);
-  padding:4px 8px;
-  border-radius:var(--r-sm);
-  cursor:pointer;
-  line-height:1;
+  background:none; border:none; font-size:18px;
+  color:var(--ink-4); padding:4px 8px;
+  border-radius:var(--r-sm); cursor:pointer; line-height:1;
 }
 .modal-close:hover{ background:var(--bg-2); color:var(--ink); }
-
 .modal-body{ padding:20px 22px; }
 
-.field{
-  margin-bottom:14px;
-}
-.field label{
-  display:block;
-  font-size:12px;
-  font-weight:600;
-  color:var(--ink-3);
-  margin-bottom:6px;
-  letter-spacing:.1px;
-}
+.field{ margin-bottom:14px; }
+.field label{ display:block; font-size:12px; font-weight:600; color:var(--ink-3); margin-bottom:6px; letter-spacing:.1px; }
 .field input, .field select{
-  width:100%;
-  padding:10px 12px;
-  border:1px solid var(--line);
-  border-radius:var(--r);
-  font-size:14px;
-  color:var(--ink);
-  background:var(--surface);
+  width:100%; padding:10px 12px;
+  border:1px solid var(--line); border-radius:var(--r);
+  font-size:14px; color:var(--ink); background:var(--surface);
   transition:border-color .15s, box-shadow .15s;
-  -webkit-appearance:none;
-  appearance:none;
+  -webkit-appearance:none; appearance:none;
 }
-.field input:focus, .field select:focus{
-  outline:none;
-  border-color:var(--teal);
-  box-shadow:0 0 0 3px rgba(13,148,136,.12);
-}
-.field .ferr{
-  font-size:12px;
-  color:var(--rose);
-  margin-top:5px;
-  display:none;
-}
+.field input:focus, .field select:focus{ outline:none; border-color:var(--teal); box-shadow:0 0 0 3px rgba(13,148,136,.12); }
+.field .ferr{ font-size:12px; color:var(--rose); margin-top:5px; display:none; }
 .field.invalid input, .field.invalid select{ border-color:var(--rose); }
 .field.invalid .ferr{ display:block; }
+.field-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 
-.field-row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
+/* AS 자동산출 안내 박스 */
+.as-hint{
+  background:linear-gradient(135deg, #f0fdf4, #ecfdf5);
+  border:1px solid rgba(13,148,136,.2);
+  border-radius:var(--r);
+  padding:12px 14px;
+  font-size:12.5px;
+  color:var(--teal-dk);
+  margin-bottom:14px;
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
 }
+.as-hint-icon{ font-size:15px; flex-shrink:0; margin-top:1px; }
 
 .modal-footer{
-  display:flex;
-  gap:8px;
-  justify-content:flex-end;
-  padding:16px 22px 20px;
-  border-top:1px solid var(--line);
+  display:flex; gap:8px; justify-content:flex-end;
+  padding:16px 22px 20px; border-top:1px solid var(--line);
 }
 
-/* ════════════════════════════════════
-   TOAST
-════════════════════════════════════ */
+/* ════ TOAST ════ */
 .toast{
-  position:fixed;
-  bottom:24px;
-  left:50%;
+  position:fixed; bottom:24px; left:50%;
   transform:translateX(-50%) translateY(12px);
-  background:var(--ink);
-  color:#fff;
-  padding:10px 18px;
-  border-radius:30px;
-  font-size:13.5px;
-  font-weight:500;
+  background:var(--ink); color:#fff;
+  padding:10px 18px; border-radius:30px;
+  font-size:13.5px; font-weight:500;
   box-shadow:0 6px 20px rgba(15,23,42,.22);
-  opacity:0;
-  transition:opacity .22s, transform .22s;
-  z-index:9999;
-  pointer-events:none;
-  max-width:90vw;
-  text-align:center;
-  display:flex;
-  align-items:center;
-  gap:7px;
-  white-space:nowrap;
+  opacity:0; transition:opacity .22s, transform .22s;
+  z-index:9999; pointer-events:none;
+  max-width:90vw; text-align:center;
+  display:flex; align-items:center; gap:7px; white-space:nowrap;
 }
 .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 .toast.t-success{ background:var(--teal-dk); }
 .toast.t-error  { background:var(--rose); }
-.toast .t-dot{
-  width:6px; height:6px;
-  border-radius:50%;
-  background:rgba(255,255,255,.6);
-  flex-shrink:0;
-}
+.toast .t-dot{ width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.6); flex-shrink:0; }
 
-/* ════════════════════════════════════
-   DASHBOARD SPECIFICS
-════════════════════════════════════ */
+/* ════ DASHBOARD ════ */
 .dash-welcome{
   background:linear-gradient(120deg, var(--ink-2) 0%, #1e3a5f 100%);
-  border-radius:var(--r-xl);
-  padding:28px 32px;
-  color:#fff;
-  margin-bottom:24px;
-  position:relative;
-  overflow:hidden;
+  border-radius:var(--r-xl); padding:28px 32px; color:#fff;
+  margin-bottom:24px; position:relative; overflow:hidden;
 }
-.dash-welcome::after{
-  content:'';
-  position:absolute;
-  right:-20px; top:-20px;
-  width:140px; height:140px;
-  border-radius:50%;
-  background:rgba(255,255,255,.04);
-}
-.dash-welcome::before{
-  content:'';
-  position:absolute;
-  right:60px; bottom:-40px;
-  width:200px; height:200px;
-  border-radius:50%;
-  background:rgba(13,148,136,.12);
-}
-.dash-welcome h2{
-  font-size:20px;
-  font-weight:700;
-  margin-bottom:4px;
-  position:relative;
-}
-.dash-welcome p{
-  font-size:13px;
-  color:rgba(255,255,255,.62);
-  position:relative;
-}
+.dash-welcome::after{ content:''; position:absolute; right:-20px; top:-20px; width:140px; height:140px; border-radius:50%; background:rgba(255,255,255,.04); }
+.dash-welcome::before{ content:''; position:absolute; right:60px; bottom:-40px; width:200px; height:200px; border-radius:50%; background:rgba(13,148,136,.12); }
+.dash-welcome h2{ font-size:20px; font-weight:700; margin-bottom:4px; position:relative; }
+.dash-welcome p{ font-size:13px; color:rgba(255,255,255,.62); position:relative; }
 
-.stat-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:14px;
-  margin-bottom:16px;
-}
-.stat-row-card{
-  background:var(--surface);
-  border:1px solid var(--line);
-  border-radius:var(--r-lg);
-  padding:16px 18px;
-  box-shadow:var(--sh-xs);
-}
+.stat-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px; }
+.stat-row-card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:16px 18px; box-shadow:var(--sh-xs); }
 .stat-row-card .label{ font-size:12px; color:var(--ink-5); font-weight:600; letter-spacing:.3px; margin-bottom:6px; }
 .stat-row-card .val{ font-size:22px; font-weight:700; color:var(--ink); }
 
-/* Statistics bar chart */
-.site-bar{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-bottom:10px;
-}
+.site-bar{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
 .site-bar-label{ width:120px; font-size:12.5px; color:var(--ink-3); text-align:right; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .site-bar-track{ flex:1; height:10px; background:var(--bg-2); border-radius:6px; overflow:hidden; }
 .site-bar-fill{ height:100%; background:linear-gradient(90deg,var(--teal),#0891b2); border-radius:6px; transition:width .4s ease; }
 .site-bar-count{ width:30px; font-size:12px; color:var(--ink-4); flex-shrink:0; }
 
-/* No sites banner */
 .no-sites{
-  background:#fffbeb;
-  border:1px solid #fde68a;
-  border-radius:var(--r-lg);
-  padding:14px 16px;
-  font-size:13px;
-  color:#92400e;
-  margin-bottom:16px;
-  display:flex;
-  align-items:center;
-  gap:8px;
+  background:#fffbeb; border:1px solid #fde68a;
+  border-radius:var(--r-lg); padding:14px 16px;
+  font-size:13px; color:#92400e; margin-bottom:16px;
+  display:flex; align-items:center; gap:8px;
 }
 
-/* ════════════════════════════════════
-   MOBILE — ≤ 768px
-════════════════════════════════════ */
+/* ════ STAT TABS ════ */
+.stat-tab-group{ display:flex; gap:4px; background:var(--bg-2); border-radius:var(--r); padding:3px; }
+.stat-tab{ padding:5px 14px; border-radius:7px; font-size:12.5px; font-weight:600; color:var(--ink-4); background:transparent; border:none; cursor:pointer; transition:all .15s ease; white-space:nowrap; }
+.stat-tab:hover{ color:var(--ink); background:rgba(255,255,255,.6); }
+.stat-tab-active{ background:var(--surface) !important; color:var(--teal-dk) !important; box-shadow:var(--sh-xs); }
+
+.tbl th[onclick]:hover{ background:var(--bg-2); color:var(--ink-3); }
+
+/* ════ MOBILE ════ */
 @media (max-width:768px){
   :root{ --sidebar-w:0px; }
-
   .sidebar{ display:none; }
   .main{ margin-left:0; }
-
   .topbar{ display:none; }
-
   .m-topbar{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    height:54px;
-    padding:0 16px;
-    background:var(--sidebar-bg);
-    color:#fff;
-    position:sticky;
-    top:0;
-    z-index:200;
-    gap:12px;
+    display:flex; align-items:center; justify-content:space-between;
+    height:54px; padding:0 16px;
+    background:var(--sidebar-bg); color:#fff;
+    position:sticky; top:0; z-index:200; gap:12px;
   }
-  .m-topbar-title{
-    font-size:15px;
-    font-weight:700;
-    flex:1;
-  }
-  .m-topbar-brand{
-    display:flex;
-    align-items:center;
-    gap:8px;
-  }
-
+  .m-topbar-title{ font-size:15px; font-weight:700; flex:1; }
+  .m-topbar-brand{ display:flex; align-items:center; gap:8px; }
   .m-tabbar{
-    display:flex;
-    position:fixed;
-    bottom:0; left:0; right:0;
-    background:var(--sidebar-bg);
-    z-index:200;
+    display:flex; position:fixed; bottom:0; left:0; right:0;
+    background:var(--sidebar-bg); z-index:200;
     box-shadow:0 -1px 0 rgba(255,255,255,.06);
     padding-bottom:env(safe-area-inset-bottom);
   }
   .m-tab{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:3px;
-    padding:9px 4px 8px;
-    cursor:pointer;
-    color:rgba(255,255,255,.45);
-    font-size:10.5px;
-    font-weight:500;
-    user-select:none;
-    transition:color .15s;
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:3px; padding:9px 4px 8px; cursor:pointer;
+    color:rgba(255,255,255,.45); font-size:10.5px; font-weight:500;
+    user-select:none; transition:color .15s;
   }
   .m-tab .m-tab-ic{ font-size:18px; line-height:1; }
   .m-tab.active{ color:var(--teal); }
-
-  .content{
-    padding:14px 14px 84px;
-  }
-
-  .kpi-grid{
-    grid-template-columns:repeat(2,1fr);
-    gap:10px;
-    margin-bottom:16px;
-  }
-  /* 5열 kpi는 모바일에서 2+3 배치 */
-  .kpi-grid.kpi-5{ grid-template-columns:repeat(3,1fr); }
+  .content{ padding:14px 14px 84px; }
+  .kpi-grid{ grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:16px; }
   .kpi-num{ font-size:24px; }
-
-  .page-head{
-    flex-direction:column;
-    gap:12px;
-    margin-bottom:16px;
-  }
-  .page-actions .btn{
-    width:100%;
-    justify-content:center;
-  }
-
-  /* hide desktop table, show mobile cards */
+  .page-head{ flex-direction:column; gap:12px; margin-bottom:16px; }
+  .page-actions .btn{ width:100%; justify-content:center; }
   .tbl-wrap{ display:none; }
   .mc-list{ display:block; }
-
   .dash-welcome{ padding:20px; }
   .dash-welcome h2{ font-size:17px; }
-
   .stat-grid{ grid-template-columns:1fr 1fr; gap:10px; }
-
-  .modal{
-    border-radius:var(--r-xl) var(--r-xl) 0 0;
-    max-width:100%;
-    margin:0;
-    max-height:92vh;
-  }
-  .modal-overlay{
-    align-items:flex-end;
-    padding:0;
-  }
-
+  .modal{ border-radius:var(--r-xl) var(--r-xl) 0 0; max-width:100%; margin:0; max-height:92vh; }
+  .modal-overlay{ align-items:flex-end; padding:0; }
   .card-header{ padding:14px 16px; flex-wrap:wrap; }
   .card-body{ padding:16px; }
-
   .field-row{ grid-template-columns:1fr; }
-
   .search-bar{ flex-direction:column; align-items:stretch; }
   .search-wrap{ max-width:100%; }
 }
@@ -1004,41 +530,6 @@ input, select{ font-family:inherit; }
   .m-tabbar{ display:none; }
 }
 
-/* ════════════════════════════════════
-   STAT TABS
-════════════════════════════════════ */
-.stat-tab-group{
-  display:flex;
-  gap:4px;
-  background:var(--bg-2);
-  border-radius:var(--r);
-  padding:3px;
-}
-.stat-tab{
-  padding:5px 14px;
-  border-radius:7px;
-  font-size:12.5px;
-  font-weight:600;
-  color:var(--ink-4);
-  background:transparent;
-  border:none;
-  cursor:pointer;
-  transition:all .15s ease;
-  white-space:nowrap;
-}
-.stat-tab:hover{ color:var(--ink); background:rgba(255,255,255,.6); }
-.stat-tab-active{
-  background:var(--surface) !important;
-  color:var(--teal-dk) !important;
-  box-shadow:var(--sh-xs);
-}
-
-/* sort th hover */
-.tbl th[onclick]:hover{ background:var(--bg-2); color:var(--ink-3); }
-
-/* ════════════════════════════════════
-   SCROLLBAR
-════════════════════════════════════ */
 ::-webkit-scrollbar{ width:5px; height:5px; }
 ::-webkit-scrollbar-track{ background:transparent; }
 ::-webkit-scrollbar-thumb{ background:var(--line); border-radius:3px; }
@@ -1049,7 +540,7 @@ input, select{ font-family:inherit; }
 
 <div class="app">
 
-  <!-- ════ SIDEBAR (desktop) ════ -->
+  <!-- ════ SIDEBAR ════ -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
       <div class="brand-icon">
@@ -1076,13 +567,11 @@ input, select{ font-family:inherit; }
         <li class="nav-item" data-page="statistics"><span class="nav-ic">📊</span>Statistics</li>
       </ul>
     </nav>
-    <div class="sidebar-footer">PMO System v2.0</div>
+    <div class="sidebar-footer">PMO System v2.1</div>
   </aside>
 
   <!-- ════ MAIN ════ -->
   <div class="main">
-
-    <!-- Mobile top bar -->
     <div class="m-topbar">
       <div class="m-topbar-brand">
         <div class="brand-icon" style="width:28px;height:28px;border-radius:7px;">
@@ -1096,12 +585,10 @@ input, select{ font-family:inherit; }
       </div>
     </div>
 
-    <!-- Desktop top bar -->
     <div class="topbar">
       <div class="topbar-title" id="topTitle">Dashboard</div>
       <div class="topbar-breadcrumb">
-        <span>PMO System</span>
-        <span>›</span>
+        <span>PMO System</span><span>›</span>
         <span id="topBreadcrumb">Dashboard</span>
       </div>
     </div>
@@ -1109,7 +596,6 @@ input, select{ font-family:inherit; }
     <main class="content" id="content"></main>
   </div>
 
-  <!-- Mobile tab bar -->
   <ul class="m-tabbar" id="tabbar">
     <li class="m-tab" data-page="dashboard"><span class="m-tab-ic">🏠</span>Home</li>
     <li class="m-tab" data-page="site"><span class="m-tab-ic">🏗️</span>Site</li>
@@ -1150,8 +636,8 @@ const COL = { site:"site", tasks:"tasks", issues:"issues" };
 let site=[], tasks=[], issues=[];
 let curPage="dashboard";
 let sq={ site:"", project:"", issue:"" };
-let projSort={ col:"receiptDate", dir:"desc" }; // col: receiptDate | siteName, dir: asc | desc
-let statPeriod="week"; // week | month | year
+let projSort={ col:"receiptDate", dir:"desc" };
+let statPeriod="week";
 
 const $content = document.getElementById("content");
 
@@ -1183,6 +669,90 @@ function fmtDate(v){
   return d.toLocaleDateString("ko-KR",{year:"numeric",month:"2-digit",day:"2-digit"});
 }
 
+/* ═══════════════════════════════════════════════
+   유/무상 AS 자동 산출 함수
+   - contractStart: "YYYY-MM-DD" 문자열
+   - maintenancePeriod: "12개월", "24개월", "5년", "2년6개월" 등 자유 형식
+   반환: { type: "무상"|"유상"|"알수없음", expireDate: Date|null, daysLeft: number|null }
+═══════════════════════════════════════════════ */
+function calcAS(contractStart, maintenancePeriod){
+  if(!contractStart || !maintenancePeriod){
+    return { type:"알수없음", expireDate:null, daysLeft:null };
+  }
+
+  const start = new Date(contractStart);
+  if(isNaN(start)) return { type:"알수없음", expireDate:null, daysLeft:null };
+
+  /* 유지보수 기간을 월(month) 단위로 파싱 */
+  let totalMonths = 0;
+  const mp = String(maintenancePeriod).trim();
+
+  /* 패턴: "5년", "2년 6개월", "18개월", "1년6개월", "24개월" 등 */
+  const yearMatch  = mp.match(/(\d+\.?\d*)\s*년/);
+  const monthMatch = mp.match(/(\d+\.?\d*)\s*개?월/);
+
+  if(yearMatch)  totalMonths += parseFloat(yearMatch[1])  * 12;
+  if(monthMatch) totalMonths += parseFloat(monthMatch[1]);
+
+  /* 숫자만 입력된 경우 개월로 간주 ("12" → 12개월) */
+  if(!yearMatch && !monthMatch){
+    const numOnly = parseFloat(mp);
+    if(!isNaN(numOnly)) totalMonths = numOnly;
+  }
+
+  if(totalMonths <= 0) return { type:"알수없음", expireDate:null, daysLeft:null };
+
+  /* 만료일 계산 */
+  const expire = new Date(start);
+  expire.setMonth(expire.getMonth() + Math.floor(totalMonths));
+  const remainDays = Math.ceil((expire - new Date()) / 86400000);
+
+  let type;
+  if(remainDays > 0){
+    type = "무상"; // 유지보수 기간 내 → 무상 AS
+  } else {
+    type = "유상"; // 유지보수 기간 만료 → 유상 AS
+  }
+
+  return { type, expireDate: expire, daysLeft: remainDays };
+}
+
+/* AS 배지 HTML */
+function bAS(contractStart, maintenancePeriod){
+  const { type, expireDate, daysLeft } = calcAS(contractStart, maintenancePeriod);
+
+  if(type === "알수없음"){
+    return `<span class="badge b-ready">-</span>`;
+  }
+
+  if(type === "무상"){
+    /* 30일 이내 만료 임박 경고 */
+    if(daysLeft <= 30){
+      return `<span class="badge b-warn-soon">⚠️ 무상 (${daysLeft}일 후 만료)</span>`;
+    }
+    return `<span class="badge b-free">✅ 무상</span>`;
+  }
+
+  /* 유상 */
+  return `<span class="badge b-paid">💰 유상</span>`;
+}
+
+/* AS 만료일 서브텍스트 */
+function asExpireText(contractStart, maintenancePeriod){
+  const { type, expireDate, daysLeft } = calcAS(contractStart, maintenancePeriod);
+  if(!expireDate) return "";
+
+  const fmt = expireDate.toLocaleDateString("ko-KR",{year:"numeric",month:"2-digit",day:"2-digit"});
+
+  if(type === "유상"){
+    return `<span class="maint-exp expired">만료: ${fmt}</span>`;
+  }
+  if(daysLeft <= 30){
+    return `<span class="maint-exp soon">만료: ${fmt} (${daysLeft}일 남음)</span>`;
+  }
+  return `<span class="maint-exp">만료: ${fmt}</span>`;
+}
+
 /* ── Realtime ── */
 onSnapshot(collection(db,COL.site),  s=>{site  =s.docs.map(d=>({id:d.id,...d.data()})); render(curPage);});
 onSnapshot(collection(db,COL.tasks), s=>{tasks =s.docs.map(d=>({id:d.id,...d.data()})); render(curPage);});
@@ -1194,13 +764,14 @@ onSnapshot(collection(db,COL.issues),s=>{issues=s.docs.map(d=>({id:d.id,...d.dat
 const $overlay = document.getElementById("modalOverlay");
 const $modal   = document.getElementById("modalEl");
 
-function openModal({title, fields, values={}, onSave}){
+function openModal({title, fields, values={}, onSave, hint=""}){
   $modal.innerHTML = `
     <div class="modal-header">
       <div class="modal-title">${esc(title)}</div>
       <button class="modal-close" id="mc-x">✕</button>
     </div>
     <div class="modal-body">
+      ${hint ? `<div class="as-hint"><span class="as-hint-icon">💡</span><span>${hint}</span></div>` : ""}
       <form id="mForm">
         ${buildFields(fields, values)}
         <div style="display:none"><button type="submit"></button></div>
@@ -1249,7 +820,6 @@ function openModal({title, fields, values={}, onSave}){
 }
 
 function buildFields(fields, vals){
-  // group consecutive pairs if marked pair:true
   const rows=[];
   let i=0;
   while(i<fields.length){
@@ -1332,10 +902,11 @@ function bIssue(s){ const m={"New":"b-new","Closed":"b-done"}; return `<span cla
 function bIssueType(t){ const m={"기술":"b-progress","일정":"b-received","자재":"b-ready","고객":"b-new"}; return `<span class="badge ${m[t]||"b-ready"}">${esc(t||"-")}</span>`; }
 
 /* ── kpi ── */
-function kpiHtml(num, label, cls=""){
+function kpiHtml(num, label, cls="", sub=""){
   return `<div class="kpi-card ${cls}">
     <div class="kpi-eyebrow">${label}</div>
     <div class="kpi-num">${num}</div>
+    ${sub?`<div class="kpi-sub">${sub}</div>`:""}
   </div>`;
 }
 
@@ -1351,7 +922,7 @@ const SITE_FIELDS = [
    opts:["신규","유지보수","연장","렌탈","판매"]},
   {key:"contractStart",label:"계약 시작", type:"date", pair:true},
   {key:"contractEnd",  label:"계약 종료", type:"date", pair:true},
-  {key:"maintenancePeriod",label:"유지보수 기간", ph:"예: 12개월"},
+  {key:"maintenancePeriod",label:"유지보수 기간", ph:"예: 12개월, 2년, 1년6개월"},
   {key:"pm", label:"담당 PM", req:true},
 ];
 
@@ -1359,6 +930,7 @@ window._openAddSite = ()=>{
   openModal({
     title:"신규 현장 등록",
     fields:SITE_FIELDS,
+    hint:"계약 시작일과 유지보수 기간을 입력하면 유/무상 AS가 자동으로 산출됩니다. (예: 12개월, 2년, 1년6개월)",
     onSave: async d=>{
       await addDoc(collection(db,COL.site), {...d, status:"준비", risk:"Low", createdAt:serverTimestamp()});
       toast("현장이 등록되었습니다","success");
@@ -1372,6 +944,7 @@ window._openEditSite = id=>{
     title:"현장 수정",
     fields:SITE_FIELDS,
     values:s,
+    hint:"계약 시작일과 유지보수 기간을 기반으로 유/무상 AS가 자동 산출됩니다.",
     onSave: async d=>{
       await updateDoc(doc(db,COL.site,id), d);
       toast("현장 정보가 수정되었습니다","success");
@@ -1394,8 +967,11 @@ function renderSiteResults(){
   if(!list.length){ ra.innerHTML=noResults(q); return; }
 
   /* desktop table */
-  const tBody=list.map(s=>`
-    <tr>
+  const tBody=list.map(s=>{
+    const asType = calcAS(s.contractStart, s.maintenancePeriod).type;
+    const rowStyle = asType === "유상" ? "opacity:.85;" : "";
+    return `
+    <tr style="${rowStyle}">
       <td style="font-weight:600;color:var(--ink)">${esc(s.name)}</td>
       <td>${esc(s.client)}</td>
       <td>${esc(s.equipment)||"-"}</td>
@@ -1403,9 +979,15 @@ function renderSiteResults(){
       <td>${bContract(s.contractType)}</td>
       <td>${esc(s.contractStart)||"-"}</td>
       <td>${esc(s.contractEnd)||"-"}</td>
-      <td>${esc(s.maintenancePeriod)||"-"}</td>
+      <td>
+        <div style="line-height:1.3;">
+          <span>${esc(s.maintenancePeriod)||"-"}</span>
+          ${asExpireText(s.contractStart, s.maintenancePeriod)}
+        </div>
+      </td>
       <td>${esc(s.pm)||"-"}</td>
       <td>${bSite(s.status)}</td>
+      <td>${bAS(s.contractStart, s.maintenancePeriod)}</td>
       <td>
         <div class="td-actions">
           <button class="btn-icon edit" onclick="_openEditSite('${s.id}')" title="수정">✏️</button>
@@ -1413,7 +995,8 @@ function renderSiteResults(){
           <button class="btn btn-sm" style="background:var(--rose-lt);color:var(--rose);font-size:12px;padding:5px 10px;border-radius:6px;" onclick="_updateSiteStatus('${s.id}','만료')">만료</button>
         </div>
       </td>
-    </tr>`).join("");
+    </tr>`;
+  }).join("");
 
   /* mobile cards */
   const mCards=list.map(s=>`
@@ -1423,7 +1006,11 @@ function renderSiteResults(){
           <div class="mc-name">${esc(s.name)}</div>
           <div class="mc-sub">${esc(s.client)} · PM: ${esc(s.pm)||"-"}</div>
         </div>
-        <div class="mc-badges">${bContract(s.contractType)}${bSite(s.status)}</div>
+        <div class="mc-badges">
+          ${bContract(s.contractType)}
+          ${bAS(s.contractStart, s.maintenancePeriod)}
+          ${bSite(s.status)}
+        </div>
         <span class="mc-chevron" id="mcc_s${s.id}">▼</span>
       </div>
       <div class="mc-body" id="mcb_s${s.id}">
@@ -1434,7 +1021,17 @@ function renderSiteResults(){
           <div class="mc-field"><span class="mc-label">계약타입</span><span class="mc-val">${esc(s.contractType)||"-"}</span></div>
           <div class="mc-field"><span class="mc-label">계약 시작</span><span class="mc-val">${esc(s.contractStart)||"-"}</span></div>
           <div class="mc-field"><span class="mc-label">계약 종료</span><span class="mc-val">${esc(s.contractEnd)||"-"}</span></div>
-          <div class="mc-field"><span class="mc-label">유지보수</span><span class="mc-val">${esc(s.maintenancePeriod)||"-"}</span></div>
+          <div class="mc-field">
+            <span class="mc-label">유지보수</span>
+            <span class="mc-val">
+              ${esc(s.maintenancePeriod)||"-"}
+              ${asExpireText(s.contractStart, s.maintenancePeriod)}
+            </span>
+          </div>
+          <div class="mc-field">
+            <span class="mc-label">AS 구분</span>
+            <span class="mc-val">${bAS(s.contractStart, s.maintenancePeriod)}</span>
+          </div>
         </div>
         <div class="mc-actions">
           <button class="btn btn-secondary btn-sm" onclick="_openEditSite('${s.id}')">✏️ 수정</button>
@@ -1450,7 +1047,9 @@ function renderSiteResults(){
         <thead><tr>
           <th>현장명</th><th>고객사</th><th>장비</th><th>수량</th>
           <th>계약방식</th><th>계약시작</th><th>계약종료</th>
-          <th>유지보수기간</th><th>PM</th><th>상태</th><th>관리</th>
+          <th>유지보수기간</th><th>PM</th><th>상태</th>
+          <th style="background:linear-gradient(to bottom,#f0fdf4,var(--bg));color:var(--teal-dk);">AS 구분</th>
+          <th>관리</th>
         </tr></thead>
         <tbody>${tBody}</tbody>
       </table>
@@ -1460,11 +1059,19 @@ function renderSiteResults(){
 _renderers.site=renderSiteResults;
 
 function renderSite(){
-  const total    = site.length;
-  const progress = site.filter(s=>s.status==="진행").length;
-  const expired  = site.filter(s=>s.status==="만료").length;
-  const rental   = site.filter(s=>s.contractType==="렌탈").length;
-  const sale     = site.filter(s=>s.contractType==="판매").length;
+  const total=site.length;
+  const progress=site.filter(s=>s.status==="진행").length;
+  const expired=site.filter(s=>s.status==="만료").length;
+
+  /* AS 집계 */
+  const asStats = site.reduce((acc, s)=>{
+    const { type, daysLeft } = calcAS(s.contractStart, s.maintenancePeriod);
+    if(type==="무상") acc.free++;
+    else if(type==="유상") acc.paid++;
+    else acc.unknown++;
+    if(type==="무상" && daysLeft !== null && daysLeft <= 30) acc.soon++;
+    return acc;
+  }, {free:0, paid:0, unknown:0, soon:0});
 
   $content.innerHTML=`
     <div class="page-head">
@@ -1476,17 +1083,29 @@ function renderSite(){
         <button class="btn btn-primary" onclick="_openAddSite()">+ 현장 등록</button>
       </div>
     </div>
+
     <div class="kpi-grid" style="grid-template-columns:repeat(5,1fr);">
-      ${kpiHtml(total,   "전체 현장", "c-teal")}
-      ${kpiHtml(progress,"진행 중",   "c-blue")}
-      ${kpiHtml(expired, "만료",      "c-amber")}
-      ${kpiHtml(rental,  "렌탈",      "c-violet")}
-      ${kpiHtml(sale,    "판매",      "c-green")}
+      ${kpiHtml(total,"전체 현장","c-teal")}
+      ${kpiHtml(progress,"진행 중","c-blue")}
+      ${kpiHtml(expired,"만료","c-amber")}
+      ${kpiHtml(asStats.free,"무상 AS","c-green", asStats.soon>0?`⚠️ ${asStats.soon}건 임박`:"")}
+      ${kpiHtml(asStats.paid,"유상 AS","c-rose")}
     </div>
+
+    ${asStats.soon > 0 ? `
+    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:var(--r-lg);padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px;color:#92400e;">
+      <span style="font-size:18px;">⏰</span>
+      <span>무상 AS 만료 임박 현장이 <strong>${asStats.soon}건</strong> 있습니다. 계약 갱신 여부를 확인해주세요.</span>
+    </div>` : ""}
+
     ${!site.length?`<div class="card"><div class="card-body">${empty("🏗️","등록된 현장이 없습니다","+ 현장 등록 버튼으로 첫 현장을 추가해보세요")}</div></div>`:`
     <div class="card">
       <div class="card-header">
         <div class="card-title">현장 목록</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-5);">
+          <span style="display:inline-flex;align-items:center;gap:4px;"><span class="badge b-free" style="font-size:11px;">✅ 무상</span> 유지보수 기간 내</span>
+          <span style="display:inline-flex;align-items:center;gap:4px;"><span class="badge b-paid" style="font-size:11px;">💰 유상</span> 기간 만료</span>
+        </div>
       </div>
       <div class="card-body">
         ${searchBox("site","현장명, 고객사, 장비, PM으로 검색")}
@@ -1539,13 +1158,18 @@ window._completeProject = async id=>{
   const t=tasks.find(x=>x.id===id); if(!t) return;
   const start=t.createdAt?toDate(t.createdAt):new Date();
   const hrs=Math.max(0,Math.round((new Date()-start)/3600000));
+
+  /* 접수 시점의 현장 AS 구분도 함께 저장 */
+  const linkedSite = site.find(s=>s.name===t.siteName);
+  const asType = linkedSite ? calcAS(linkedSite.contractStart, linkedSite.maintenancePeriod).type : "알수없음";
+
   try{
-    await updateDoc(doc(db,COL.tasks,id),{status:"완료", completedAt:serverTimestamp(), processTime:hrs});
-    toast(`완료 처리 · 처리시간 ${hrs}시간`,"success");
+    await updateDoc(doc(db,COL.tasks,id),{status:"완료", completedAt:serverTimestamp(), processTime:hrs, asType});
+    toast(`완료 처리 · 처리시간 ${hrs}시간 · AS구분: ${asType}`,"success");
   } catch(e){ toast("처리 실패","error"); }
 };
 
-/* 정렬 토글 핸들러 */
+/* 정렬 */
 window._projSortBy = col => {
   if(projSort.col === col){
     projSort.dir = projSort.dir === "asc" ? "desc" : "asc";
@@ -1572,55 +1196,61 @@ function renderProjectResults(){
   if(ma) ma.textContent=q?`${list.length}건 검색됨`:"";
   if(!list.length){ ra.innerHTML=noResults(q); return; }
 
-  /* ── 정렬: 미완료 우선, 그 다음 접수일 or 현장명 기준 ── */
   list = list.slice().sort((a,b)=>{
-    // 완료된 항목은 항상 맨 아래
     const doneA = a.status==="완료" ? 1 : 0;
     const doneB = b.status==="완료" ? 1 : 0;
     if(doneA !== doneB) return doneA - doneB;
-
-    // 동일 완료 여부 내에서 선택 컬럼 기준 정렬
     let va = a[projSort.col] || "";
     let vb = b[projSort.col] || "";
-    // receiptDate: 날짜 문자열 비교 (YYYY-MM-DD 형식이므로 문자열 비교 OK)
     const cmp = va < vb ? -1 : va > vb ? 1 : 0;
     return projSort.dir === "asc" ? cmp : -cmp;
   });
 
-  const thSort = (col, label) =>
-    `<th style="cursor:pointer;user-select:none;white-space:nowrap;" onclick="_projSortBy('${col}')">${label}${sortIcon(col)}</th>`;
-
-  const tBody=list.map(t=>{
-    const isDone = t.status==="완료";
-    const rowStyle = isDone ? "opacity:.6;" : "";
-    return `
-    <tr style="${rowStyle}">
-      <td style="font-weight:600;color:var(--ink)">${esc(t.siteName)||"-"}</td>
-      <td>${esc(t.receiptDate)||"-"}</td>
-      <td style="max-width:200px;white-space:normal;line-height:1.4;">${esc(t.symptom)}</td>
-      <td>${esc(t.manager)||"-"}</td>
-      <td>${esc(t.phone)||"-"}</td>
-      <td>${esc(t.pm)||"-"}</td>
-      <td>${bTask(t.status)}</td>
-      <td>${t.processTime||0}h</td>
-      <td>
-        <div class="td-actions">
-          <button class="btn-icon edit" onclick="_openEditProject('${t.id}')" title="수정">✏️</button>
-          ${!isDone
-            ?`<button class="btn btn-sm btn-primary" onclick="_completeProject('${t.id}')">완료</button>`
-            :`<span style="font-size:12px;color:var(--ink-5);">완료됨</span>`}
-        </div>
-      </td>
-    </tr>`;
-  }).join("");
-
-  /* 완료 건수 구분선 위치 */
   const pendingCount = list.filter(t=>t.status!=="완료").length;
   const doneCount    = list.length - pendingCount;
 
+  const thSort = (col, label) =>
+    `<th style="cursor:pointer;user-select:none;white-space:nowrap;" onclick="_projSortBy('${col}')">${label}${sortIcon(col)}</th>`;
+
+  /* 현장별 AS 구분 조회 헬퍼 */
+  const getSiteAS = (siteName) => {
+    const s = site.find(x=>x.name===siteName);
+    if(!s) return "";
+    return bAS(s.contractStart, s.maintenancePeriod);
+  };
+
+  const tBodyWithDivider = (() => {
+    return list.map((t,idx) => {
+      const isDone = t.status==="완료";
+      const rowStyle = isDone ? "opacity:.6;" : "";
+      const sep = (isDone && idx===pendingCount && doneCount>0)
+        ? `<tr><td colspan="10" style="padding:4px 14px;background:var(--bg-2);font-size:11.5px;color:var(--ink-5);font-weight:600;letter-spacing:.4px;border-bottom:2px solid var(--line);">처리 완료 ${doneCount}건</td></tr>`
+        : "";
+      return sep + `
+      <tr style="${rowStyle}">
+        <td style="font-weight:600;color:var(--ink)">${esc(t.siteName)||"-"}</td>
+        <td>${esc(t.receiptDate)||"-"}</td>
+        <td style="max-width:200px;white-space:normal;line-height:1.4;">${esc(t.symptom)}</td>
+        <td>${esc(t.manager)||"-"}</td>
+        <td>${esc(t.phone)||"-"}</td>
+        <td>${esc(t.pm)||"-"}</td>
+        <td>${bTask(t.status)}</td>
+        <td>${getSiteAS(t.siteName)}</td>
+        <td>${t.processTime||0}h</td>
+        <td>
+          <div class="td-actions">
+            <button class="btn-icon edit" onclick="_openEditProject('${t.id}')" title="수정">✏️</button>
+            ${!isDone
+              ?`<button class="btn btn-sm btn-primary" onclick="_completeProject('${t.id}')">완료</button>`
+              :`<span style="font-size:12px;color:var(--ink-5);">완료됨</span>`}
+          </div>
+        </td>
+      </tr>`;
+    }).join("");
+  })();
+
   const mCards=list.map((t,idx)=>{
     const isDone = t.status==="완료";
-    /* 모바일: 완료 구간 시작에 구분 레이블 */
     const dividerHtml = (isDone && idx===pendingCount && doneCount>0)
       ? `<div style="text-align:center;font-size:11.5px;color:var(--ink-5);font-weight:600;letter-spacing:.4px;text-transform:uppercase;padding:6px 0 2px;">── 처리 완료 ${doneCount}건 ──</div>`
       : "";
@@ -1631,13 +1261,14 @@ function renderProjectResults(){
           <div class="mc-name">${esc(t.siteName)||"미등록 현장"}</div>
           <div class="mc-sub">${esc(t.receiptDate)||"-"} · ${esc(t.symptom)||"-"}</div>
         </div>
-        <div class="mc-badges">${bTask(t.status)}</div>
+        <div class="mc-badges">${bTask(t.status)}${getSiteAS(t.siteName)}</div>
         <span class="mc-chevron" id="mcc_t${t.id}">▼</span>
       </div>
       <div class="mc-body" id="mcb_t${t.id}">
         <hr class="mc-divider"/>
         <div class="mc-fields">
           <div class="mc-field"><span class="mc-label">접수일</span><span class="mc-val">${esc(t.receiptDate)||"-"}</span></div>
+          <div class="mc-field"><span class="mc-label">AS 구분</span><span class="mc-val">${getSiteAS(t.siteName)||"-"}</span></div>
           <div class="mc-field"><span class="mc-label">담당자</span><span class="mc-val">${esc(t.manager)||"-"}</span></div>
           <div class="mc-field"><span class="mc-label">연락처</span><span class="mc-val">${esc(t.phone)||"-"}</span></div>
           <div class="mc-field"><span class="mc-label">PM</span><span class="mc-val">${esc(t.pm)||"-"}</span></div>
@@ -1653,47 +1284,18 @@ function renderProjectResults(){
     </div>`;
   }).join("");
 
-  /* 데스크탑 테이블 — 완료 행 위에 구분선 tr 삽입 */
-  const tBodyWithDivider = (() => {
-    if(pendingCount===0 || doneCount===0) return tBody;
-    const rows = list.map((t,idx) => {
-      const isDone = t.status==="완료";
-      const rowStyle = isDone ? "opacity:.6;" : "";
-      const sep = (isDone && idx===pendingCount)
-        ? `<tr><td colspan="9" style="padding:4px 14px;background:var(--bg-2);font-size:11.5px;color:var(--ink-5);font-weight:600;letter-spacing:.4px;border-bottom:2px solid var(--line);">처리 완료 ${doneCount}건</td></tr>`
-        : "";
-      return sep + `
-      <tr style="${rowStyle}">
-        <td style="font-weight:600;color:var(--ink)">${esc(t.siteName)||"-"}</td>
-        <td>${esc(t.receiptDate)||"-"}</td>
-        <td style="max-width:200px;white-space:normal;line-height:1.4;">${esc(t.symptom)}</td>
-        <td>${esc(t.manager)||"-"}</td>
-        <td>${esc(t.phone)||"-"}</td>
-        <td>${esc(t.pm)||"-"}</td>
-        <td>${bTask(t.status)}</td>
-        <td>${t.processTime||0}h</td>
-        <td>
-          <div class="td-actions">
-            <button class="btn-icon edit" onclick="_openEditProject('${t.id}')" title="수정">✏️</button>
-            ${!isDone
-              ?`<button class="btn btn-sm btn-primary" onclick="_completeProject('${t.id}')">완료</button>`
-              :`<span style="font-size:12px;color:var(--ink-5);">완료됨</span>`}
-          </div>
-        </td>
-      </tr>`;
-    }).join("");
-    return rows;
-  })();
-
   ra.innerHTML=`
     <div class="tbl-wrap">
       <table class="tbl">
         <thead><tr>
           ${thSort("siteName","현장명")}
           ${thSort("receiptDate","접수일")}
-          <th>증상</th><th>담당자</th><th>연락처</th><th>PM</th><th>상태</th><th>처리시간</th><th>관리</th>
+          <th>증상</th><th>담당자</th><th>연락처</th><th>PM</th>
+          <th>상태</th>
+          <th style="background:linear-gradient(to bottom,#f0fdf4,var(--bg));color:var(--teal-dk);">AS 구분</th>
+          <th>처리시간</th><th>관리</th>
         </tr></thead>
-        <tbody>${pendingCount===0||doneCount===0 ? tBody : tBodyWithDivider}</tbody>
+        <tbody>${tBodyWithDivider}</tbody>
       </table>
     </div>
     <div class="mc-list">${mCards}</div>`;
@@ -1857,43 +1459,9 @@ function byPeriod(type){
   });
 }
 
-/* 기간 선택 기준 월별 그룹핑 (주·월·년 탭 공통) */
-function groupByMonth(data){
-  const map={};
-  data.forEach(t=>{
-    const d=toDate(t.createdAt); if(!d) return;
-    const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
-    if(!map[key]) map[key]={label:key, total:0, done:0, time:0};
-    map[key].total++;
-    if(t.status==="완료"){ map[key].done++; map[key].time+=(t.processTime||0); }
-  });
-  return Object.values(map).sort((a,b)=>a.label.localeCompare(b.label));
-}
-
-function groupByWeek(data){
-  const map={};
-  data.forEach(t=>{
-    const d=toDate(t.createdAt); if(!d) return;
-    /* ISO week: 월요일 기준 */
-    const tmp=new Date(d); tmp.setHours(0,0,0,0);
-    tmp.setDate(tmp.getDate()-((tmp.getDay()+6)%7)); // 월요일로 이동
-    const key=tmp.toISOString().slice(0,10);
-    const label=`${key} 주`;
-    if(!map[key]) map[key]={label, total:0, done:0, time:0};
-    map[key].total++;
-    if(t.status==="완료"){ map[key].done++; map[key].time+=(t.processTime||0); }
-  });
-  return Object.values(map).sort((a,b)=>a.label.localeCompare(b.label));
-}
-
-function cDone(arr){ return arr.filter(x=>x.status==="완료").length; }
-function cAvg(arr){ return arr.length?(arr.reduce((a,b)=>a+(b.processTime||0),0)/arr.length).toFixed(1):"0.0"; }
-
-/* 기간 탭 클릭 핸들러 */
 window._setStatPeriod = p => {
   statPeriod = p;
   renderStatPeriodSection();
-  /* 탭 활성 표시 */
   document.querySelectorAll(".stat-tab").forEach(el=>{
     el.classList.toggle("stat-tab-active", el.dataset.period===p);
   });
@@ -1904,26 +1472,20 @@ function renderStatPeriodSection(){
   if(!el) return;
 
   const now = new Date();
-  let data, groups, summaryRows;
+  let data, groups;
 
   if(statPeriod==="week"){
-    /* 이번 주 7일 데이터 → 일별 그룹 */
     const weekAgo=new Date(now); weekAgo.setDate(weekAgo.getDate()-6); weekAgo.setHours(0,0,0,0);
     data = tasks.filter(t=>{ const d=toDate(t.createdAt); return d&&d>=weekAgo; });
-    /* 7일 날짜 배열 생성 */
     const days=[];
     for(let i=6;i>=0;i--){ const d=new Date(now); d.setDate(d.getDate()-i); days.push(d); }
     groups = days.map(d=>{
-      const key=d.toISOString().slice(0,10);
       const label=d.toLocaleDateString("ko-KR",{month:"2-digit",day:"2-digit",weekday:"short"});
       const items=data.filter(t=>{const dd=toDate(t.createdAt); return dd&&dd.toDateString()===d.toDateString();});
       return {label, total:items.length, done:items.filter(x=>x.status==="완료").length,
               time:items.reduce((a,b)=>a+(b.processTime||0),0)};
     });
-    summaryRows = groups;
-
   } else if(statPeriod==="month"){
-    /* 이번 달 데이터 → 주차별 그룹 */
     data = tasks.filter(t=>{
       const d=toDate(t.createdAt);
       return d&&d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
@@ -1941,10 +1503,7 @@ function renderStatPeriodSection(){
       const key=`${w}주차`;
       return wkMap[key]||{label:key,total:0,done:0,time:0};
     }).filter((_,i)=>i<5);
-    summaryRows = groups;
-
-  } else { /* year */
-    /* 올해 데이터 → 월별 그룹 */
+  } else {
     data = tasks.filter(t=>{const d=toDate(t.createdAt); return d&&d.getFullYear()===now.getFullYear();});
     const mMap={};
     data.forEach(t=>{
@@ -1958,16 +1517,14 @@ function renderStatPeriodSection(){
       const key=`${i+1}월`;
       return mMap[key]||{label:key,total:0,done:0,time:0};
     });
-    summaryRows = groups;
   }
 
   const totalAll  = data.length;
   const doneAll   = data.filter(x=>x.status==="완료").length;
   const rateAll   = totalAll ? ((doneAll/totalAll)*100).toFixed(1) : "0.0";
   const avgAll    = totalAll ? (data.reduce((a,b)=>a+(b.processTime||0),0)/totalAll).toFixed(1):"0.0";
-  const maxTotal  = Math.max(...summaryRows.map(r=>r.total), 1);
+  const maxTotal  = Math.max(...groups.map(r=>r.total), 1);
 
-  /* 요약 KPI */
   const kpiStrip = `
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
       <div class="kpi-card c-blue"  style="padding:14px 16px;"><div class="kpi-eyebrow">전체 접수</div><div class="kpi-num" style="font-size:24px;">${totalAll}</div></div>
@@ -1976,8 +1533,7 @@ function renderStatPeriodSection(){
       <div class="kpi-card c-amber" style="padding:14px 16px;"><div class="kpi-eyebrow">평균처리시간</div><div class="kpi-num" style="font-size:24px;">${avgAll}h</div></div>
     </div>`;
 
-  /* 바 차트 */
-  const bars = summaryRows.map(r=>{
+  const bars = groups.map(r=>{
     const pct = (r.total/maxTotal*100).toFixed(1);
     const donePct = r.total ? (r.done/r.total*100).toFixed(0) : 0;
     const avg = r.total ? (r.time/r.total).toFixed(1) : "0.0";
@@ -1993,7 +1549,6 @@ function renderStatPeriodSection(){
       </div>`;
   }).join("");
 
-  /* 헤더 라벨 */
   const barHeader = `
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--line);">
       <div style="width:72px;"></div>
@@ -2019,16 +1574,21 @@ function renderStatistics(){
     const s=sMap[k];
     const avg=s.total?(s.time/s.total).toFixed(1):"0.0";
     const rate=s.total?((s.done/s.total)*100).toFixed(0):0;
+
+    /* 해당 현장의 AS 구분 */
+    const linkedSite = site.find(x=>x.name===k);
+    const asBadge = linkedSite ? bAS(linkedSite.contractStart, linkedSite.maintenancePeriod) : "";
+
     return `
-      <div class="site-bar">
+      <div class="site-bar" style="align-items:center;">
         <div class="site-bar-label" title="${esc(k)}">${esc(k)}</div>
         <div class="site-bar-track"><div class="site-bar-fill" style="width:${(s.total/maxSiteTotal*100).toFixed(1)}%"></div></div>
         <div class="site-bar-count">${s.total}</div>
         <div style="width:36px;font-size:12px;color:var(--teal-dk);font-weight:600;">${rate}%</div>
+        <div style="width:80px;display:flex;justify-content:flex-end;">${asBadge}</div>
       </div>`;
   }).join("");
 
-  /* 탭 버튼 */
   const tabs=[["week","이번 주"],["month","이번 달"],["year","올해"]].map(([p,l])=>
     `<button class="stat-tab${statPeriod===p?" stat-tab-active":""}" data-period="${p}" onclick="_setStatPeriod('${p}')">${l}</button>`
   ).join("");
@@ -2058,6 +1618,7 @@ function renderStatistics(){
                <div style="flex:1;font-size:11px;font-weight:700;color:var(--ink-5);text-transform:uppercase;letter-spacing:.4px;">접수 건수</div>
                <div style="width:30px;font-size:11px;font-weight:700;color:var(--ink-5);">건</div>
                <div style="width:36px;font-size:11px;font-weight:700;color:var(--ink-5);">완료율</div>
+               <div style="width:80px;font-size:11px;font-weight:700;color:var(--teal-dk);text-align:right;">AS 구분</div>
              </div>${sPerf}`
           : `<div class="empty"><div class="empty-icon">📊</div><div class="empty-title">집계 데이터 없음</div><div class="empty-body">접수 데이터가 쌓이면 자동으로 분석됩니다.</div></div>`}
       </div>
@@ -2074,6 +1635,15 @@ function renderDashboard(){
   const openIssues=issues.filter(i=>i.status==="New").length;
   const pendingTasks=tasks.filter(t=>t.status==="접수").length;
   const issueRate=issues.length?((issues.filter(i=>i.status==="Closed").length/issues.length)*100).toFixed(1):"0.0";
+
+  /* AS 집계 */
+  const asStats = site.reduce((acc, s)=>{
+    const { type, daysLeft } = calcAS(s.contractStart, s.maintenancePeriod);
+    if(type==="무상") acc.free++;
+    else if(type==="유상") acc.paid++;
+    if(type==="무상" && daysLeft !== null && daysLeft <= 30) acc.soon++;
+    return acc;
+  }, {free:0, paid:0, soon:0});
 
   const recentTasks=tasks.slice().sort((a,b)=>{
     const ta=toDate(a.createdAt)||new Date(0), tb=toDate(b.createdAt)||new Date(0);
@@ -2098,6 +1668,12 @@ function renderDashboard(){
       ${kpiHtml(issueRate+"%","이슈 종결률","c-violet")}
     </div>
 
+    ${asStats.soon > 0 ? `
+    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:var(--r-lg);padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px;color:#92400e;cursor:pointer;" onclick="navigate('site')">
+      <span style="font-size:18px;">⏰</span>
+      <span>무상 AS 만료 임박 현장이 <strong>${asStats.soon}건</strong> 있습니다. <u>Site Master에서 확인</u></span>
+    </div>` : ""}
+
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;" id="dashGrid">
       <div class="card" style="margin:0;">
         <div class="card-header">
@@ -2119,29 +1695,55 @@ function renderDashboard(){
           :`<div class="empty" style="padding:32px 16px;"><div class="empty-icon" style="font-size:28px">🛠️</div><div class="empty-body">접수 내역이 없습니다</div></div>`}
         </div>
       </div>
+
       <div class="card" style="margin:0;">
         <div class="card-header">
-          <div class="card-title">최근 이슈</div>
-          <button class="btn btn-ghost btn-sm" onclick="navigate('issue')">전체 보기 →</button>
+          <div class="card-title">AS 현황</div>
+          <button class="btn btn-ghost btn-sm" onclick="navigate('site')">현장 보기 →</button>
         </div>
-        <div class="card-body card-body-flush">
-          ${recentIssues.length?`
-          <table class="tbl">
-            <thead><tr><th>이슈</th><th>유형</th><th>상태</th></tr></thead>
-            <tbody>${recentIssues.map(i=>`
-              <tr>
-                <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;">${esc(i.title)||"-"}</td>
-                <td>${bIssueType(i.issueType)}</td>
-                <td>${bIssue(i.status)}</td>
-              </tr>`).join("")}
-            </tbody>
-          </table>`
-          :`<div class="empty" style="padding:32px 16px;"><div class="empty-icon" style="font-size:28px">⚠️</div><div class="empty-body">등록된 이슈가 없습니다</div></div>`}
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div style="background:var(--free-lt);border:1px solid rgba(13,148,136,.15);border-radius:var(--r-lg);padding:14px;text-align:center;">
+              <div style="font-size:24px;font-weight:700;color:var(--free);">${asStats.free}</div>
+              <div style="font-size:12px;color:var(--free);font-weight:600;margin-top:3px;">✅ 무상 AS</div>
+            </div>
+            <div style="background:var(--paid-lt);border:1px solid rgba(220,38,38,.15);border-radius:var(--r-lg);padding:14px;text-align:center;">
+              <div style="font-size:24px;font-weight:700;color:var(--paid);">${asStats.paid}</div>
+              <div style="font-size:12px;color:var(--paid);font-weight:600;margin-top:3px;">💰 유상 AS</div>
+            </div>
+          </div>
+          ${asStats.soon > 0 ? `
+          <div style="margin-top:10px;padding:10px 12px;background:var(--warn-lt);border:1px solid rgba(217,119,6,.2);border-radius:var(--r);font-size:12.5px;color:var(--warn);font-weight:600;">
+            ⚠️ 30일 내 무상 만료 ${asStats.soon}건
+          </div>` : `
+          <div style="margin-top:10px;padding:10px 12px;background:var(--teal-lt);border:1px solid rgba(13,148,136,.15);border-radius:var(--r);font-size:12.5px;color:var(--teal-dk);">
+            ✅ 임박 만료 현장 없음
+          </div>`}
         </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">최근 이슈</div>
+        <button class="btn btn-ghost btn-sm" onclick="navigate('issue')">전체 보기 →</button>
+      </div>
+      <div class="card-body card-body-flush">
+        ${recentIssues.length?`
+        <table class="tbl">
+          <thead><tr><th>이슈</th><th>유형</th><th>상태</th></tr></thead>
+          <tbody>${recentIssues.map(i=>`
+            <tr>
+              <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;">${esc(i.title)||"-"}</td>
+              <td>${bIssueType(i.issueType)}</td>
+              <td>${bIssue(i.status)}</td>
+            </tr>`).join("")}
+          </tbody>
+        </table>`
+        :`<div class="empty" style="padding:32px 16px;"><div class="empty-icon" style="font-size:28px">⚠️</div><div class="empty-body">등록된 이슈가 없습니다</div></div>`}
       </div>
     </div>`;
 
-  /* mobile: stack grid */
   const g=document.getElementById("dashGrid");
   if(g && window.innerWidth<=768) g.style.gridTemplateColumns="1fr";
 }
@@ -2185,7 +1787,6 @@ document.querySelectorAll(".nav-item,.m-tab").forEach(el=>{
   el.onclick=()=>navigate(el.dataset.page);
 });
 
-/* init */
 setActive("dashboard");
 render("dashboard");
 </script>
