@@ -961,8 +961,7 @@ function _buildQuoteHTML(data,task){
     ${data.quoteNotes?`
     <div class="qdoc-notes">
       <div class="qdoc-notes-title">✦ 특기사항</div>
-      ${esc(data.quoteNotes).replace(/
-/g,"<br/>")}
+      ${esc(data.quoteNotes).replace(/\n/g,"<br/>")}
     </div>`:""}
 
     <!-- Footer -->
