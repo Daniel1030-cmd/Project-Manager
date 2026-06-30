@@ -68,8 +68,8 @@ input,select,textarea{font-family:inherit;}
 .kpi-card.c-violet::before{background:var(--violet);}
 .kpi-card.c-rose::before{background:var(--rose);}
 .kpi-card.c-green::before{background:var(--green);}
-.kpi-eyebrow{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-5);margin-bottom:8px;}
-.kpi-num{font-size:30px;font-weight:700;color:var(--ink);line-height:1;letter-spacing:-1px;}
+.kpi-eyebrow{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-5);margin-bottom:8px;white-space:normal;word-break:keep-all;line-height:1.3;}
+.kpi-num{font-size:28px;font-weight:700;color:var(--ink);line-height:1;letter-spacing:-1px;}
 .kpi-card.c-teal .kpi-num{color:var(--teal-dk);}
 .kpi-card.c-blue .kpi-num{color:var(--blue);}
 .kpi-card.c-amber .kpi-num{color:var(--amber);}
@@ -83,7 +83,7 @@ input,select,textarea{font-family:inherit;}
 .card-body-flush{padding:0;}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--r);font-size:13px;font-weight:600;line-height:1;border:none;cursor:pointer;white-space:nowrap;transition:all .15s ease;}
 .btn-primary{background:var(--teal);color:#fff;box-shadow:0 1px 3px rgba(13,148,136,.35);}
-.btn-primary:hover{background:var(--teal-dk);box-shadow:0 2px 6px rgba(13,148,136,.45);}
+.btn-primary:hover{background:var(--teal-dk);}
 .btn-secondary{background:var(--surface);color:var(--ink-3);border:1px solid var(--line);box-shadow:var(--sh-xs);}
 .btn-secondary:hover{background:var(--bg-2);border-color:var(--ink-5);}
 .btn-ghost{background:transparent;color:var(--ink-4);padding:6px 10px;}
@@ -101,13 +101,12 @@ input,select,textarea{font-family:inherit;}
 .search-wrap input::placeholder{color:var(--ink-5);}
 .search-wrap input:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,148,136,.12);}
 .search-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--ink-5);font-size:12px;padding:3px 6px;cursor:pointer;display:none;border-radius:4px;}
-.search-clear:hover{background:var(--bg-2);color:var(--ink);}
 .search-wrap.has-val .search-clear{display:inline-flex;}
 .search-meta{font-size:12px;color:var(--ink-5);margin-bottom:12px;min-height:16px;}
 .tbl-wrap{overflow-x:auto;}
 .tbl{width:100%;border-collapse:collapse;font-size:13px;}
 .tbl th{background:var(--bg);border-bottom:2px solid var(--line);padding:10px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-4);white-space:nowrap;}
-.tbl td{padding:12px 14px;border-bottom:1px solid var(--line);color:var(--ink-2);white-space:nowrap;vertical-align:middle;}
+.tbl td{padding:11px 14px;border-bottom:1px solid var(--line);color:var(--ink-2);white-space:nowrap;vertical-align:middle;}
 .tbl tbody tr:last-child td{border-bottom:none;}
 .tbl tbody tr:hover td{background:var(--bg);}
 .tbl .td-actions{display:flex;gap:5px;align-items:center;}
@@ -140,12 +139,12 @@ input,select,textarea{font-family:inherit;}
 .mc-chevron{color:var(--ink-5);flex-shrink:0;transition:transform .22s ease;font-size:11px;}
 .mc-chevron.open{transform:rotate(180deg);}
 .mc-body{max-height:0;overflow:hidden;transition:max-height .3s cubic-bezier(.4,0,.2,1);}
-.mc-body.open{max-height:800px;}
+.mc-body.open{max-height:1200px;}
 .mc-divider{border:none;border-top:1px solid var(--line);}
 .mc-fields{padding:12px 16px 6px;}
 .mc-field{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--line);gap:10px;font-size:13.5px;}
 .mc-field:last-child{border-bottom:none;}
-.mc-label{color:var(--ink-5);font-size:12px;font-weight:600;white-space:nowrap;min-width:72px;flex-shrink:0;padding-top:1px;}
+.mc-label{color:var(--ink-5);font-size:12px;font-weight:600;white-space:nowrap;min-width:76px;flex-shrink:0;padding-top:1px;}
 .mc-val{color:var(--ink-2);text-align:right;word-break:break-word;font-size:13.5px;}
 .mc-actions{display:flex;gap:8px;padding:10px 16px 14px;background:var(--bg);border-top:1px solid var(--line);flex-wrap:wrap;}
 .mc-actions .btn{flex:1;justify-content:center;}
@@ -184,7 +183,6 @@ input,select,textarea{font-family:inherit;}
 .dash-welcome::before{content:'';position:absolute;right:60px;bottom:-40px;width:200px;height:200px;border-radius:50%;background:rgba(13,148,136,.12);}
 .dash-welcome h2{font-size:20px;font-weight:700;margin-bottom:4px;position:relative;}
 .dash-welcome p{font-size:13px;color:rgba(255,255,255,.62);position:relative;}
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
 .site-bar{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
 .site-bar-label{width:120px;font-size:12.5px;color:var(--ink-3);text-align:right;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .site-bar-track{flex:1;height:10px;background:var(--bg-2);border-radius:6px;overflow:hidden;}
@@ -199,22 +197,117 @@ input,select,textarea{font-family:inherit;}
 /* ════ QUOTE MODAL WIDE ════ */
 .modal-wide{max-width:780px;}
 
-/* ════ QUOTE PREVIEW PRINT ════ */
+/* ════ DETAIL MODAL ════ */
+.modal-xl{max-width:700px;}
+
+/* ════ AS 이력카드 탭 ════ */
+.as-tabs{display:flex;gap:2px;background:var(--bg-2);border-radius:var(--r);padding:3px;margin-bottom:18px;}
+.as-tab{flex:1;padding:8px 6px;border-radius:8px;font-size:12px;font-weight:600;color:var(--ink-4);background:transparent;border:none;cursor:pointer;transition:all .15s;text-align:center;white-space:nowrap;}
+.as-tab:hover{background:rgba(255,255,255,.7);color:var(--ink);}
+.as-tab.active{background:var(--surface);color:var(--teal-dk);box-shadow:var(--sh-xs);}
+.as-tab-panel{display:none;}
+.as-tab-panel.active{display:block;}
+
+/* ════ AS 이력카드 섹션 ════ */
+.as-section{margin-bottom:18px;}
+.as-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-5);margin-bottom:10px;display:flex;align-items:center;gap:6px;padding-bottom:7px;border-bottom:1px solid var(--line-2);}
+.as-section-title span{width:18px;height:18px;border-radius:50%;background:var(--teal-lt);color:var(--teal-dk);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;}
+
+/* ════ 원인구분 셀렉트 컬러 ════ */
+.cause-hw{color:#d97706;}
+.cause-sw{color:#2563eb;}
+.cause-user{color:#7c3aed;}
+.cause-env{color:#0891b2;}
+.cause-age{color:#94a3b8;}
+
+/* ════ 방문일정 타임라인 ════ */
+.visit-timeline{position:relative;padding-left:20px;}
+.visit-timeline::before{content:'';position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:var(--line);border-radius:1px;}
+.visit-step{position:relative;margin-bottom:12px;}
+.visit-step:last-child{margin-bottom:0;}
+.visit-dot{position:absolute;left:-17px;top:3px;width:10px;height:10px;border-radius:50%;background:var(--line);border:2px solid var(--surface);box-shadow:0 0 0 1px var(--line);}
+.visit-dot.done{background:var(--teal);}
+.visit-dot.active{background:var(--blue);}
+.visit-dot.pending{background:var(--amber);}
+.visit-label{font-size:11px;font-weight:700;color:var(--ink-5);letter-spacing:.3px;}
+.visit-val{font-size:13px;color:var(--ink-2);margin-top:2px;font-weight:500;}
+.visit-val.highlight{color:var(--blue);font-weight:700;}
+
+/* ════ D-day 배지 ════ */
+.dday{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700;margin-left:6px;}
+.dday-today{background:#fef9c3;color:#854d0e;}
+.dday-soon{background:var(--blue-lt);color:var(--blue);}
+.dday-past{background:var(--rose-lt);color:var(--rose);}
+.dday-future{background:var(--line-2);color:var(--ink-4);}
+
+/* ════ 조치유형 태그 ════ */
+.action-tag{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;}
+.at-visit{background:#eff6ff;color:#1d4ed8;}
+.at-remote{background:#f0fdf4;color:#15803d;}
+.at-parts{background:#fff7ed;color:#c2410c;}
+.at-sw{background:#faf5ff;color:#7e22ce;}
+.at-check{background:#f8fafc;color:#475569;}
+
+/* ════ 완료처리 체크리스트 ════ */
+.checklist{display:flex;flex-direction:column;gap:8px;}
+.check-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--bg);}
+.check-item input[type="checkbox"]{width:16px;height:16px;margin-top:2px;accent-color:var(--teal);flex-shrink:0;}
+.check-item-text{font-size:13px;color:var(--ink-2);line-height:1.4;}
+.check-item.done-item .check-item-text{text-decoration:line-through;color:var(--ink-5);}
+
+/* ════ 이력 타임라인 ════ */
+.history-list{display:flex;flex-direction:column;gap:0;}
+.history-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line);}
+.history-item:last-child{border-bottom:none;}
+.history-dot-col{display:flex;flex-direction:column;align-items:center;gap:0;width:20px;flex-shrink:0;padding-top:4px;}
+.history-dot{width:8px;height:8px;border-radius:50%;background:var(--teal-lt);border:2px solid var(--teal);flex-shrink:0;}
+.history-line{flex:1;width:1px;background:var(--line);margin-top:3px;}
+.history-content{flex:1;min-width:0;}
+.history-meta{font-size:11px;color:var(--ink-5);margin-bottom:3px;}
+.history-text{font-size:13px;color:var(--ink-2);line-height:1.5;}
+.history-tag{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10.5px;font-weight:700;background:var(--teal-lt);color:var(--teal-dk);margin-left:5px;}
+
+/* ════ 증상 요약 카드 ════ */
+.symptom-card{background:linear-gradient(135deg,#f8fafc,#f1f5f9);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;}
+.symptom-card-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-5);margin-bottom:5px;}
+.symptom-card-text{font-size:13.5px;color:var(--ink-2);line-height:1.6;}
+
+/* ════ QUOTE STYLES ════ */
+.qform-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.qform-grid .field{margin:0;}
+.qform-full{grid-column:1/-1;}
+.q-summary{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:14px;}
+.q-summary-row{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:1px solid var(--line);}
+.q-summary-row:last-child{border-bottom:none;}
+.q-summary-label{font-size:12.5px;color:var(--ink-4);font-weight:600;}
+.q-summary-val{font-size:13px;font-weight:700;color:var(--ink);}
+.q-summary-total{background:var(--teal-lt);}
+.q-summary-total .q-summary-label{font-size:13.5px;color:var(--teal-dk);font-weight:800;}
+.q-summary-total .q-summary-val{font-size:16px;font-weight:800;color:var(--teal-dk);}
+.qi-editor{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:12px;}
+.qi-header{display:grid;grid-template-columns:2fr 60px 100px 110px 50px;gap:0;background:var(--bg);border-bottom:1px solid var(--line);padding:7px 10px;font-size:11px;font-weight:700;color:var(--ink-4);text-transform:uppercase;letter-spacing:.4px;}
+.qi-row{display:grid;grid-template-columns:2fr 60px 100px 110px 50px;gap:4px;padding:6px 8px;border-bottom:1px solid var(--line-2);align-items:center;}
+.qi-row:last-child{border-bottom:none;}
+.qi-row input{padding:5px 7px;border:1px solid var(--line);border-radius:5px;font-size:12.5px;width:100%;}
+.qi-row input:focus{outline:none;border-color:var(--teal);}
+.qi-row .qi-amt{font-size:12px;font-weight:600;color:var(--teal-dk);text-align:right;padding-right:4px;}
+.qi-row .qi-del{background:var(--rose-lt);color:var(--rose);border:none;border-radius:4px;padding:4px 7px;cursor:pointer;font-size:12px;}
+.qi-add-btn{width:100%;padding:8px;background:var(--bg);border:none;border-top:1px solid var(--line);color:var(--teal);font-weight:600;font-size:13px;cursor:pointer;transition:background .15s;}
+.qi-add-btn:hover{background:var(--teal-lt);}
+
+/* ════ QUOTE PRINT ════ */
 @media print{
   body > *:not(#quotePrintArea){display:none!important;}
   #quotePrintArea{display:block!important;position:fixed;inset:0;z-index:99999;background:#fff;padding:0;margin:0;}
   #quotePrintArea .no-print{display:none!important;}
-  @page{margin:15mm 15mm 15mm 15mm;size:A4;}
+  @page{margin:15mm;size:A4;}
+  .qdoc{padding:28px 32px!important;max-width:100%!important;border:none!important;}
+  .qdoc-header{flex-direction:row!important;align-items:flex-start!important;}
+  .qdoc-meta-grid{grid-template-columns:1fr 1fr!important;}
+  .qdoc-amount-box{flex-direction:row!important;align-items:center!important;}
 }
 #quotePrintArea{display:none;}
-
-/* ════ QUOTE DOCUMENT STYLE ════ */
-.qdoc{
-  font-family:'Noto Sans KR','Inter',sans-serif;
-  font-size:12px;color:#111;background:#fff;
-  padding:28px 32px;max-width:780px;margin:0 auto;
-  border:1px solid #ddd;border-radius:8px;
-}
+.qdoc{font-family:'Noto Sans KR','Inter',sans-serif;font-size:12px;color:#111;background:#fff;padding:28px 32px;max-width:780px;margin:0 auto;border:1px solid #ddd;border-radius:8px;}
 .qdoc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;padding-bottom:18px;border-bottom:3px solid #1a73c8;}
 .qdoc-logo{height:52px;object-fit:contain;}
 .qdoc-title-block{text-align:right;}
@@ -234,7 +327,7 @@ input,select,textarea{font-family:inherit;}
 .qdoc-items-table .num{text-align:right;}
 .qdoc-items-table .ctr{text-align:center;}
 .qdoc-total-block{margin-top:0;border:1px solid #dde3ee;border-top:none;}
-.qdoc-total-row{display:flex;justify-content:flex-end;align-items:center;gap:0;border-bottom:1px solid #eee;}
+.qdoc-total-row{display:flex;justify-content:flex-end;align-items:center;border-bottom:1px solid #eee;}
 .qdoc-total-row:last-child{border-bottom:none;}
 .qdoc-total-label{padding:8px 16px;font-size:12px;font-weight:600;color:#555;background:#f5f7fa;border-right:1px solid #eee;min-width:120px;text-align:right;}
 .qdoc-total-val{padding:8px 16px;font-size:12px;font-weight:700;color:#111;min-width:130px;text-align:right;}
@@ -245,55 +338,17 @@ input,select,textarea{font-family:inherit;}
 .qdoc-footer{margin-top:24px;padding-top:16px;border-top:2px solid #1a73c8;display:flex;justify-content:space-between;align-items:flex-end;}
 .qdoc-footer-company{font-size:12px;color:#333;line-height:1.8;}
 .qdoc-footer-company strong{font-size:14px;color:#1a73c8;}
+.qdoc-amount-box{border:2px solid #1a73c8;border-radius:8px;padding:12px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#e8f0fe,#f0f7ff);}
 
-/* ════ QUOTE ITEMS EDITOR ════ */
-.qi-editor{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:12px;}
-.qi-header{display:grid;grid-template-columns:2fr 60px 100px 110px 50px;gap:0;background:var(--bg);border-bottom:1px solid var(--line);padding:7px 10px;font-size:11px;font-weight:700;color:var(--ink-4);text-transform:uppercase;letter-spacing:.4px;}
-.qi-row{display:grid;grid-template-columns:2fr 60px 100px 110px 50px;gap:4px;padding:6px 8px;border-bottom:1px solid var(--line-2);align-items:center;}
-.qi-row:last-child{border-bottom:none;}
-.qi-row input,.qi-row select{padding:5px 7px;border:1px solid var(--line);border-radius:5px;font-size:12.5px;width:100%;}
-.qi-row input:focus,.qi-row select:focus{outline:none;border-color:var(--teal);}
-.qi-row .qi-amt{font-size:12px;font-weight:600;color:var(--teal-dk);text-align:right;padding-right:4px;}
-.qi-row .qi-del{background:var(--rose-lt);color:var(--rose);border:none;border-radius:4px;padding:4px 7px;cursor:pointer;font-size:12px;}
-.qi-add-btn{width:100%;padding:8px;background:var(--bg);border:none;border-top:1px solid var(--line);color:var(--teal);font-weight:600;font-size:13px;cursor:pointer;transition:background .15s;}
-.qi-add-btn:hover{background:var(--teal-lt);}
-
-/* ════ QUOTE FORM GRID ════ */
-.qform-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
-.qform-grid .field{margin:0;}
-.qform-full{grid-column:1/-1;}
-
-/* ════ QUOTE SUMMARY BOX ════ */
-.q-summary{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:14px;}
-.q-summary-row{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:1px solid var(--line);}
-.q-summary-row:last-child{border-bottom:none;}
-.q-summary-label{font-size:12.5px;color:var(--ink-4);font-weight:600;}
-.q-summary-val{font-size:13px;font-weight:700;color:var(--ink);}
-.q-summary-total{background:var(--teal-lt);}
-.q-summary-total .q-summary-label{font-size:13.5px;color:var(--teal-dk);font-weight:800;}
-.q-summary-total .q-summary-val{font-size:16px;font-weight:800;color:var(--teal-dk);}
-
-/* ════ QUOTE PREVIEW OVERLAY ════ */
-.quote-preview-overlay{
-  display:none;
-  position:fixed;inset:0;z-index:9998;
-  background:#fff;
-  overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
-}
+/* Quote Preview Overlay */
+.quote-preview-overlay{display:none;position:fixed;inset:0;z-index:9998;background:#fff;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .quote-preview-overlay.active{display:block;}
-.quote-preview-bar{
-  position:sticky;top:0;z-index:10;
-  background:#fff;border-bottom:1px solid var(--line);
-  padding:12px 16px;
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
-  box-shadow:var(--sh-sm);
-}
+.quote-preview-bar{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:var(--sh-sm);}
 .quote-preview-bar-title{font-size:14px;font-weight:700;color:var(--ink);}
 .quote-preview-actions{display:flex;gap:8px;flex-wrap:wrap;}
 .quote-preview-content{padding:16px;}
 
-/* ════ MOBILE RESPONSIVE ════ */
+/* ════ MOBILE ════ */
 @media(max-width:768px){
   :root{--sidebar-w:0px;}
   .sidebar{display:none;}
@@ -307,85 +362,57 @@ input,select,textarea{font-family:inherit;}
   .m-tab .m-tab-ic{font-size:18px;line-height:1;}
   .m-tab.active{color:var(--teal);}
   .content{padding:14px 14px 84px;}
-  .kpi-grid{grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;}
-  .kpi-num{font-size:24px;}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)!important;gap:10px;margin-bottom:16px;}
+  .kpi-num{font-size:22px;}
+  .kpi-card{padding:14px 14px;}
   .page-head{flex-direction:column;gap:12px;margin-bottom:16px;}
   .page-actions .btn{width:100%;justify-content:center;}
   .tbl-wrap{display:none;}
   .mc-list{display:block;}
   .dash-welcome{padding:20px;}
   .dash-welcome h2{font-size:17px;}
-  .stat-grid{grid-template-columns:1fr 1fr;gap:10px;}
   .modal{border-radius:var(--r-xl) var(--r-xl) 0 0;max-width:100%;margin:0;max-height:92vh;}
   .modal-overlay{align-items:flex-end;padding:0;}
+  .modal-wide{max-width:100%;}
+  .modal-xl{max-width:100%;}
   .card-header{padding:14px 16px;flex-wrap:wrap;}
   .card-body{padding:16px;}
   .field-row{grid-template-columns:1fr;}
   .search-bar{flex-direction:column;align-items:stretch;}
   .search-wrap{max-width:100%;}
-  .modal-wide{max-width:100%;}
-
-  /* ── 견적서 모달 모바일 최적화 ── */
   .modal-footer{flex-wrap:wrap;padding:12px 16px 16px;}
   .modal-footer .btn{flex:1 1 auto;min-width:calc(50% - 4px);justify-content:center;font-size:12px;padding:9px 8px;}
-
-  /* 견적서 폼 그리드 → 1열 */
   .qform-grid{grid-template-columns:1fr;}
-
-  /* 품목 편집기 모바일 레이아웃 */
-  .qi-header{display:none;} /* 헤더 숨김 */
-  .qi-row{
-    display:flex;flex-direction:column;gap:6px;
-    padding:10px 10px 12px;
-    border-bottom:1px solid var(--line);
-    background:var(--surface);
-  }
-  .qi-row .qi-item-header{
-    display:flex;align-items:center;justify-content:space-between;
-    margin-bottom:2px;
-  }
-  .qi-row .qi-name-wrap{display:flex;flex-direction:column;gap:4px;flex:1;}
-  .qi-row .qi-price-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;align-items:center;}
-  .qi-row .qi-amt{
-    text-align:right;font-size:13px;font-weight:700;
-    color:var(--teal-dk);padding:0;
-    grid-column:1/-1;
-    padding-top:4px;border-top:1px dashed var(--line);
-  }
-  .qi-row .qi-del{align-self:flex-start;padding:5px 9px;}
-  .qi-label{font-size:10px;font-weight:700;color:var(--ink-5);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;}
-
-  /* 견적서 문서 모바일 */
-  .qdoc{padding:16px 14px;font-size:11px;}
-  .qdoc-header{flex-direction:column;gap:10px;align-items:flex-start;margin-bottom:14px;padding-bottom:12px;}
-  .qdoc-logo{height:36px;}
+  .qi-header{display:none;}
+  .qi-row{display:flex;flex-direction:column;gap:6px;padding:10px 10px 12px;border-bottom:1px solid var(--line);background:var(--surface);}
+  .qi-row .qi-item-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;}
+  .qi-row .qi-name-wrap{display:flex;flex-direction:column;gap:4px;}
+  .qi-row .qi-price-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+  .qi-row .qi-amt{grid-column:1/-1;padding-top:4px;border-top:1px dashed var(--line);font-size:13px;font-weight:700;text-align:right;}
+  .qi-label{font-size:10px;font-weight:700;color:var(--ink-5);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;display:block;}
+  .qdoc{padding:14px 12px;font-size:11px;}
+  .qdoc-header{flex-direction:column;gap:8px;align-items:flex-start;margin-bottom:12px;padding-bottom:10px;}
+  .qdoc-logo{height:34px;}
   .qdoc-title-block{text-align:left;}
-  .qdoc-title{font-size:18px;}
-  .qdoc-meta-grid{grid-template-columns:1fr;gap:0;margin-bottom:14px;}
+  .qdoc-title{font-size:17px;}
+  .qdoc-meta-grid{grid-template-columns:1fr;margin-bottom:12px;}
   .qdoc-meta-grid .qdoc-meta-col:first-child{border-bottom:2px solid #1a73c8;}
-  .qdoc-meta-label{min-width:76px;padding:7px 10px;font-size:10px;}
-  .qdoc-meta-val{padding:7px 10px;font-size:11px;}
-  .qdoc-items-table{font-size:10.5px;}
-  .qdoc-items-table th{padding:6px 6px;font-size:10px;}
-  .qdoc-items-table td{padding:6px 6px;}
-  /* 모바일에서 규격 컬럼 숨김 (테이블 너비 절약) */
+  .qdoc-meta-label{min-width:74px;padding:6px 9px;font-size:10px;}
+  .qdoc-meta-val{padding:6px 9px;font-size:11px;}
+  .qdoc-items-table{font-size:10px;}
+  .qdoc-items-table th,.qdoc-items-table td{padding:5px 5px;}
   .qdoc-items-table .col-spec{display:none;}
-  .qdoc-total-label{min-width:80px;padding:7px 10px;font-size:11px;}
-  .qdoc-total-val{min-width:100px;padding:7px 10px;font-size:11px;}
+  .qdoc-total-label{min-width:80px;padding:6px 10px;font-size:11px;}
+  .qdoc-total-val{min-width:100px;padding:6px 10px;font-size:11px;}
   .qdoc-total-row.grand .qdoc-total-val{font-size:13px;}
-  .qdoc-footer{flex-direction:column;gap:12px;align-items:flex-start;}
-  .qdoc-footer-company{font-size:11px;}
-  .qdoc-footer-company strong{font-size:12px;}
-
-  /* 금액 박스 모바일 */
-  .qdoc-amount-box{padding:10px 14px !important;}
-  .qdoc-amount-box .qdoc-amount-label{font-size:11px !important;}
-  .qdoc-amount-box .qdoc-amount-val{font-size:16px !important;}
-
-  /* 미리보기 바 버튼 */
-  .quote-preview-actions{gap:6px;}
+  .qdoc-footer{flex-direction:column;gap:10px;align-items:flex-start;}
+  .qdoc-amount-box{flex-direction:column;align-items:flex-start;gap:4px;padding:10px 12px;}
+  .qdoc-amount-box .qdoc-amount-label{font-size:11px;}
+  .qdoc-amount-box .qdoc-amount-val{font-size:16px!important;}
+  .as-tab{font-size:11px;padding:7px 4px;}
+  .as-tabs{gap:1px;}
   .quote-preview-actions .btn{font-size:12px;padding:8px 10px;}
-  .quote-preview-content{padding:10px 8px;}
+  .quote-preview-content{padding:8px 6px;}
 }
 @media(min-width:769px){.m-topbar{display:none;}.m-tabbar{display:none;}}
 ::-webkit-scrollbar{width:5px;height:5px;}
@@ -396,7 +423,7 @@ input,select,textarea{font-family:inherit;}
 </head>
 <body>
 <div class="app">
-  <aside class="sidebar" id="sidebar">
+  <aside class="sidebar">
     <div class="sidebar-brand">
       <div class="brand-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -422,7 +449,7 @@ input,select,textarea{font-family:inherit;}
         <li class="nav-item" data-page="statistics"><span class="nav-ic">📊</span>Statistics</li>
       </ul>
     </nav>
-    <div class="sidebar-footer">PMO System v2.2</div>
+    <div class="sidebar-footer">PMO System v3.0</div>
   </aside>
 
   <div class="main">
@@ -448,7 +475,7 @@ input,select,textarea{font-family:inherit;}
     <main class="content" id="content"></main>
   </div>
 
-  <ul class="m-tabbar" id="tabbar">
+  <ul class="m-tabbar">
     <li class="m-tab" data-page="dashboard"><span class="m-tab-ic">🏠</span>Home</li>
     <li class="m-tab" data-page="site"><span class="m-tab-ic">🏗️</span>Site</li>
     <li class="m-tab" data-page="project"><span class="m-tab-ic">🛠️</span>Project</li>
@@ -461,7 +488,7 @@ input,select,textarea{font-family:inherit;}
   <div class="modal" id="modalEl"></div>
 </div>
 
-<!-- Quote Preview Overlay (모바일 전용 풀스크린 미리보기) -->
+<!-- Quote Preview Overlay -->
 <div class="quote-preview-overlay" id="quotePreviewOverlay">
   <div class="quote-preview-bar no-print">
     <div class="quote-preview-bar-title">📋 견적서 미리보기</div>
@@ -473,9 +500,7 @@ input,select,textarea{font-family:inherit;}
   <div class="quote-preview-content" id="quotePreviewContent"></div>
 </div>
 
-<!-- Quote Print Area -->
 <div id="quotePrintArea"></div>
-
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -505,14 +530,24 @@ let statPeriod="week";
 const $content=document.getElementById("content");
 const isMobile=()=>window.innerWidth<=768;
 
-/* ── LOGO DATA URI ── */
-const COMPANY_LOGO = "data:image/png;base64,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AIAEBAAAAABIQAAAAACQgAAAAAEhAAAAAAIAEBAAAAAAJCAAAAACQgAAAAAAgAQEAAABAAgIAAAAAJCAAAAAASEAAAAAAgAQEAAAAAAkIAAAAAJCAAAAAACABAQAAAEACAgAAAAAkIAAAAABIQAAAAACABAQAAAAACQgAAAAAEhAAAAAAIAEBAAAAQAICAAAAACQgAAAAAEhAAAAAAJCAAAAAAAAJCAAAAAASEAAAAAAgAQEAAABAAgIAAACABAQAAAAASEAAAAAAkIAAAAAAAAkIAAAAABIQAAAAACQgAAAAAEACAgAAAIAEBAAAAABIQAAAAACQgAAAAAAACQgAAAAAEhAAAAAAJCAAAAAAQAICAAAAgAQEAAAAAEhAAAAAAJCAAAAAACABAQAAAAASEAAAAAAkIAAAAABAAgIAAACABAQAAAAACQgAAAAAkIAAAAAAIAEBAAAAABIQAAAAACQgAAAAAEhAAAAAAIAEBAAAAAAJCAAAAACQgAAAAAAgAQEAAABAAsIlAAAAAEACAgAAAIAEBAAAAABIQAAAAACQgAAAAAAACQgAAAAAEhAAAAAAJCAAAAAAQAICAAAAgAQEAAAAAEhAAAAAAJCAAAAAACABAQAAAAASEAAAAAAkIAAAAABAAgIAAACABAQAAAAACQgAAAAAkIAAAAAAIAEBAAAAABIQAAAAACQgAAAAAEhAAAAAAIAEBAAAAAAJCAAAAACQgAAAAAAgAQEAAABAAgIAAAAAJCAAAAAASEAAAAAAgAQEAAAAAAkIAAAAAJCAAAAAACABAQAAAEACAgAAAAAkIAAAAABIQAAAAACABAQAAAAACQgAAAAAEhAAAAAAIAEBAAAAQAICAAAAACQgAAAAAEhAAAAAAJCAAAAAAAAJCAAAAAASEAAAAAAgAQEAAABAAgIAAACABAQAAAAASEAAAAAAkIAAAAAAAAkIAAAAABIQAAAAACQgAAAAAEACAgAAAIAEBAAAAABIQAAAAACQgAAAAAAgAQEAAAAAEhAAAAAAJCAAAAAAQAICAAAAgAQEAAAAAEhAAAAAAJCAAAAAACABAQAAAAASEAAAAAAkIAAAAABAAgIAAACABAQAAAAACQgAAAAAkIAAAAAAIAEBAAAAABIQAAAAACQgAAAAAEhAAAAAAIAEBAAAAAAJCAAAAACQgAAAAAAgAQEAAAAAEhAAAAAAJCAAAAAASEAAAAAAgAQEAAAAAAkIAAAAAJCAAAAAACABAQAAAEACAgAAAAAkIAAAAABIQAAAAACABAQAAAAACQgAAAAAEhAAAAAAIAEBAAAAQAICAAAAACQgAAAAAEhAAAAAAJCAAAAAAAAJCAAAAAASEAAAAAAgAQEAAABAAgIAAACABAQAAAAASEAAAAAAkIAAAAAAAAkIAAAAABIQAAAAACQgAAAAAEACAgAAAIAEBAAAAABIQAAAAACQgAAAAAAACQgAAAAAEhAAAAAAJCAAAAAAQAICAAAAgAQEAAAAAEhAAAAAAJCAAAAAACABAQAAAAASEAAAAAAkIAAAAABAAgIAAACABAQAAAAACQgAAAAAkIAAAAAAIAEBAAAAABIQAAAAACQgAAAAAEhAAAAAAIAEBAAAAAAJCAAAAACQgAAAAAAgAQEAAABAAgIAAAAAJCAAAAAASEAAAAAAgAQEAAAAAAkIAAAAAJCAAAAAACABAQAAAEACAgAAAAAkIAAAAABIQAAAAACABAQAAAAACQgAAAAAEhAAAAAAIAEBAAAAQAICAAAAACQgAAAAAEhAAAAAAJCAAAAAAAAJCAAAAAASEAAAAAAgAQEAAABAAgIAAACABAQAAAAASEAAAAAAkIAAAAAAAAkIAAAAABIQAAAAACQgAAAAAEACAgAAAIAEBAAAAABIQAAAAACQgAAAAAAgAQEAAAAAEhAAAAAAJCAAAAAAQAICAAAAgAQEAAAAAEhAAAAAAJCAAAAAACABAQAAAAASEAAAAAAkIAAAAABAAgIAAACABAQAAAAACQgAAAAAkIAAAAAAIAEBAAAAABIQAAAAACQgAAAAAEhAAAAAAIAEBAAAAAAJCAAAAACQgAAAAAAgAQEAAABAAgIAAAAAJCAAAAAASEAAAAAAgAQEAAAAAAkIAAAAAJCAAAAAACABAQAAAEACAgAAAAAkIAAAAABIQAAAAACABAQAAAAACQgAAAAAEhAAAAAAIAEBAAAAQAICAAAAACQgAAAAAEhAAAAAAJCAAAAAAAAJCAAAAAASEAAAAAAgAQEAAABAAgIAAACABAQAAAAASEAAAAAAkIAAAAAAAAkIAAAAABIQAAAAACQgAAAAAEACAgAAAIAEBAAAAABIQAAAAACQgAAAAAAgAQEAAAAAEhAAAAAAJCAAAAAAQAICAAAAgAQEAAAAAEhAAAAAAJCAAAAAACABAQAAAIAb+v8PAOF6GMXt5d3EAAAAAElFTkSuQmCC";
-const COMPANY_NAME = "(주)성주컴텍";
-const COMPANY_CEO  = "은 시 형";
-const COMPANY_ADDR = "서울특별시 구로구 부광로 88, 구로SK V1 Center A동 310호";
-const COMPANY_TEL  = "1661-0731";
-const COMPANY_EMAIL= "sj@sungju.com";
-const COMPANY_BIZ  = "106-86-80913";
+const COMPANY_LOGO="data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="220" height="64" viewBox="0 0 220 64"><rect width="220" height="64" rx="10" fill="#1a73c8"/><text x="20" y="40" font-family="Arial, sans-serif" font-size="26" font-weight="800" fill="#ffffff">성주컴텍</text><text x="20" y="54" font-family="Arial, sans-serif" font-size="9" fill="#cfe3fa">SUNGJU COMTECH</text></svg>');
+const COMPANY_NAME="(주)성주컴텍";
+const COMPANY_CEO="은 시 형";
+const COMPANY_ADDR="서울특별시 구로구 부광로 88, 구로SK V1 Center A동 310호";
+const COMPANY_TEL="1661-0731";
+const COMPANY_EMAIL="sj@sungju.com";
+const COMPANY_BIZ="106-86-80913";
+
+/* ════ 원인 구분 옵션 ════ */
+const CAUSE_TYPES=["하드웨어 결함","소프트웨어 오류","운용자 조작 오류","환경·설치 문제","부품 노후화·마모","기타"];
+/* ════ 조치 유형 옵션 ════ */
+const ACTION_TYPES=["현장 방문 수리","원격 진단·지원","부품 교체","소프트웨어 업데이트","예방 점검","기타"];
+/* ════ 점검 체크리스트 ════ */
+const CHECKLIST_ITEMS=[
+  "장비 전원 정상 확인","센서 작동 상태 확인","배터리 잔량·충전 확인",
+  "소프트웨어 버전 확인","청소 구역 맵 정합성 확인","기계적 이상음·진동 확인",
+  "부품 체결 상태 확인","고객 확인 서명 수령"
+];
 
 const esc=v=>v==null?"":String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
 
@@ -521,64 +556,90 @@ function toast(msg,type=""){
   const el=document.getElementById("toast");
   el.innerHTML=`<span class="t-dot"></span>${esc(msg)}`;
   el.className="toast show"+(type?" t-"+type:"");
-  clearTimeout(_tt);
-  _tt=setTimeout(()=>el.classList.remove("show"),2600);
+  clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove("show"),2600);
 }
 
 function toDate(v){
-  if(!v) return null;
-  if(typeof v.toDate==="function") return v.toDate();
-  const d=new Date(v); return isNaN(d)?null:d;
+  if(!v)return null;
+  if(typeof v.toDate==="function")return v.toDate();
+  const d=new Date(v);return isNaN(d)?null:d;
 }
 function fmtDate(v){
-  const d=toDate(v); if(!d) return "-";
+  const d=toDate(v);if(!d)return"-";
   return d.toLocaleDateString("ko-KR",{year:"numeric",month:"2-digit",day:"2-digit"});
+}
+function fmtDatetime(v){
+  const d=toDate(v);if(!d)return"-";
+  return d.toLocaleDateString("ko-KR",{year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"});
 }
 
 function calcAS(contractStart,maintenancePeriod){
-  if(!contractStart||!maintenancePeriod) return{type:"알수없음",expireDate:null,daysLeft:null};
-  const start=new Date(contractStart);
-  if(isNaN(start)) return{type:"알수없음",expireDate:null,daysLeft:null};
+  if(!contractStart||!maintenancePeriod)return{type:"알수없음",expireDate:null,daysLeft:null};
+  const start=new Date(contractStart);if(isNaN(start))return{type:"알수없음",expireDate:null,daysLeft:null};
   let totalMonths=0;
   const mp=String(maintenancePeriod).trim();
-  const yearMatch=mp.match(/(\d+\.?\d*)\s*년/);
-  const monthMatch=mp.match(/(\d+\.?\d*)\s*개?월/);
-  if(yearMatch)  totalMonths+=parseFloat(yearMatch[1])*12;
-  if(monthMatch) totalMonths+=parseFloat(monthMatch[1]);
+  const yearMatch=mp.match(/(\d+\.?\d*)\s*년/);const monthMatch=mp.match(/(\d+\.?\d*)\s*개?월/);
+  if(yearMatch)totalMonths+=parseFloat(yearMatch[1])*12;
+  if(monthMatch)totalMonths+=parseFloat(monthMatch[1]);
   if(!yearMatch&&!monthMatch){const n=parseFloat(mp);if(!isNaN(n))totalMonths=n;}
-  if(totalMonths<=0) return{type:"알수없음",expireDate:null,daysLeft:null};
-  const expire=new Date(start);
-  expire.setMonth(expire.getMonth()+Math.floor(totalMonths));
+  if(totalMonths<=0)return{type:"알수없음",expireDate:null,daysLeft:null};
+  const expire=new Date(start);expire.setMonth(expire.getMonth()+Math.floor(totalMonths));
   const remainDays=Math.ceil((expire-new Date())/86400000);
   return{type:remainDays>0?"무상":"유상",expireDate:expire,daysLeft:remainDays};
 }
 
-function bAS(contractStart,maintenancePeriod){
-  const{type,daysLeft}=calcAS(contractStart,maintenancePeriod);
-  if(type==="알수없음") return`<span class="badge b-ready">-</span>`;
+function bAS(cs,mp){
+  const{type,daysLeft}=calcAS(cs,mp);
+  if(type==="알수없음")return`<span class="badge b-ready">-</span>`;
   if(type==="무상"){
-    if(daysLeft<=30) return`<span class="badge b-warn-soon">⚠️ 무상 (${daysLeft}일 후 만료)</span>`;
+    if(daysLeft<=30)return`<span class="badge b-warn-soon">⚠️ 무상 (${daysLeft}일 후 만료)</span>`;
     return`<span class="badge b-free">✅ 무상</span>`;
   }
   return`<span class="badge b-paid">💰 유상</span>`;
 }
-
-function asExpireText(contractStart,maintenancePeriod){
-  const{type,expireDate,daysLeft}=calcAS(contractStart,maintenancePeriod);
-  if(!expireDate) return"";
+function asExpireText(cs,mp){
+  const{type,expireDate,daysLeft}=calcAS(cs,mp);
+  if(!expireDate)return"";
   const fmt=expireDate.toLocaleDateString("ko-KR",{year:"numeric",month:"2-digit",day:"2-digit"});
-  if(type==="유상") return`<span class="maint-exp expired">만료: ${fmt}</span>`;
-  if(daysLeft<=30) return`<span class="maint-exp soon">만료: ${fmt} (${daysLeft}일 남음)</span>`;
+  if(type==="유상")return`<span class="maint-exp expired">만료: ${fmt}</span>`;
+  if(daysLeft<=30)return`<span class="maint-exp soon">만료: ${fmt} (${daysLeft}일 남음)</span>`;
   return`<span class="maint-exp">만료: ${fmt}</span>`;
 }
 
-onSnapshot(collection(db,COL.site), s=>{site=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
+/* ════ D-day 계산 ════ */
+function calcDday(dateStr){
+  if(!dateStr)return null;
+  const target=new Date(dateStr);target.setHours(0,0,0,0);
+  const today=new Date();today.setHours(0,0,0,0);
+  return Math.round((target-today)/86400000);
+}
+function ddayBadge(dateStr){
+  const d=calcDday(dateStr);
+  if(d===null)return"";
+  if(d===0)return`<span class="dday dday-today">D-day</span>`;
+  if(d>0&&d<=3)return`<span class="dday dday-soon">D-${d}</span>`;
+  if(d>3)return`<span class="dday dday-future">D-${d}</span>`;
+  return`<span class="dday dday-past">D+${Math.abs(d)}</span>`;
+}
+
+/* ════ 조치유형 태그 ════ */
+function actionTag(t){
+  if(!t)return"";
+  const m={"현장 방문 수리":"at-visit 🔧","원격 진단·지원":"at-remote 📡","부품 교체":"at-parts 🔩","소프트웨어 업데이트":"at-sw 💻","예방 점검":"at-check 🔍"};
+  const cls=m[t]||"at-check";const parts=cls.split(" ");
+  return`<span class="action-tag ${parts[0]}">${parts[1]||""} ${esc(t)}</span>`;
+}
+
+onSnapshot(collection(db,COL.site),s=>{site=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
 onSnapshot(collection(db,COL.tasks),s=>{tasks=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
 onSnapshot(collection(db,COL.issues),s=>{issues=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
 
 const $overlay=document.getElementById("modalOverlay");
 const $modal=document.getElementById("modalEl");
 
+/* ════════════════════════════════════
+   기본 모달 (현장/이슈 등록)
+════════════════════════════════════ */
 function openModal({title,fields,values={},onSave,hint="",wide=false}){
   $modal.className="modal"+(wide?" modal-wide":"");
   $modal.innerHTML=`
@@ -588,14 +649,11 @@ function openModal({title,fields,values={},onSave,hint="",wide=false}){
     </div>
     <div class="modal-body">
       ${hint?`<div class="as-hint"><span class="as-hint-icon">💡</span><span>${hint}</span></div>`:""}
-      <form id="mForm">
-        ${buildFields(fields,values)}
-        <div style="display:none"><button type="submit"></button></div>
-      </form>
+      <form id="mForm">${buildFields(fields,values)}<div style="display:none"><button type="submit"></button></div></form>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" id="mc-cancel">취소</button>
-      <button class="btn btn-primary"   id="mc-save">저장</button>
+      <button class="btn btn-primary" id="mc-save">저장</button>
     </div>`;
   $overlay.classList.remove("hidden");
   document.getElementById("f_"+fields.find(f=>!f.hidden)?.key)?.focus();
@@ -604,12 +662,10 @@ function openModal({title,fields,values={},onSave,hint="",wide=false}){
   document.getElementById("mc-cancel").onclick=close;
   $overlay.onclick=e=>{if(e.target===$overlay)close();};
   const doSave=async()=>{
-    const data={},flds=fields.filter(f=>!f.hidden);
-    let ok=true;
+    const data={},flds=fields.filter(f=>!f.hidden);let ok=true;
     flds.forEach(f=>{
       const el=document.getElementById("f_"+f.key);if(!el)return;
-      const v=el.value.trim();
-      const wrap=el.closest(".field");
+      const v=el.value.trim();const wrap=el.closest(".field");
       if(f.req&&!v){wrap?.classList.add("invalid");ok=false;}
       else wrap?.classList.remove("invalid");
       data[f.key]=v;
@@ -630,38 +686,34 @@ function buildFields(fields,vals){
     if(fields[i].hidden){i++;continue;}
     if(fields[i].pair&&fields[i+1]&&!fields[i+1].hidden){
       rows.push(`<div class="field-row">${fld(fields[i],vals)}${fld(fields[i+1],vals)}</div>`);i+=2;
-    } else {rows.push(fld(fields[i],vals));i++;}
+    }else{rows.push(fld(fields[i],vals));i++;}
   }
   return rows.join("");
 }
-
 function fld(f,vals){
   const val=esc(vals[f.key]||"");
   let inner;
   if(f.type==="select"){
     inner=`<select id="f_${f.key}" name="${f.key}"><option value="">선택</option>${f.opts.map(o=>`<option value="${esc(o)}"${vals[f.key]===o?" selected":""}>${esc(o)}</option>`).join("")}</select>`;
-  } else if(f.type==="textarea"){
-    inner=`<textarea id="f_${f.key}" name="${f.key}" rows="3" placeholder="${esc(f.ph||"")}">${val}</textarea>`;
-  } else {
+  }else if(f.type==="textarea"){
+    inner=`<textarea id="f_${f.key}" name="${f.key}" rows="${f.rows||3}" placeholder="${esc(f.ph||"")}">${val}</textarea>`;
+  }else{
     inner=`<input id="f_${f.key}" name="${f.key}" type="${f.type||"text"}" value="${val}" autocomplete="off" placeholder="${esc(f.ph||"")}"/>`;
   }
   return`<div class="field"><label for="f_${f.key}">${esc(f.label)}${f.req?` <span style='color:var(--rose)'>*</span>`:""}</label>${inner}<div class="ferr">${esc(f.err||"필수 입력")}</div></div>`;
 }
 
 window._toggleMC=id=>{
-  const b=document.getElementById("mcb_"+id);
-  const c=document.getElementById("mcc_"+id);
+  const b=document.getElementById("mcb_"+id);const c=document.getElementById("mcc_"+id);
   if(!b)return;
   const open=b.classList.contains("open");
-  b.classList.toggle("open",!open);
-  if(c)c.classList.toggle("open",!open);
+  b.classList.toggle("open",!open);if(c)c.classList.toggle("open",!open);
 };
 
 function searchBox(key,ph){
   const v=sq[key]||"";
   return`<div class="search-bar"><div class="search-wrap${v?" has-val":""}" id="sw_${key}"><span class="search-ic">🔍</span><input type="text" id="si_${key}" value="${esc(v)}" placeholder="${esc(ph)}" oninput="window._si('${key}',this.value)"/><button class="search-clear" onclick="window._sc('${key}')">✕</button></div></div><div class="search-meta" id="sm_${key}"></div>`;
 }
-
 const _renderers={};
 window._si=(key,v)=>{sq[key]=v;const w=document.getElementById("sw_"+key);if(w)w.classList.toggle("has-val",!!v);_renderers[key]?.();};
 window._sc=(key)=>{sq[key]="";const i=document.getElementById("si_"+key);if(i){i.value="";i.focus();}const w=document.getElementById("sw_"+key);if(w)w.classList.remove("has-val");_renderers[key]?.();};
@@ -670,81 +722,306 @@ function noResults(q){return`<div class="empty"><div class="empty-icon">🔍</di
 
 function bSite(s){const m={"준비":"b-ready","진행":"b-progress","만료":"b-expired"};return`<span class="badge ${m[s]||"b-ready"}"><span class="badge-dot"></span>${esc(s||"준비")}</span>`;}
 function bContract(t){const m={"렌탈":"b-rental","판매":"b-sale","신규":"b-received","유지보수":"b-maint","연장":"b-renew"};return t?`<span class="badge ${m[t]||"b-ready"}">${esc(t)}</span>`:"";}
-function bTask(s){const m={"접수":"b-received","완료":"b-done"};return`<span class="badge ${m[s]||"b-received"}"><span class="badge-dot"></span>${esc(s||"접수")}</span>`;}
+function bTask(s){const m={"접수":"b-received","진행 중":"b-progress","완료":"b-done"};return`<span class="badge ${m[s]||"b-received"}"><span class="badge-dot"></span>${esc(s||"접수")}</span>`;}
 function bIssue(s){const m={"New":"b-new","Closed":"b-done"};return`<span class="badge ${m[s]||"b-new"}"><span class="badge-dot"></span>${esc(s||"New")}</span>`;}
 function bIssueType(t){const m={"기술":"b-progress","일정":"b-received","자재":"b-ready","고객":"b-new"};return`<span class="badge ${m[t]||"b-ready"}">${esc(t||"-")}</span>`;}
 function kpiHtml(num,label,cls="",sub=""){return`<div class="kpi-card ${cls}"><div class="kpi-eyebrow">${label}</div><div class="kpi-num">${num}</div>${sub?`<div class="kpi-sub">${sub}</div>`:""}</div>`;}
 
 /* ════════════════════════════════════
-   견적서 (QUOTATION) ENGINE
+   AS 이력카드 모달
 ════════════════════════════════════ */
+let _detailTaskId=null;
 
-let quoteItems=[];
-let quoteTaskId=null;
+window._openDetailModal=function(taskId,initialTab="symptom"){
+  const task=tasks.find(t=>t.id===taskId);
+  if(!task){toast("접수 정보를 찾을 수 없습니다","error");return;}
+  _detailTaskId=taskId;
+  const linkedSite=site.find(s=>s.name===task.siteName);
+  const asRes=linkedSite?calcAS(linkedSite.contractStart,linkedSite.maintenancePeriod):{type:"알수없음"};
 
-function fmtMoney(n){
-  const v=parseInt(n)||0;
-  return v.toLocaleString("ko-KR")+"원";
+  $modal.className="modal modal-xl";
+  $overlay.classList.remove("hidden");
+  _renderDetailModal(task,linkedSite,asRes,initialTab);
+};
+
+function _renderDetailModal(task,linkedSite,asRes,activeTab){
+  const tabs=[
+    {id:"symptom",label:"📋 접수·증상"},
+    {id:"cause",  label:"🔍 원인 분석"},
+    {id:"action", label:"🔧 조치 계획"},
+    {id:"complete",label:"✅ 완료 처리"},
+  ];
+
+  const checklist=task.checklist||{};
+
+  $modal.innerHTML=`
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">AS 이력카드</div>
+        <div style="font-size:12px;color:var(--ink-5);margin-top:2px;">${esc(task.siteName||"-")} · ${esc(task.receiptDate||"-")}</div>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.add('hidden')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px 18px;">
+      <!-- 탭 -->
+      <div class="as-tabs">
+        ${tabs.map(t=>`<button class="as-tab${activeTab===t.id?" active":""}" onclick="window._switchDetailTab('${t.id}')">${t.label}</button>`).join("")}
+      </div>
+
+      <!-- ①접수·증상 -->
+      <div class="as-tab-panel${activeTab==="symptom"?" active":""}" id="dp_symptom">
+        <div class="as-section">
+          <div class="as-section-title"><span>1</span>기본 접수 정보</div>
+          <div class="field-row">
+            <div class="field"><label>현장명</label><input id="dd_siteName" value="${esc(task.siteName||"")}"/></div>
+            <div class="field"><label>접수일자</label><input id="dd_receiptDate" type="date" value="${esc(task.receiptDate||"")}"/></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>담당자</label><input id="dd_manager" value="${esc(task.manager||"")}" placeholder="현장 담당자명"/></div>
+            <div class="field"><label>연락처</label><input id="dd_phone" type="tel" value="${esc(task.phone||"")}"/></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>담당 PM</label><input id="dd_pm" value="${esc(task.pm||"")}" placeholder="PM 이름"/></div>
+            <div class="field"><label>장비모델</label><input id="dd_equipModel" value="${esc(task.equipModel||"")}" placeholder="예: KEENON T-10"/></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>장비 S/N</label><input id="dd_equipSN" value="${esc(task.equipSN||"")}" placeholder="시리얼넘버"/></div>
+            <div class="field"><label>AS 구분</label>
+              <div style="padding-top:6px;">${bAS(linkedSite?.contractStart,linkedSite?.maintenancePeriod)}
+              ${asRes.expireDate?`<span style="font-size:11px;color:var(--ink-5);margin-left:6px;">만료: ${fmtDate(asRes.expireDate)}</span>`:""}</div>
+            </div>
+          </div>
+        </div>
+        <div class="as-section">
+          <div class="as-section-title"><span>2</span>접수 증상</div>
+          <div class="field">
+            <label>증상 설명 <span style="color:var(--rose)">*</span></label>
+            <textarea id="dd_symptom" rows="3" placeholder="고객이 보고한 증상을 구체적으로 기록하세요 (예: 2층 복도에서 충전 스테이션 미인식, 약 3회/일 발생)">${esc(task.symptom||"")}</textarea>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>최초 발생일</label><input id="dd_firstOccur" type="date" value="${esc(task.firstOccur||"")}"/></div>
+            <div class="field"><label>발생 빈도</label>
+              <select id="dd_occurFreq">
+                ${["","상시","간헐적 (1회/일 이상)","간헐적 (1회/주)","최초 발생","기타"].map(o=>`<option${task.occurFreq===o?" selected":""}>${esc(o)}</option>`).join("")}
+              </select>
+            </div>
+          </div>
+          <div class="field"><label>재현 조건</label><textarea id="dd_reproStep" rows="2" placeholder="증상이 재현되는 조건 (예: 청소 시작 후 20분, 특정 구역 진입 시)">${esc(task.reproStep||"")}</textarea></div>
+        </div>
+      </div>
+
+      <!-- ②원인 분석 -->
+      <div class="as-tab-panel${activeTab==="cause"?" active":""}" id="dp_cause">
+        <div class="as-section">
+          <div class="as-section-title"><span>3</span>원인 분석</div>
+          <div class="field-row">
+            <div class="field"><label>원인 구분</label>
+              <select id="dd_causeType">
+                <option value="">-- 선택 --</option>
+                ${CAUSE_TYPES.map(o=>`<option value="${esc(o)}"${task.causeType===o?" selected":""}>${esc(o)}</option>`).join("")}
+              </select>
+            </div>
+            <div class="field"><label>분석 담당자</label><input id="dd_diagEngineer" value="${esc(task.diagEngineer||task.pm||"")}" placeholder="엔지니어 이름"/></div>
+          </div>
+          <div class="field"><label>원인 상세 <span style="color:var(--rose)">*</span></label>
+            <textarea id="dd_causeDetail" rows="3" placeholder="근본 원인을 구체적으로 기술하세요 (예: IR 근접 센서 수광부 먼지 누적으로 감지 거리 저하, 정상 150cm → 실측 40cm)">${esc(task.causeDetail||"")}</textarea>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>불량 부품·모듈</label><input id="dd_faultyPart" value="${esc(task.faultyPart||"")}" placeholder="예: IR 센서 보드 #3, 배터리 팩 B"/></div>
+            <div class="field"><label>에러 코드</label><input id="dd_errorCode" value="${esc(task.errorCode||"")}" placeholder="예: ERR-0x1F, Fault 12"/></div>
+          </div>
+          <div class="field"><label>진단 근거 · 측정값</label>
+            <textarea id="dd_diagEvidence" rows="2" placeholder="예: 배터리 전압 측정 22.1V (정상 24V), 로그 분석 결과 3번 센서 타임아웃 12회 기록">${esc(task.diagEvidence||"")}</textarea>
+          </div>
+        </div>
+        <div class="as-section">
+          <div class="as-section-title"><span>4</span>재발 방지 검토</div>
+          <div class="field"><label>재발 방지 대책</label>
+            <textarea id="dd_recurrence" rows="2" placeholder="예: 월 1회 센서부 에어 클리닝 정기 점검 항목 추가, 알람 임계값 조정">${esc(task.recurrence||"")}</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- ③조치 계획 -->
+      <div class="as-tab-panel${activeTab==="action"?" active":""}" id="dp_action">
+        <div class="as-section">
+          <div class="as-section-title"><span>5</span>조치 유형 · 방문 일정</div>
+          <div class="field-row">
+            <div class="field"><label>조치 유형</label>
+              <select id="dd_actionType">
+                <option value="">-- 선택 --</option>
+                ${ACTION_TYPES.map(o=>`<option value="${esc(o)}"${task.actionType===o?" selected":""}>${esc(o)}</option>`).join("")}
+              </select>
+            </div>
+            <div class="field"><label>담당 기사</label><input id="dd_techEngineer" value="${esc(task.techEngineer||task.pm||"")}" placeholder="방문 기사 이름"/></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>방문 예정일</label><input id="dd_visitDate" type="date" value="${esc(task.visitDate||"")}" oninput="window._updateDday()"/></div>
+            <div class="field"><label>방문 예정 시간</label>
+              <select id="dd_visitTime">
+                ${["","오전 9:00","오전 10:00","오전 11:00","오후 12:00","오후 1:00","오후 2:00","오후 3:00","오후 4:00","오후 5:00"].map(o=>`<option${task.visitTime===o?" selected":""}>${esc(o)}</option>`).join("")}
+              </select>
+            </div>
+          </div>
+          <div id="ddayDisplay" style="margin-top:-6px;margin-bottom:12px;font-size:13px;color:var(--ink-4);">
+            ${task.visitDate?`방문 예정: <strong>${esc(task.visitDate)}</strong> ${task.visitTime?esc(task.visitTime):""} ${ddayBadge(task.visitDate)}`:"방문 일정을 입력해주세요"}
+          </div>
+          <div class="field"><label>예상 소요시간</label>
+            <select id="dd_estHour">
+              ${["","30분","1시간","2시간","3시간","4시간","반일 (4시간 이상)","종일"].map(o=>`<option${task.estHour===o?" selected":""}>${esc(o)}</option>`).join("")}
+            </select>
+          </div>
+          <div class="field"><label>준비 부품·자재</label>
+            <textarea id="dd_prepParts" rows="2" placeholder="방문 전 준비할 교체 부품이나 공구 목록 (예: IR 센서 보드 x2, 전동 드라이버, 태블릿)">${esc(task.prepParts||"")}</textarea>
+          </div>
+          <div class="field"><label>고객 전달 사항</label>
+            <textarea id="dd_customerMsg" rows="2" placeholder="방문 전 고객에게 안내할 내용 (예: 방문 당일 오전 8시까지 해당 구역 청소 완료 및 기기 대기 요청)">${esc(task.customerMsg||"")}</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- ④완료 처리 -->
+      <div class="as-tab-panel${activeTab==="complete"?" active":""}" id="dp_complete">
+        <div class="as-section">
+          <div class="as-section-title"><span>6</span>조치 결과</div>
+          <div class="field"><label>조치 내용 요약 <span style="color:var(--rose)">*</span></label>
+            <textarea id="dd_actionResult" rows="3" placeholder="실제 수행한 조치 내용 (예: IR 센서 보드 교체 후 캘리브레이션, 배터리 셀 1번 교체, 소프트웨어 v2.3.1 → v2.4.0 업데이트)">${esc(task.actionResult||"")}</textarea>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>사용 부품 (실제)</label><input id="dd_usedParts" value="${esc(task.usedParts||"")}" placeholder="예: IR센서 보드 1EA, 나사 M3 4EA"/></div>
+            <div class="field"><label>실제 소요시간</label>
+              <select id="dd_actualHour">
+                ${["","30분 미만","30분","1시간","2시간","3시간","4시간","반일 이상","종일"].map(o=>`<option${task.actualHour===o?" selected":""}>${esc(o)}</option>`).join("")}
+              </select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>완료일자</label><input id="dd_completeDate" type="date" value="${esc(task.completeDate||"")}"/></div>
+            <div class="field"><label>후속 조치 필요</label>
+              <select id="dd_followUp">
+                ${["","없음 (완전 해결)","부품 추가 주문 필요","재방문 일정 필요","고객 교육 필요","기타"].map(o=>`<option${task.followUp===o?" selected":""}>${esc(o)}</option>`).join("")}
+              </select>
+            </div>
+          </div>
+          <div class="field"><label>특이사항 · 비고</label>
+            <textarea id="dd_actionNote" rows="2" placeholder="완료 시 특이사항이나 고객 피드백">${esc(task.actionNote||"")}</textarea>
+          </div>
+        </div>
+        <div class="as-section">
+          <div class="as-section-title"><span>7</span>완료 점검 체크리스트</div>
+          <div class="checklist">
+            ${CHECKLIST_ITEMS.map((item,i)=>{
+              const done=checklist[i];
+              return`<label class="check-item${done?" done-item":""}" id="chkwrap_${i}">
+                <input type="checkbox" ${done?"checked":""} onchange="window._toggleCheck(${i},this.checked)"/>
+                <span class="check-item-text">${esc(item)}</span>
+              </label>`;
+            }).join("")}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="document.getElementById('modalOverlay').classList.add('hidden')">닫기</button>
+      <button class="btn btn-secondary" style="background:var(--blue-lt);color:var(--blue);border-color:rgba(37,99,235,.2);" onclick="window._openQuoteModal('${task.id}')">📋 견적서</button>
+      <button class="btn btn-primary" onclick="window._saveDetail()">💾 저장</button>
+      ${task.status!=="완료"?`<button class="btn btn-primary" style="background:var(--green);" onclick="window._completeProject('${task.id}')">✅ 완료 처리</button>`:""}
+    </div>`;
 }
 
-function quoteItemsTotal(){
-  return quoteItems.reduce((s,it)=>{
-    return s+((parseInt(it.qty)||0)*(parseInt(it.unitPrice)||0));
-  },0);
-}
+window._switchDetailTab=function(tabId){
+  document.querySelectorAll(".as-tab").forEach((el,i)=>{
+    const tabs=["symptom","cause","action","complete"];
+    el.classList.toggle("active",tabs[i]===tabId);
+  });
+  document.querySelectorAll(".as-tab-panel").forEach(el=>{
+    el.classList.toggle("active",el.id==="dp_"+tabId);
+  });
+};
 
-/* ── 견적서 모달 열기 ── */
+window._toggleCheck=function(idx,val){
+  const task=tasks.find(t=>t.id===_detailTaskId);if(!task)return;
+  const checklist=task.checklist?{...task.checklist}:{};
+  checklist[idx]=val;
+  const wrap=document.getElementById("chkwrap_"+idx);
+  if(wrap)wrap.classList.toggle("done-item",val);
+  updateDoc(doc(db,COL.tasks,_detailTaskId),{checklist}).catch(e=>console.error(e));
+};
+
+window._updateDday=function(){
+  const dateEl=document.getElementById("dd_visitDate");
+  const timeEl=document.getElementById("dd_visitTime");
+  const display=document.getElementById("ddayDisplay");
+  if(!dateEl||!display)return;
+  const v=dateEl.value;const t=timeEl?timeEl.value:"";
+  if(v)display.innerHTML=`방문 예정: <strong>${esc(v)}</strong> ${esc(t)} ${ddayBadge(v)}`;
+  else display.textContent="방문 일정을 입력해주세요";
+};
+
+window._saveDetail=async function(){
+  if(!_detailTaskId)return;
+  const g=id=>document.getElementById(id)?.value.trim()||"";
+  const data={
+    siteName:g("dd_siteName"),receiptDate:g("dd_receiptDate"),
+    manager:g("dd_manager"),phone:g("dd_phone"),pm:g("dd_pm"),
+    equipModel:g("dd_equipModel"),equipSN:g("dd_equipSN"),
+    symptom:g("dd_symptom"),firstOccur:g("dd_firstOccur"),
+    occurFreq:g("dd_occurFreq"),reproStep:g("dd_reproStep"),
+    causeType:g("dd_causeType"),diagEngineer:g("dd_diagEngineer"),
+    causeDetail:g("dd_causeDetail"),faultyPart:g("dd_faultyPart"),
+    errorCode:g("dd_errorCode"),diagEvidence:g("dd_diagEvidence"),
+    recurrence:g("dd_recurrence"),
+    actionType:g("dd_actionType"),techEngineer:g("dd_techEngineer"),
+    visitDate:g("dd_visitDate"),visitTime:g("dd_visitTime"),
+    estHour:g("dd_estHour"),prepParts:g("dd_prepParts"),
+    customerMsg:g("dd_customerMsg"),
+    actionResult:g("dd_actionResult"),usedParts:g("dd_usedParts"),
+    actualHour:g("dd_actualHour"),completeDate:g("dd_completeDate"),
+    followUp:g("dd_followUp"),actionNote:g("dd_actionNote"),
+  };
+  try{
+    await updateDoc(doc(db,COL.tasks,_detailTaskId),data);
+    toast("AS 이력카드가 저장되었습니다","success");
+  }catch(e){console.error(e);toast("저장 실패","error");}
+};
+
+/* ════════════════════════════════════
+   견적서 엔진 (원본 유지)
+════════════════════════════════════ */
+let quoteItems=[],quoteTaskId=null;
+function quoteItemsTotal(){return quoteItems.reduce((s,it)=>s+((parseInt(it.qty)||0)*(parseInt(it.unitPrice)||0)),0);}
+
 window._openQuoteModal=function(taskId){
   const task=tasks.find(t=>t.id===taskId);
   if(!task){toast("접수 정보를 찾을 수 없습니다","error");return;}
-
   quoteTaskId=taskId;
   const linkedSite=site.find(s=>s.name===task.siteName);
   const asResult=linkedSite?calcAS(linkedSite.contractStart,linkedSite.maintenancePeriod):{type:"알수없음"};
-
-  quoteItems=(task.quoteItems&&task.quoteItems.length>0)
-    ? JSON.parse(JSON.stringify(task.quoteItems))
-    : [{id:Date.now(),name:"",spec:"",qty:1,unit:"식",unitPrice:0}];
-
+  quoteItems=(task.quoteItems&&task.quoteItems.length>0)?JSON.parse(JSON.stringify(task.quoteItems)):[{id:Date.now(),name:"",spec:"",qty:1,unit:"식",unitPrice:0}];
   const today=new Date().toISOString().slice(0,10);
   const quoteNo=task.quoteNo||`Q-${today.replace(/-/g,"")}-${taskId.slice(-4).toUpperCase()}`;
-
   $modal.className="modal modal-wide";
   $overlay.classList.remove("hidden");
   _renderQuoteModal(task,linkedSite,asResult,quoteNo,today);
 };
 
 function _renderQuoteModal(task,linkedSite,asResult,quoteNo,today){
-  const vatRate=0.1;
-  const supply=quoteItemsTotal();
-  const vat=Math.round(supply*vatRate);
-  const total=supply+vat;
-
+  const vatRate=0.1;const supply=quoteItemsTotal();const vat=Math.round(supply*vatRate);const total=supply+vat;
   $modal.innerHTML=`
     <div class="modal-header">
       <div class="modal-title">📋 견적서 — ${esc(task.siteName||"-")}</div>
       <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.add('hidden')">✕</button>
     </div>
     <div class="modal-body" style="padding:14px 16px;">
-
-      <!-- 기본 정보 그리드 -->
       <div class="qform-grid">
-        <div class="field"><label>견적번호</label>
-          <input id="qf_quoteNo" type="text" value="${esc(quoteNo)}" placeholder="Q-XXXXXXXX-XXXX"/></div>
-        <div class="field"><label>견적일자</label>
-          <input id="qf_quoteDate" type="date" value="${esc(task.quoteDate||today)}"/></div>
-        <div class="field"><label>유효기간</label>
-          <input id="qf_validUntil" type="date" value="${esc(task.quoteValidUntil||"")}"/></div>
-        <div class="field"><label>납기일</label>
-          <input id="qf_deliveryDate" type="date" value="${esc(task.quoteDeliveryDate||"")}"/></div>
-        <div class="field"><label>수신처 (고객사)</label>
-          <input id="qf_recipient" type="text" value="${esc(task.quoteRecipient||task.siteName||"")}" placeholder="고객사명"/></div>
-        <div class="field"><label>담당자</label>
-          <input id="qf_contactPerson" type="text" value="${esc(task.quoteContactPerson||task.manager||"")}" placeholder="고객 담당자명"/></div>
-        <div class="field qform-full"><label>제목/건명 <span style="color:var(--rose)">*</span></label>
-          <input id="qf_title" type="text" value="${esc(task.quoteTitle||task.symptom||"")}" placeholder="예: 청소로봇 유지보수 및 부품 교체"/></div>
-        <div class="field qform-full"><label>현장 주소</label>
-          <input id="qf_siteAddr" type="text" value="${esc(task.quoteSiteAddr||linkedSite?.address||"")}" placeholder="현장 주소"/></div>
+        <div class="field"><label>견적번호</label><input id="qf_quoteNo" type="text" value="${esc(quoteNo)}"/></div>
+        <div class="field"><label>견적일자</label><input id="qf_quoteDate" type="date" value="${esc(task.quoteDate||today)}"/></div>
+        <div class="field"><label>유효기간</label><input id="qf_validUntil" type="date" value="${esc(task.quoteValidUntil||"")}"/></div>
+        <div class="field"><label>납기일</label><input id="qf_deliveryDate" type="date" value="${esc(task.quoteDeliveryDate||"")}"/></div>
+        <div class="field"><label>수신처</label><input id="qf_recipient" type="text" value="${esc(task.quoteRecipient||task.siteName||"")}" placeholder="고객사명"/></div>
+        <div class="field"><label>담당자</label><input id="qf_contactPerson" type="text" value="${esc(task.quoteContactPerson||task.manager||"")}" placeholder="고객 담당자명"/></div>
+        <div class="field qform-full"><label>제목/건명 <span style="color:var(--rose)">*</span></label><input id="qf_title" type="text" value="${esc(task.quoteTitle||task.symptom||"")}"/></div>
+        <div class="field qform-full"><label>현장 주소</label><input id="qf_siteAddr" type="text" value="${esc(task.quoteSiteAddr||linkedSite?.address||"")}"/></div>
         <div class="field qform-full"><label>AS 구분</label>
           <select id="qf_asType">
             <option value="무상" ${(task.quoteAsType||asResult.type)==="무상"?"selected":""}>✅ 무상 AS</option>
@@ -752,299 +1029,161 @@ function _renderQuoteModal(task,linkedSite,asResult,quoteNo,today){
             <option value="협의" ${(task.quoteAsType||asResult.type)==="협의"?"selected":""}>🤝 협의</option>
           </select></div>
       </div>
-
-      <!-- 품목 편집기 -->
       <div style="font-size:12px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;">📦 견적 품목</div>
       <div class="qi-editor" id="qiEditor">
-        <div class="qi-header">
-          <span>품목명 / 규격</span>
-          <span style="text-align:center;">수량</span>
-          <span style="text-align:center;">단위/단가(원)</span>
-          <span style="text-align:right;">금액(원)</span>
-          <span></span>
-        </div>
+        <div class="qi-header"><span>품목명 / 규격</span><span style="text-align:center;">수량</span><span style="text-align:center;">단위/단가(원)</span><span style="text-align:right;">금액(원)</span><span></span></div>
         <div id="qiRows"></div>
         <button class="qi-add-btn" onclick="window._addQiRow()">+ 품목 추가</button>
       </div>
-
-      <!-- 합계 -->
       <div class="q-summary">
-        <div class="q-summary-row">
-          <span class="q-summary-label">공급가액</span>
-          <span class="q-summary-val" id="qSummarySupply">${supply.toLocaleString("ko-KR")}원</span>
-        </div>
-        <div class="q-summary-row">
-          <span class="q-summary-label">부가세 (10%)</span>
-          <span class="q-summary-val" id="qSummaryVat">${vat.toLocaleString("ko-KR")}원</span>
-        </div>
-        <div class="q-summary-row q-summary-total">
-          <span class="q-summary-label">합계금액</span>
-          <span class="q-summary-val" id="qSummaryTotal">${total.toLocaleString("ko-KR")}원</span>
-        </div>
+        <div class="q-summary-row"><span class="q-summary-label">공급가액</span><span class="q-summary-val" id="qSummarySupply">${supply.toLocaleString("ko-KR")}원</span></div>
+        <div class="q-summary-row"><span class="q-summary-label">부가세 (10%)</span><span class="q-summary-val" id="qSummaryVat">${vat.toLocaleString("ko-KR")}원</span></div>
+        <div class="q-summary-row q-summary-total"><span class="q-summary-label">합계금액</span><span class="q-summary-val" id="qSummaryTotal">${total.toLocaleString("ko-KR")}원</span></div>
       </div>
-
-      <!-- 결제 조건 / 비고 -->
       <div class="qform-grid">
         <div class="field"><label>결제 조건</label>
           <select id="qf_paymentTerm">
-            <option value="현금" ${(task.quotePaymentTerm||"")==="현금"?"selected":""}>현금</option>
-            <option value="30일 어음" ${(task.quotePaymentTerm||"")==="30일 어음"?"selected":""}>30일 어음</option>
-            <option value="60일 어음" ${(task.quotePaymentTerm||"")==="60일 어음"?"selected":""}>60일 어음</option>
-            <option value="계좌이체" ${(task.quotePaymentTerm||"")==="계좌이체"?"selected":""}>계좌이체</option>
-            <option value="협의" ${(task.quotePaymentTerm||"")==="협의"?"selected":""}>협의</option>
+            ${["현금","30일 어음","60일 어음","계좌이체","협의"].map(o=>`<option${task.quotePaymentTerm===o?" selected":""}>${esc(o)}</option>`).join("")}
           </select></div>
-        <div class="field"><label>설치/작업 조건</label>
-          <input id="qf_installCond" type="text" value="${esc(task.quoteInstallCond||"당사 기술자 파견")}" placeholder="예: 당사 기술자 파견"/></div>
+        <div class="field"><label>설치/작업 조건</label><input id="qf_installCond" type="text" value="${esc(task.quoteInstallCond||"당사 기술자 파견")}"/></div>
       </div>
-      <div class="field" style="margin-bottom:4px;">
-        <label>특기사항 / 비고</label>
-        <textarea id="qf_notes" rows="3" placeholder="특이사항, 보증 조건, 기타 안내 등">${esc(task.quoteNotes||"")}</textarea>
-      </div>
+      <div class="field" style="margin-bottom:4px;"><label>특기사항 / 비고</label><textarea id="qf_notes" rows="3">${esc(task.quoteNotes||"")}</textarea></div>
     </div>
-
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="document.getElementById('modalOverlay').classList.add('hidden')">닫기</button>
       <button class="btn btn-secondary" onclick="window._saveQuote(false)">💾 저장</button>
       <button class="btn btn-secondary" style="background:var(--blue-lt);color:var(--blue);border-color:rgba(37,99,235,.2);" onclick="window._previewQuote()">👁️ 미리보기</button>
       <button class="btn btn-primary" onclick="window._printQuote()">🖨️ 인쇄/PDF</button>
     </div>`;
-
   _renderQiRows();
 }
 
-/* ── 품목 행 렌더 (데스크톱/모바일 분기) ── */
 function _renderQiRows(){
-  const el=document.getElementById("qiRows");
-  if(!el)return;
-  if(quoteItems.length===0){
-    quoteItems=[{id:Date.now(),name:"",spec:"",qty:1,unit:"식",unitPrice:0}];
-  }
-
-  if(window.innerWidth<=768){
-    /* 모바일: 카드형 레이아웃 */
+  const el=document.getElementById("qiRows");if(!el)return;
+  if(quoteItems.length===0)quoteItems=[{id:Date.now(),name:"",spec:"",qty:1,unit:"식",unitPrice:0}];
+  if(isMobile()){
     el.innerHTML=quoteItems.map((it,idx)=>{
       const amt=(parseInt(it.qty)||0)*(parseInt(it.unitPrice)||0);
       return`<div class="qi-row" id="qirow_${it.id}">
-        <div class="qi-item-header">
-          <span style="font-size:11px;font-weight:700;color:var(--ink-5);">품목 ${idx+1}</span>
-          <button class="qi-del" onclick="window._qiDelete(${it.id})">✕ 삭제</button>
-        </div>
+        <div class="qi-item-header"><span style="font-size:11px;font-weight:700;color:var(--ink-5);">품목 ${idx+1}</span><button class="qi-del" onclick="window._qiDelete(${it.id})">✕ 삭제</button></div>
         <div class="qi-name-wrap">
-          <div><span class="qi-label">품목명</span>
-            <input type="text" placeholder="품목명 *" value="${esc(it.name)}"
-              oninput="window._qiUpdate(${it.id},'name',this.value)"/></div>
-          <div><span class="qi-label">규격/사양</span>
-            <input type="text" placeholder="규격/사양 (선택)" value="${esc(it.spec||"")}"
-              oninput="window._qiUpdate(${it.id},'spec',this.value)"/></div>
+          <div><span class="qi-label">품목명</span><input type="text" placeholder="품목명 *" value="${esc(it.name)}" oninput="window._qiUpdate(${it.id},'name',this.value)"/></div>
+          <div><span class="qi-label">규격/사양</span><input type="text" placeholder="규격/사양" value="${esc(it.spec||"")}" oninput="window._qiUpdate(${it.id},'spec',this.value)"/></div>
         </div>
         <div class="qi-price-row">
-          <div><span class="qi-label">단위</span>
-            <input type="text" placeholder="단위" value="${esc(it.unit||'식')}"
-              style="text-align:center;"
-              oninput="window._qiUpdate(${it.id},'unit',this.value)"/></div>
-          <div><span class="qi-label">수량</span>
-            <input type="number" min="1" value="${it.qty||1}"
-              style="text-align:center;"
-              oninput="window._qiUpdate(${it.id},'qty',this.value)"/></div>
-          <div><span class="qi-label">단가(원)</span>
-            <input type="number" min="0" value="${it.unitPrice||0}"
-              style="text-align:right;"
-              oninput="window._qiUpdate(${it.id},'unitPrice',this.value)"/></div>
+          <div><span class="qi-label">단위</span><input type="text" value="${esc(it.unit||'식')}" style="text-align:center;" oninput="window._qiUpdate(${it.id},'unit',this.value)"/></div>
+          <div><span class="qi-label">수량</span><input type="number" min="1" value="${it.qty||1}" style="text-align:center;" oninput="window._qiUpdate(${it.id},'qty',this.value)"/></div>
+          <div><span class="qi-label">단가(원)</span><input type="number" min="0" value="${it.unitPrice||0}" style="text-align:right;" oninput="window._qiUpdate(${it.id},'unitPrice',this.value)"/></div>
           <div class="qi-amt" id="qiamt_${it.id}">금액: ${amt.toLocaleString("ko-KR")}원</div>
         </div>
       </div>`;
     }).join("");
-  } else {
-    /* 데스크톱: 기존 그리드 레이아웃 */
-    el.innerHTML=quoteItems.map((it,idx)=>{
+  }else{
+    el.innerHTML=quoteItems.map((it)=>{
       const amt=(parseInt(it.qty)||0)*(parseInt(it.unitPrice)||0);
       return`<div class="qi-row" id="qirow_${it.id}">
         <div style="display:flex;flex-direction:column;gap:3px;">
-          <input type="text" placeholder="품목명 *" value="${esc(it.name)}"
-            oninput="window._qiUpdate(${it.id},'name',this.value)"/>
-          <input type="text" placeholder="규격/사양" value="${esc(it.spec||"")}"
-            style="font-size:11px;padding:4px 7px;border:1px dashed var(--line);background:var(--bg);"
-            oninput="window._qiUpdate(${it.id},'spec',this.value)"/>
+          <input type="text" placeholder="품목명 *" value="${esc(it.name)}" oninput="window._qiUpdate(${it.id},'name',this.value)"/>
+          <input type="text" placeholder="규격/사양" value="${esc(it.spec||"")}" style="font-size:11px;padding:4px 7px;border:1px dashed var(--line);background:var(--bg);" oninput="window._qiUpdate(${it.id},'spec',this.value)"/>
         </div>
         <div style="display:flex;flex-direction:column;gap:3px;">
-          <input type="number" min="1" value="${it.qty||1}"
-            style="text-align:center;"
-            oninput="window._qiUpdate(${it.id},'qty',this.value)"/>
-          <input type="text" placeholder="단위" value="${esc(it.unit||'식')}"
-            style="font-size:11px;padding:4px 7px;text-align:center;"
-            oninput="window._qiUpdate(${it.id},'unit',this.value)"/>
+          <input type="number" min="1" value="${it.qty||1}" style="text-align:center;" oninput="window._qiUpdate(${it.id},'qty',this.value)"/>
+          <input type="text" placeholder="단위" value="${esc(it.unit||'식')}" style="font-size:11px;padding:4px 7px;text-align:center;" oninput="window._qiUpdate(${it.id},'unit',this.value)"/>
         </div>
-        <input type="number" min="0" value="${it.unitPrice||0}" placeholder="단가"
-          style="text-align:right;"
-          oninput="window._qiUpdate(${it.id},'unitPrice',this.value)"/>
+        <input type="number" min="0" value="${it.unitPrice||0}" placeholder="단가" style="text-align:right;" oninput="window._qiUpdate(${it.id},'unitPrice',this.value)"/>
         <div class="qi-amt" id="qiamt_${it.id}">${amt.toLocaleString("ko-KR")}</div>
-        <button class="qi-del" onclick="window._qiDelete(${it.id})" title="삭제">✕</button>
+        <button class="qi-del" onclick="window._qiDelete(${it.id})">✕</button>
       </div>`;
     }).join("");
   }
   _updateQiSummary();
 }
-
 window._qiUpdate=function(id,field,value){
   const it=quoteItems.find(x=>x.id===id);if(!it)return;
   it[field]=field==="qty"||field==="unitPrice"?parseInt(value)||0:value;
   const amt=it.qty*it.unitPrice;
   const amtEl=document.getElementById("qiamt_"+id);
-  if(amtEl){
-    if(window.innerWidth<=768) amtEl.textContent=`금액: ${amt.toLocaleString("ko-KR")}원`;
-    else amtEl.textContent=amt.toLocaleString("ko-KR");
-  }
+  if(amtEl)amtEl.textContent=isMobile()?`금액: ${amt.toLocaleString("ko-KR")}원`:amt.toLocaleString("ko-KR");
   _updateQiSummary();
 };
-
-window._addQiRow=function(){
-  quoteItems.push({id:Date.now(),name:"",spec:"",qty:1,unit:"식",unitPrice:0});
-  _renderQiRows();
-};
-
+window._addQiRow=function(){quoteItems.push({id:Date.now(),name:"",spec:"",qty:1,unit:"식",unitPrice:0});_renderQiRows();};
 window._qiDelete=function(id){
   if(quoteItems.length<=1){toast("최소 1개 품목이 필요합니다","error");return;}
-  quoteItems=quoteItems.filter(x=>x.id!==id);
-  _renderQiRows();
+  quoteItems=quoteItems.filter(x=>x.id!==id);_renderQiRows();
 };
-
 function _updateQiSummary(){
-  const supply=quoteItemsTotal();
-  const vat=Math.round(supply*0.1);
-  const total=supply+vat;
-  const s=document.getElementById("qSummarySupply");
-  const v=document.getElementById("qSummaryVat");
-  const t=document.getElementById("qSummaryTotal");
+  const supply=quoteItemsTotal();const vat=Math.round(supply*0.1);const total=supply+vat;
+  const s=document.getElementById("qSummarySupply");const v=document.getElementById("qSummaryVat");const t=document.getElementById("qSummaryTotal");
   if(s)s.textContent=supply.toLocaleString("ko-KR")+"원";
   if(v)v.textContent=vat.toLocaleString("ko-KR")+"원";
   if(t)t.textContent=total.toLocaleString("ko-KR")+"원";
 }
-
 function _gatherQuoteData(){
+  const g=id=>document.getElementById(id)?.value.trim()||"";
   return{
-    quoteNo: document.getElementById("qf_quoteNo")?.value.trim()||"",
-    quoteDate: document.getElementById("qf_quoteDate")?.value||"",
-    quoteValidUntil: document.getElementById("qf_validUntil")?.value||"",
-    quoteDeliveryDate: document.getElementById("qf_deliveryDate")?.value||"",
-    quoteRecipient: document.getElementById("qf_recipient")?.value.trim()||"",
-    quoteContactPerson: document.getElementById("qf_contactPerson")?.value.trim()||"",
-    quoteTitle: document.getElementById("qf_title")?.value.trim()||"",
-    quoteSiteAddr: document.getElementById("qf_siteAddr")?.value.trim()||"",
-    quoteAsType: document.getElementById("qf_asType")?.value||"",
-    quotePaymentTerm: document.getElementById("qf_paymentTerm")?.value||"",
-    quoteInstallCond: document.getElementById("qf_installCond")?.value.trim()||"",
-    quoteNotes: document.getElementById("qf_notes")?.value.trim()||"",
-    quoteItems: JSON.parse(JSON.stringify(quoteItems)),
+    quoteNo:g("qf_quoteNo"),quoteDate:g("qf_quoteDate"),quoteValidUntil:g("qf_validUntil"),
+    quoteDeliveryDate:g("qf_deliveryDate"),quoteRecipient:g("qf_recipient"),
+    quoteContactPerson:g("qf_contactPerson"),quoteTitle:g("qf_title"),
+    quoteSiteAddr:g("qf_siteAddr"),quoteAsType:g("qf_asType"),
+    quotePaymentTerm:g("qf_paymentTerm"),quoteInstallCond:g("qf_installCond"),
+    quoteNotes:g("qf_notes"),quoteItems:JSON.parse(JSON.stringify(quoteItems)),
   };
 }
-
 window._saveQuote=async function(silent=false){
   if(!quoteTaskId)return;
-  const data=_gatherQuoteData();
-  try{
-    await updateDoc(doc(db,COL.tasks,quoteTaskId),data);
-    if(!silent)toast("견적서가 저장되었습니다","success");
-  }catch(e){console.error(e);if(!silent)toast("저장 실패","error");}
+  try{await updateDoc(doc(db,COL.tasks,quoteTaskId),_gatherQuoteData());if(!silent)toast("저장되었습니다","success");}
+  catch(e){console.error(e);if(!silent)toast("저장 실패","error");}
 };
-
-/* ── 견적서 HTML 생성 ── */
 function _buildQuoteHTML(data,task){
-  const supply=quoteItemsTotal();
-  const vat=Math.round(supply*0.1);
-  const total=supply+vat;
-
-  const itemRows=quoteItems.map((it,idx)=>`
-    <tr>
-      <td class="ctr" style="color:#555;">${idx+1}</td>
-      <td style="font-weight:600;">${esc(it.name)||"-"}</td>
-      <td class="col-spec" style="color:#666;font-size:11px;">${esc(it.spec||"-")}</td>
-      <td class="ctr">${esc(it.unit||"식")}</td>
-      <td class="num">${(parseInt(it.qty)||0).toLocaleString("ko-KR")}</td>
-      <td class="num">${(parseInt(it.unitPrice)||0).toLocaleString("ko-KR")}</td>
-      <td class="num" style="font-weight:700;color:#1a3a6b;">
-        ${((parseInt(it.qty)||0)*(parseInt(it.unitPrice)||0)).toLocaleString("ko-KR")}
-      </td>
-    </tr>`).join("");
-
-  const asLabel=data.quoteAsType==="무상"?"✅ 무상 AS (유지보수 기간 내)":
-                data.quoteAsType==="유상"?"💰 유상 AS (유지보수 기간 만료)":"🤝 AS 구분 협의";
-
+  const supply=quoteItemsTotal();const vat=Math.round(supply*0.1);const total=supply+vat;
+  const itemRows=quoteItems.map((it,idx)=>`<tr>
+    <td class="ctr">${idx+1}</td><td style="font-weight:600;">${esc(it.name)||"-"}</td>
+    <td class="col-spec">${esc(it.spec||"-")}</td><td class="ctr">${esc(it.unit||"식")}</td>
+    <td class="num">${(parseInt(it.qty)||0).toLocaleString("ko-KR")}</td>
+    <td class="num">${(parseInt(it.unitPrice)||0).toLocaleString("ko-KR")}</td>
+    <td class="num" style="font-weight:700;color:#1a3a6b;">${((parseInt(it.qty)||0)*(parseInt(it.unitPrice)||0)).toLocaleString("ko-KR")}</td>
+  </tr>`).join("");
+  const asLabel=data.quoteAsType==="무상"?"✅ 무상 AS":data.quoteAsType==="유상"?"💰 유상 AS":"🤝 AS 구분 협의";
   const deliveryRow=data.quoteDeliveryDate?`<div class="qdoc-meta-row"><span class="qdoc-meta-label">납기일</span><span class="qdoc-meta-val">${esc(data.quoteDeliveryDate)}</span></div>`:"";
   const validRow=data.quoteValidUntil?`<div class="qdoc-meta-row"><span class="qdoc-meta-label">유효기간</span><span class="qdoc-meta-val">${esc(data.quoteValidUntil)} 까지</span></div>`:"";
-
-  return`
-  <div class="qdoc" id="quotePrintDoc">
+  return`<div class="qdoc">
     <div class="qdoc-header">
       <img src="${COMPANY_LOGO}" class="qdoc-logo" alt="${esc(COMPANY_NAME)}"/>
-      <div class="qdoc-title-block">
-        <div class="qdoc-title">견 &nbsp; 적 &nbsp; 서</div>
-        <div class="qdoc-no">No. ${esc(data.quoteNo)}</div>
-        <div style="font-size:11px;color:#888;margin-top:2px;">작성일: ${esc(data.quoteDate)}</div>
-      </div>
+      <div class="qdoc-title-block"><div class="qdoc-title">견 &nbsp; 적 &nbsp; 서</div><div class="qdoc-no">No. ${esc(data.quoteNo)}</div><div style="font-size:11px;color:#888;margin-top:2px;">작성일: ${esc(data.quoteDate)}</div></div>
     </div>
-
     <div class="qdoc-meta-grid">
       <div class="qdoc-meta-col">
-        <div class="qdoc-meta-row" style="background:#f0f7ff;">
-          <span class="qdoc-meta-label" style="background:#1a73c8;color:#fff;border-right:none;">수 신</span>
-          <span class="qdoc-meta-val" style="font-weight:800;font-size:13px;color:#1a3a6b;">${esc(data.quoteRecipient||task.siteName||"-")} 귀중</span>
-        </div>
+        <div class="qdoc-meta-row" style="background:#f0f7ff;"><span class="qdoc-meta-label" style="background:#1a73c8;color:#fff;border-right:none;">수 신</span><span class="qdoc-meta-val" style="font-weight:800;font-size:13px;color:#1a3a6b;">${esc(data.quoteRecipient||task.siteName||"-")} 귀중</span></div>
         <div class="qdoc-meta-row"><span class="qdoc-meta-label">담당자</span><span class="qdoc-meta-val">${esc(data.quoteContactPerson||"-")}</span></div>
         <div class="qdoc-meta-row"><span class="qdoc-meta-label">현장주소</span><span class="qdoc-meta-val">${esc(data.quoteSiteAddr||"-")}</span></div>
         <div class="qdoc-meta-row"><span class="qdoc-meta-label">AS 구분</span><span class="qdoc-meta-val" style="font-weight:700;">${asLabel}</span></div>
       </div>
       <div class="qdoc-meta-col">
-        <div class="qdoc-meta-row" style="background:#f0f7ff;">
-          <span class="qdoc-meta-label" style="background:#1a73c8;color:#fff;border-right:none;">공 급</span>
-          <span class="qdoc-meta-val" style="font-weight:800;font-size:13px;color:#1a3a6b;">${esc(COMPANY_NAME)}</span>
-        </div>
+        <div class="qdoc-meta-row" style="background:#f0f7ff;"><span class="qdoc-meta-label" style="background:#1a73c8;color:#fff;border-right:none;">공 급</span><span class="qdoc-meta-val" style="font-weight:800;font-size:13px;color:#1a3a6b;">${esc(COMPANY_NAME)}</span></div>
         <div class="qdoc-meta-row"><span class="qdoc-meta-label">사업자번호</span><span class="qdoc-meta-val">${esc(COMPANY_BIZ)}</span></div>
         <div class="qdoc-meta-row"><span class="qdoc-meta-label">대표자</span><span class="qdoc-meta-val">${esc(COMPANY_CEO)}</span></div>
         <div class="qdoc-meta-row"><span class="qdoc-meta-label">연락처</span><span class="qdoc-meta-val">${esc(COMPANY_TEL)} / ${esc(COMPANY_EMAIL)}</span></div>
         <div class="qdoc-meta-row"><span class="qdoc-meta-label">주소</span><span class="qdoc-meta-val">${esc(COMPANY_ADDR)}</span></div>
       </div>
     </div>
-
     <div style="border:1px solid #c5d3e8;border-radius:6px;padding:10px 14px;margin-bottom:14px;background:#f0f7ff;">
       <div style="font-size:10px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">건 명</div>
       <div style="font-size:14px;font-weight:800;color:#1a3a6b;">${esc(data.quoteTitle||"-")}</div>
     </div>
-
-    <div class="qdoc-amount-box" style="border:2px solid #1a73c8;border-radius:8px;padding:12px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#e8f0fe,#f0f7ff);">
+    <div class="qdoc-amount-box">
       <div class="qdoc-amount-label" style="font-size:12px;font-weight:700;color:#1a3a6b;">합계금액 (VAT포함)</div>
       <div class="qdoc-amount-val" style="font-size:20px;font-weight:900;color:#1a73c8;letter-spacing:-0.5px;">₩ ${total.toLocaleString("ko-KR")} 원정</div>
     </div>
-
     <div class="qdoc-section-title">■ 견적 내역</div>
     <table class="qdoc-items-table">
-      <thead>
-        <tr>
-          <th style="width:34px;">No</th>
-          <th style="text-align:left;min-width:100px;">품목명</th>
-          <th class="col-spec" style="text-align:left;min-width:70px;">규격</th>
-          <th style="width:36px;">단위</th>
-          <th style="width:46px;">수량</th>
-          <th style="width:86px;">단가(원)</th>
-          <th style="width:96px;">금액(원)</th>
-        </tr>
-      </thead>
+      <thead><tr><th style="width:34px;">No</th><th style="text-align:left;min-width:100px;">품목명</th><th class="col-spec" style="text-align:left;min-width:70px;">규격</th><th style="width:36px;">단위</th><th style="width:46px;">수량</th><th style="width:86px;">단가(원)</th><th style="width:96px;">금액(원)</th></tr></thead>
       <tbody>${itemRows}</tbody>
     </table>
     <div class="qdoc-total-block">
-      <div class="qdoc-total-row">
-        <div class="qdoc-total-label">공급가액</div>
-        <div class="qdoc-total-val">${supply.toLocaleString("ko-KR")} 원</div>
-      </div>
-      <div class="qdoc-total-row">
-        <div class="qdoc-total-label">부가세 (10%)</div>
-        <div class="qdoc-total-val">${vat.toLocaleString("ko-KR")} 원</div>
-      </div>
-      <div class="qdoc-total-row grand">
-        <div class="qdoc-total-label">합계금액</div>
-        <div class="qdoc-total-val">₩ ${total.toLocaleString("ko-KR")} 원</div>
-      </div>
+      <div class="qdoc-total-row"><div class="qdoc-total-label">공급가액</div><div class="qdoc-total-val">${supply.toLocaleString("ko-KR")} 원</div></div>
+      <div class="qdoc-total-row"><div class="qdoc-total-label">부가세 (10%)</div><div class="qdoc-total-val">${vat.toLocaleString("ko-KR")} 원</div></div>
+      <div class="qdoc-total-row grand"><div class="qdoc-total-label">합계금액</div><div class="qdoc-total-val">₩ ${total.toLocaleString("ko-KR")} 원</div></div>
     </div>
-
     <div class="qdoc-section-title">■ 계약 조건</div>
     <div style="border:1px solid #dde3ee;border-radius:0 0 6px 6px;overflow:hidden;margin-bottom:12px;">
       <div style="display:grid;grid-template-columns:1fr 1fr;">
@@ -1053,20 +1192,14 @@ function _buildQuoteHTML(data,task){
         ${validRow}${deliveryRow}
       </div>
     </div>
-
-    ${data.quoteNotes?`
-    <div class="qdoc-notes">
-      <div class="qdoc-notes-title">✦ 특기사항</div>
-      ${esc(data.quoteNotes).replace(/\n/g,"<br/>")}
-    </div>`:""}
-
+    ${data.quoteNotes?`<div class="qdoc-notes"><div class="qdoc-notes-title">✦ 특기사항</div>${esc(data.quoteNotes).replace(/\n/g,"<br/>")}</div>`:""}
     <div class="qdoc-footer">
       <div class="qdoc-footer-company">
         <div><strong>${esc(COMPANY_NAME)}</strong></div>
         <div>대표이사: ${esc(COMPANY_CEO)}</div>
-        <div>Tel: ${esc(COMPANY_TEL)}&nbsp;&nbsp;|&nbsp;&nbsp;E-mail: ${esc(COMPANY_EMAIL)}</div>
+        <div>Tel: ${esc(COMPANY_TEL)} | E-mail: ${esc(COMPANY_EMAIL)}</div>
         <div>${esc(COMPANY_ADDR)}</div>
-        <div style="margin-top:6px;font-size:11px;color:#aaa;">본 견적서는 ${esc(data.quoteDate)} 기준으로 작성되었습니다.</div>
+        <div style="margin-top:6px;font-size:11px;color:#aaa;">본 견적서는 ${esc(data.quoteDate)} 기준 작성.</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
         <img src="${COMPANY_LOGO}" style="height:38px;object-fit:contain;opacity:.7;" alt="logo"/>
@@ -1074,179 +1207,122 @@ function _buildQuoteHTML(data,task){
     </div>
   </div>`;
 }
-
-/* ── 미리보기: 모바일=전체화면 오버레이, 데스크톱=기존 방식 ── */
 window._previewQuote=async function(){
   await window._saveQuote(true);
-  const data=_gatherQuoteData();
-  const task=tasks.find(t=>t.id===quoteTaskId);if(!task)return;
+  const data=_gatherQuoteData();const task=tasks.find(t=>t.id===quoteTaskId);if(!task)return;
   const html=_buildQuoteHTML(data,task);
-
-  if(window.innerWidth<=768){
-    /* 모바일: 전체화면 오버레이 */
+  if(isMobile()){
     const overlay=document.getElementById("quotePreviewOverlay");
-    const content=document.getElementById("quotePreviewContent");
-    content.innerHTML=html;
-    overlay.classList.add("active");
-    overlay.scrollTop=0;
-    /* 모달 닫기 */
+    document.getElementById("quotePreviewContent").innerHTML=html;
+    overlay.classList.add("active");overlay.scrollTop=0;
     $overlay.classList.add("hidden");
-  } else {
-    /* 데스크톱: 기존 방식 */
+  }else{
     const pa=document.getElementById("quotePrintArea");
     pa.style.cssText="display:block;position:fixed;inset:0;z-index:9998;background:#fff;overflow:auto;padding:20px;";
-    pa.innerHTML=`
-      <div style="max-width:820px;margin:0 auto;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;" class="no-print">
-          <div style="font-size:15px;font-weight:700;color:var(--ink);">견적서 미리보기</div>
-          <div style="display:flex;gap:8px;">
-            <button class="btn btn-primary no-print" onclick="window._printQuote()">🖨️ 인쇄/PDF</button>
-            <button class="btn btn-secondary no-print" onclick="document.getElementById('quotePrintArea').style.display='none'">✕ 닫기</button>
-          </div>
+    pa.innerHTML=`<div style="max-width:820px;margin:0 auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;" class="no-print">
+        <div style="font-size:15px;font-weight:700;">견적서 미리보기</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary no-print" onclick="window._printQuote()">🖨️ 인쇄/PDF</button>
+          <button class="btn btn-secondary no-print" onclick="document.getElementById('quotePrintArea').style.display='none'">✕ 닫기</button>
         </div>
-        ${html}
-      </div>`;
+      </div>${html}</div>`;
   }
 };
-
-window._closeQuotePreview=function(){
-  const overlay=document.getElementById("quotePreviewOverlay");
-  overlay.classList.remove("active");
-};
-
+window._closeQuotePreview=function(){document.getElementById("quotePreviewOverlay").classList.remove("active");};
 window._printQuote=async function(){
   await window._saveQuote(true);
-  const data=_gatherQuoteData();
-  const task=tasks.find(t=>t.id===quoteTaskId);if(!task)return;
-  /* 미리보기 오버레이 닫기 */
+  const data=_gatherQuoteData();const task=tasks.find(t=>t.id===quoteTaskId);if(!task)return;
   document.getElementById("quotePreviewOverlay").classList.remove("active");
   const pa=document.getElementById("quotePrintArea");
-  pa.style.cssText="display:block;";
-  pa.innerHTML=_buildQuoteHTML(data,task);
-  setTimeout(()=>{
-    window.print();
-    setTimeout(()=>{pa.style.display="none";},800);
-  },200);
+  pa.style.cssText="display:block;";pa.innerHTML=_buildQuoteHTML(data,task);
+  setTimeout(()=>{window.print();setTimeout(()=>{pa.style.display="none";},800);},200);
 };
 
 /* ════════════════════════════════════
    SITE
 ════════════════════════════════════ */
 const SITE_FIELDS=[
-  {key:"name",    label:"현장명",     req:true},
-  {key:"client",  label:"고객사",     req:true},
-  {key:"equipment",label:"장비",      ph:"장비명 입력",pair:true},
-  {key:"quantity",label:"수량",       type:"number",pair:true},
+  {key:"name",label:"현장명",req:true},
+  {key:"client",label:"고객사",req:true},
+  {key:"equipment",label:"장비",ph:"장비명 입력",pair:true},
+  {key:"quantity",label:"수량",type:"number",pair:true},
   {key:"contractType",label:"계약 방식",type:"select",opts:["신규","유지보수","연장","렌탈","판매"]},
   {key:"contractStart",label:"계약 시작",type:"date",pair:true},
-  {key:"contractEnd",  label:"계약 종료",type:"date",pair:true},
+  {key:"contractEnd",label:"계약 종료",type:"date",pair:true},
   {key:"maintenancePeriod",label:"유지보수 기간",ph:"예: 12개월, 2년, 1년6개월"},
   {key:"pm",label:"담당 PM",req:true},
 ];
-
-window._openAddSite=()=>{
-  openModal({title:"신규 현장 등록",fields:SITE_FIELDS,
-    hint:"계약 시작일과 유지보수 기간을 입력하면 유/무상 AS가 자동으로 산출됩니다.",
-    onSave:async d=>{await addDoc(collection(db,COL.site),{...d,status:"준비",risk:"Low",createdAt:serverTimestamp()});toast("현장이 등록되었습니다","success");}
-  });
-};
+window._openAddSite=()=>openModal({title:"신규 현장 등록",fields:SITE_FIELDS,hint:"계약 시작일과 유지보수 기간 입력 시 AS 구분이 자동 산출됩니다.",
+  onSave:async d=>{await addDoc(collection(db,COL.site),{...d,status:"준비",createdAt:serverTimestamp()});toast("현장이 등록되었습니다","success");}});
 window._openEditSite=id=>{
   const s=site.find(x=>x.id===id);if(!s)return;
   openModal({title:"현장 수정",fields:SITE_FIELDS,values:s,
-    hint:"계약 시작일과 유지보수 기간을 기반으로 유/무상 AS가 자동 산출됩니다.",
-    onSave:async d=>{await updateDoc(doc(db,COL.site,id),d);toast("현장 정보가 수정되었습니다","success");}
-  });
+    onSave:async d=>{await updateDoc(doc(db,COL.site,id),d);toast("수정되었습니다","success");}});
 };
 window._updateSiteStatus=async(id,status)=>{
   try{await updateDoc(doc(db,COL.site,id),{status});toast(`상태: ${status}`);}
   catch(e){toast("변경 실패","error");}
 };
-
 function renderSiteResults(){
-  const q=sq.site;
-  const list=site.filter(s=>match(q,[s.name,s.client,s.equipment,s.pm,s.contractType]));
-  const ra=document.getElementById("siteRA");
-  const ma=document.getElementById("sm_site");
-  if(!ra)return;
-  if(ma)ma.textContent=q?`${list.length}건 검색됨`:"";
+  const q=sq.site;const list=site.filter(s=>match(q,[s.name,s.client,s.equipment,s.pm,s.contractType]));
+  const ra=document.getElementById("siteRA");const ma=document.getElementById("sm_site");
+  if(!ra)return;if(ma)ma.textContent=q?`${list.length}건 검색됨`:"";
   if(!list.length){ra.innerHTML=noResults(q);return;}
-
-  const tBody=list.map(s=>`
-    <tr>
-      <td style="font-weight:600;color:var(--ink)">${esc(s.name)}</td>
-      <td>${esc(s.client)}</td>
-      <td>${esc(s.equipment)||"-"}</td>
-      <td>${esc(s.quantity)||"-"}</td>
-      <td>${bContract(s.contractType)}</td>
-      <td>${esc(s.contractStart)||"-"}</td>
-      <td>${esc(s.contractEnd)||"-"}</td>
-      <td><div style="line-height:1.3;"><span>${esc(s.maintenancePeriod)||"-"}</span>${asExpireText(s.contractStart,s.maintenancePeriod)}</div></td>
-      <td>${esc(s.pm)||"-"}</td>
-      <td>${bSite(s.status)}</td>
-      <td>${bAS(s.contractStart,s.maintenancePeriod)}</td>
-      <td>
-        <div class="td-actions">
-          <button class="btn-icon edit" onclick="_openEditSite('${s.id}')" title="수정">✏️</button>
-          <button class="btn btn-sm btn-secondary" onclick="_updateSiteStatus('${s.id}','진행')">진행</button>
-          <button class="btn btn-sm" style="background:var(--rose-lt);color:var(--rose);font-size:12px;padding:5px 10px;border-radius:6px;" onclick="_updateSiteStatus('${s.id}','만료')">만료</button>
-        </div>
-      </td>
-    </tr>`).join("");
-
-  const mCards=list.map(s=>`
-    <div class="mc">
-      <div class="mc-head" onclick="_toggleMC('s${s.id}')">
-        <div class="mc-title"><div class="mc-name">${esc(s.name)}</div><div class="mc-sub">${esc(s.client)} · PM: ${esc(s.pm)||"-"}</div></div>
-        <div class="mc-badges">${bContract(s.contractType)}${bAS(s.contractStart,s.maintenancePeriod)}${bSite(s.status)}</div>
-        <span class="mc-chevron" id="mcc_s${s.id}">▼</span>
-      </div>
-      <div class="mc-body" id="mcb_s${s.id}">
-        <hr class="mc-divider"/>
-        <div class="mc-fields">
-          <div class="mc-field"><span class="mc-label">장비</span><span class="mc-val">${esc(s.equipment)||"-"}</span></div>
-          <div class="mc-field"><span class="mc-label">수량</span><span class="mc-val">${esc(s.quantity)||"-"}</span></div>
-          <div class="mc-field"><span class="mc-label">계약타입</span><span class="mc-val">${esc(s.contractType)||"-"}</span></div>
-          <div class="mc-field"><span class="mc-label">계약 시작</span><span class="mc-val">${esc(s.contractStart)||"-"}</span></div>
-          <div class="mc-field"><span class="mc-label">계약 종료</span><span class="mc-val">${esc(s.contractEnd)||"-"}</span></div>
-          <div class="mc-field"><span class="mc-label">유지보수</span><span class="mc-val">${esc(s.maintenancePeriod)||"-"}${asExpireText(s.contractStart,s.maintenancePeriod)}</span></div>
-          <div class="mc-field"><span class="mc-label">AS 구분</span><span class="mc-val">${bAS(s.contractStart,s.maintenancePeriod)}</span></div>
-        </div>
-        <div class="mc-actions">
-          <button class="btn btn-secondary btn-sm" onclick="_openEditSite('${s.id}')">✏️ 수정</button>
-          <button class="btn btn-secondary btn-sm" onclick="_updateSiteStatus('${s.id}','진행')">진행</button>
-          <button class="btn btn-sm" style="background:var(--rose-lt);color:var(--rose);" onclick="_updateSiteStatus('${s.id}','만료')">만료</button>
-        </div>
-      </div>
-    </div>`).join("");
-
-  ra.innerHTML=`
-    <div class="tbl-wrap">
-      <table class="tbl"><thead><tr>
-        <th>현장명</th><th>고객사</th><th>장비</th><th>수량</th>
-        <th>계약방식</th><th>계약시작</th><th>계약종료</th>
-        <th>유지보수기간</th><th>PM</th><th>상태</th>
-        <th style="background:linear-gradient(to bottom,#f0fdf4,var(--bg));color:var(--teal-dk);">AS 구분</th>
-        <th>관리</th>
-      </tr></thead><tbody>${tBody}</tbody></table>
+  const tBody=list.map(s=>`<tr>
+    <td style="font-weight:600;">${esc(s.name)}</td><td>${esc(s.client)}</td>
+    <td>${esc(s.equipment)||"-"}</td><td>${esc(s.quantity)||"-"}</td>
+    <td>${bContract(s.contractType)}</td><td>${esc(s.contractStart)||"-"}</td>
+    <td>${esc(s.contractEnd)||"-"}</td>
+    <td><div style="line-height:1.3;">${esc(s.maintenancePeriod)||"-"}${asExpireText(s.contractStart,s.maintenancePeriod)}</div></td>
+    <td>${esc(s.pm)||"-"}</td><td>${bSite(s.status)}</td>
+    <td>${bAS(s.contractStart,s.maintenancePeriod)}</td>
+    <td><div class="td-actions">
+      <button class="btn-icon edit" onclick="_openEditSite('${s.id}')">✏️</button>
+      <button class="btn btn-sm btn-secondary" onclick="_updateSiteStatus('${s.id}','진행')">진행</button>
+      <button class="btn btn-sm" style="background:var(--rose-lt);color:var(--rose);" onclick="_updateSiteStatus('${s.id}','만료')">만료</button>
+    </div></td>
+  </tr>`).join("");
+  const mCards=list.map(s=>`<div class="mc">
+    <div class="mc-head" onclick="_toggleMC('s${s.id}')">
+      <div class="mc-title"><div class="mc-name">${esc(s.name)}</div><div class="mc-sub">${esc(s.client)} · PM: ${esc(s.pm)||"-"}</div></div>
+      <div class="mc-badges">${bContract(s.contractType)}${bAS(s.contractStart,s.maintenancePeriod)}${bSite(s.status)}</div>
+      <span class="mc-chevron" id="mcc_s${s.id}">▼</span>
     </div>
-    <div class="mc-list">${mCards}</div>`;
+    <div class="mc-body" id="mcb_s${s.id}">
+      <hr class="mc-divider"/>
+      <div class="mc-fields">
+        <div class="mc-field"><span class="mc-label">장비</span><span class="mc-val">${esc(s.equipment)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">계약기간</span><span class="mc-val">${esc(s.contractStart)||"-"} ~ ${esc(s.contractEnd)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">유지보수</span><span class="mc-val">${esc(s.maintenancePeriod)||"-"}${asExpireText(s.contractStart,s.maintenancePeriod)}</span></div>
+        <div class="mc-field"><span class="mc-label">AS 구분</span><span class="mc-val">${bAS(s.contractStart,s.maintenancePeriod)}</span></div>
+      </div>
+      <div class="mc-actions">
+        <button class="btn btn-secondary btn-sm" onclick="_openEditSite('${s.id}')">✏️ 수정</button>
+        <button class="btn btn-secondary btn-sm" onclick="_updateSiteStatus('${s.id}','진행')">진행</button>
+        <button class="btn btn-sm" style="background:var(--rose-lt);color:var(--rose);" onclick="_updateSiteStatus('${s.id}','만료')">만료</button>
+      </div>
+    </div>
+  </div>`).join("");
+  ra.innerHTML=`<div class="tbl-wrap"><table class="tbl"><thead><tr>
+    <th>현장명</th><th>고객사</th><th>장비</th><th>수량</th><th>계약방식</th>
+    <th>계약시작</th><th>계약종료</th><th>유지보수기간</th><th>PM</th>
+    <th>상태</th><th style="color:var(--teal-dk);">AS 구분</th><th>관리</th>
+  </tr></thead><tbody>${tBody}</tbody></table></div>
+  <div class="mc-list">${mCards}</div>`;
 }
 _renderers.site=renderSiteResults;
-
 function renderSite(){
-  const total=site.length;
-  const progress=site.filter(s=>s.status==="진행").length;
-  const expired=site.filter(s=>s.status==="만료").length;
+  const total=site.length;const progress=site.filter(s=>s.status==="진행").length;const expired=site.filter(s=>s.status==="만료").length;
   const asStats=site.reduce((acc,s)=>{
     const{type,daysLeft}=calcAS(s.contractStart,s.maintenancePeriod);
     if(type==="무상")acc.free++;else if(type==="유상")acc.paid++;else acc.unknown++;
     if(type==="무상"&&daysLeft!==null&&daysLeft<=30)acc.soon++;
     return acc;
   },{free:0,paid:0,unknown:0,soon:0});
-
   $content.innerHTML=`
     <div class="page-head">
-      <div class="page-head-left"><div class="page-title">Site Master</div><div class="page-subtitle">등록된 현장을 관리합니다</div></div>
+      <div><div class="page-title">Site Master</div><div class="page-subtitle">등록된 현장을 관리합니다</div></div>
       <div class="page-actions"><button class="btn btn-primary" onclick="_openAddSite()">+ 현장 등록</button></div>
     </div>
     <div class="kpi-grid" style="grid-template-columns:repeat(5,1fr);">
@@ -1256,15 +1332,9 @@ function renderSite(){
       ${kpiHtml(asStats.paid,"유상 AS","c-rose")}
     </div>
     ${asStats.soon>0?`<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:var(--r-lg);padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px;color:#92400e;"><span style="font-size:18px;">⏰</span><span>무상 AS 만료 임박 현장이 <strong>${asStats.soon}건</strong> 있습니다.</span></div>`:""}
-    ${!site.length?`<div class="card"><div class="card-body">${empty("🏗️","등록된 현장이 없습니다","+ 현장 등록 버튼으로 첫 현장을 추가해보세요")}</div></div>`:`
+    ${!site.length?`<div class="card"><div class="card-body">${empty("🏗️","등록된 현장이 없습니다","+ 현장 등록 버튼으로 추가해보세요")}</div></div>`:`
     <div class="card">
-      <div class="card-header">
-        <div class="card-title">현장 목록</div>
-        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-5);">
-          <span><span class="badge b-free" style="font-size:11px;">✅ 무상</span> 유지보수 기간 내</span>
-          <span><span class="badge b-paid" style="font-size:11px;">💰 유상</span> 기간 만료</span>
-        </div>
-      </div>
+      <div class="card-header"><div class="card-title">현장 목록</div></div>
       <div class="card-body">${searchBox("site","현장명, 고객사, 장비, PM으로 검색")}<div id="siteRA"></div></div>
     </div>`}`;
   renderSiteResults();
@@ -1274,33 +1344,24 @@ function renderSite(){
    PROJECT
 ════════════════════════════════════ */
 const PROJ_FIELDS=[
-  {key:"siteName",  label:"현장명",   type:"select",opts:[],req:true,err:"현장을 선택해주세요"},
+  {key:"siteName",label:"현장명",type:"select",opts:[],req:true,err:"현장을 선택해주세요"},
   {key:"receiptDate",label:"접수일자",type:"date",req:true},
-  {key:"symptom",   label:"접수 증상",req:true,ph:"증상을 간략히 입력"},
-  {key:"manager",   label:"담당자",   ph:"이름",pair:true},
-  {key:"phone",     label:"연락처",   type:"tel",pair:true},
-  {key:"pm",        label:"담당 PM"},
+  {key:"symptom",label:"접수 증상",req:true,ph:"증상을 간략히 입력"},
+  {key:"manager",label:"담당자",ph:"이름",pair:true},
+  {key:"phone",label:"연락처",type:"tel",pair:true},
+  {key:"pm",label:"담당 PM"},
 ];
-
 function projFields(){return PROJ_FIELDS.map(f=>f.key==="siteName"?{...f,opts:site.map(s=>s.name).filter(Boolean)}:f);}
-
 window._openAddProject=()=>{
   if(!site.length){toast("먼저 Site 메뉴에서 현장을 등록해주세요","error");return;}
   openModal({title:"신규 접수 등록",fields:projFields(),
-    onSave:async d=>{
-      await addDoc(collection(db,COL.tasks),{...d,status:"접수",createdAt:serverTimestamp(),completedAt:null,processTime:0});
-      toast("접수가 등록되었습니다","success");
-    }
-  });
+    onSave:async d=>{await addDoc(collection(db,COL.tasks),{...d,status:"접수",createdAt:serverTimestamp(),completedAt:null,processTime:0});toast("접수가 등록되었습니다","success");}});
 };
-
 window._openEditProject=id=>{
   const t=tasks.find(x=>x.id===id);if(!t)return;
   openModal({title:"접수 수정",fields:projFields(),values:t,
-    onSave:async d=>{await updateDoc(doc(db,COL.tasks,id),d);toast("접수 정보가 수정되었습니다","success");}
-  });
+    onSave:async d=>{await updateDoc(doc(db,COL.tasks,id),d);toast("수정되었습니다","success");}});
 };
-
 window._completeProject=async id=>{
   const t=tasks.find(x=>x.id===id);if(!t)return;
   const start=t.createdAt?toDate(t.createdAt):new Date();
@@ -1309,86 +1370,89 @@ window._completeProject=async id=>{
   const asType=linkedSite?calcAS(linkedSite.contractStart,linkedSite.maintenancePeriod).type:"알수없음";
   try{
     await updateDoc(doc(db,COL.tasks,id),{status:"완료",completedAt:serverTimestamp(),processTime:hrs,asType});
-    toast(`완료 처리 · 처리시간 ${hrs}시간 · AS구분: ${asType}`,"success");
+    $overlay.classList.add("hidden");
+    toast(`완료 처리 완료 · 처리시간 ${hrs}시간 · AS: ${asType}`,"success");
   }catch(e){toast("처리 실패","error");}
 };
-
 window._projSortBy=col=>{
   if(projSort.col===col){projSort.dir=projSort.dir==="asc"?"desc":"asc";}
   else{projSort.col=col;projSort.dir=col==="receiptDate"?"desc":"asc";}
   renderProjectResults();
 };
-
 function sortIcon(col){
   if(projSort.col!==col)return`<span style="opacity:.3;font-size:10px;margin-left:3px;">↕</span>`;
   return projSort.dir==="asc"?`<span style="color:var(--teal);font-size:10px;margin-left:3px;">↑</span>`:`<span style="color:var(--teal);font-size:10px;margin-left:3px;">↓</span>`;
 }
+function getSiteAS(siteName){const s=site.find(x=>x.name===siteName);return s?bAS(s.contractStart,s.maintenancePeriod):"";}
 
 function renderProjectResults(){
   const q=sq.project;
-  let list=tasks.filter(t=>match(q,[t.siteName,t.symptom,t.manager,t.phone,t.pm]));
-  const ra=document.getElementById("projRA");
-  const ma=document.getElementById("sm_project");
-  if(!ra)return;
-  if(ma)ma.textContent=q?`${list.length}건 검색됨`:"";
+  let list=tasks.filter(t=>match(q,[t.siteName,t.symptom,t.manager,t.phone,t.pm,t.causeType,t.actionType]));
+  const ra=document.getElementById("projRA");const ma=document.getElementById("sm_project");
+  if(!ra)return;if(ma)ma.textContent=q?`${list.length}건 검색됨`:"";
   if(!list.length){ra.innerHTML=noResults(q);return;}
-
   list=list.slice().sort((a,b)=>{
     const dA=a.status==="완료"?1:0,dB=b.status==="완료"?1:0;
     if(dA!==dB)return dA-dB;
     let va=a[projSort.col]||"",vb=b[projSort.col]||"";
-    const cmp=va<vb?-1:va>vb?1:0;
-    return projSort.dir==="asc"?cmp:-cmp;
+    const cmp=va<vb?-1:va>vb?1:0;return projSort.dir==="asc"?cmp:-cmp;
   });
-
   const pendingCount=list.filter(t=>t.status!=="완료").length;
   const doneCount=list.length-pendingCount;
-
   const thSort=(col,label)=>`<th style="cursor:pointer;user-select:none;white-space:nowrap;" onclick="_projSortBy('${col}')">${label}${sortIcon(col)}</th>`;
-
-  const getSiteAS=siteName=>{
-    const s=site.find(x=>x.name===siteName);
-    return s?bAS(s.contractStart,s.maintenancePeriod):"";
-  };
 
   const tBodyRows=list.map((t,idx)=>{
     const isDone=t.status==="완료";
     const sep=(isDone&&idx===pendingCount&&doneCount>0)
-      ?`<tr><td colspan="11" style="padding:4px 14px;background:var(--bg-2);font-size:11.5px;color:var(--ink-5);font-weight:600;letter-spacing:.4px;border-bottom:2px solid var(--line);">처리 완료 ${doneCount}건</td></tr>`:"";
-    return sep+`
-      <tr style="${isDone?"opacity:.6;":""}">
-        <td style="font-weight:600;color:var(--ink)">${esc(t.siteName)||"-"}</td>
-        <td>${esc(t.receiptDate)||"-"}</td>
-        <td style="max-width:200px;white-space:normal;line-height:1.4;">${esc(t.symptom)}</td>
-        <td>${esc(t.manager)||"-"}</td>
-        <td>${esc(t.phone)||"-"}</td>
-        <td>${esc(t.pm)||"-"}</td>
-        <td>${bTask(t.status)}</td>
-        <td>${getSiteAS(t.siteName)}</td>
-        <td>${t.processTime||0}h</td>
-        <td>
-          ${t.quoteItems&&t.quoteItems.length>0
-            ?`<span class="badge b-done" style="font-size:11px;cursor:pointer;" onclick="_openQuoteModal('${t.id}')">📋 견적완료</span>`
-            :`<button class="btn btn-sm" style="background:var(--blue-lt);color:var(--blue);font-weight:700;font-size:12px;border:1px solid rgba(37,99,235,.2);" onclick="_openQuoteModal('${t.id}')">📋 견적서</button>`}
-        </td>
-        <td>
-          <div class="td-actions">
-            <button class="btn-icon edit" onclick="_openEditProject('${t.id}')" title="수정">✏️</button>
-            ${!isDone?`<button class="btn btn-sm btn-primary" onclick="_completeProject('${t.id}')">완료</button>`:`<span style="font-size:12px;color:var(--ink-5);">완료됨</span>`}
-          </div>
-        </td>
-      </tr>`;
+      ?`<tr><td colspan="13" style="padding:4px 14px;background:var(--bg-2);font-size:11.5px;color:var(--ink-5);font-weight:600;letter-spacing:.4px;border-bottom:2px solid var(--line);">처리 완료 ${doneCount}건</td></tr>`:"";
+    const visitBadge=t.visitDate?ddayBadge(t.visitDate):"";
+    const causeIcon=t.causeType?`<div style="font-size:10.5px;color:var(--ink-5);margin-top:2px;">${esc(t.causeType)}</div>`:"";
+    const actionIcon=t.actionType?`<div style="margin-top:3px;">${actionTag(t.actionType)}</div>`:"";
+    return sep+`<tr style="${isDone?"opacity:.62;":""}">
+      <td style="font-weight:600;">${esc(t.siteName)||"-"}</td>
+      <td>${esc(t.receiptDate)||"-"}</td>
+      <td style="width:180px;min-width:180px;max-width:220px;white-space:normal;word-break:keep-all;line-height:1.4;">${esc(t.symptom)}</td>
+      <td>${esc(t.manager)||"-"}</td>
+      <td>${esc(t.phone)||"-"}</td>
+      <td>${esc(t.pm)||"-"}</td>
+      <td>${bTask(t.status)}</td>
+      <td>${getSiteAS(t.siteName)}</td>
+      <td>
+        <div>${t.causeType?`<span style="font-size:12px;color:var(--ink-3);">${esc(t.causeType)}</span>`:`<span style="color:var(--ink-5);font-size:11px;">미입력</span>`}</div>
+        ${actionIcon}
+      </td>
+      <td>
+        ${t.visitDate?`<div style="font-size:12px;font-weight:600;color:var(--blue);">${esc(t.visitDate)}</div><div>${visitBadge} ${esc(t.visitTime||"")}</div>`:`<span style="color:var(--ink-5);font-size:11px;">미정</span>`}
+      </td>
+      <td>${t.processTime||0}h</td>
+      <td>
+        ${t.quoteItems&&t.quoteItems.length>0
+          ?`<span class="badge b-done" style="font-size:11px;cursor:pointer;" onclick="_openQuoteModal('${t.id}')">📋 완료</span>`
+          :`<button class="btn btn-sm" style="background:var(--blue-lt);color:var(--blue);font-weight:700;font-size:11px;border:1px solid rgba(37,99,235,.2);" onclick="_openQuoteModal('${t.id}')">📋 견적서</button>`}
+      </td>
+      <td>
+        <div class="td-actions">
+          <button class="btn btn-sm btn-primary" style="font-size:11px;" onclick="_openDetailModal('${t.id}')">📂 상세</button>
+          <button class="btn-icon edit" onclick="_openEditProject('${t.id}')">✏️</button>
+          ${!isDone?`<button class="btn btn-sm btn-primary" onclick="_completeProject('${t.id}')">완료</button>`:""}
+        </div>
+      </td>
+    </tr>`;
   }).join("");
 
   const mCards=list.map((t,idx)=>{
     const isDone=t.status==="완료";
-    const divH=(isDone&&idx===pendingCount&&doneCount>0)
-      ?`<div style="text-align:center;font-size:11.5px;color:var(--ink-5);font-weight:600;padding:6px 0 2px;">── 처리 완료 ${doneCount}건 ──</div>`:"";
+    const divH=(isDone&&idx===pendingCount&&doneCount>0)?`<div style="text-align:center;font-size:11.5px;color:var(--ink-5);font-weight:600;padding:6px 0 2px;">── 처리 완료 ${doneCount}건 ──</div>`:"";
     const hasQuote=t.quoteItems&&t.quoteItems.length>0;
+    const visitBadge=t.visitDate?`<div style="font-size:11.5px;color:var(--blue);font-weight:600;margin-top:2px;">📅 ${esc(t.visitDate)} ${esc(t.visitTime||"")} ${ddayBadge(t.visitDate)}</div>`:"";
     return`${divH}
     <div class="mc" style="${isDone?"opacity:.65;":""}">
       <div class="mc-head" onclick="_toggleMC('t${t.id}')">
-        <div class="mc-title"><div class="mc-name">${esc(t.siteName)||"미등록 현장"}</div><div class="mc-sub">${esc(t.receiptDate)||"-"} · ${esc(t.symptom)||"-"}</div></div>
+        <div class="mc-title">
+          <div class="mc-name">${esc(t.siteName)||"미등록 현장"}</div>
+          <div class="mc-sub">${esc(t.receiptDate)||"-"} · ${esc(t.symptom)||"-"}</div>
+          ${visitBadge}
+        </div>
         <div class="mc-badges">${bTask(t.status)}${getSiteAS(t.siteName)}${hasQuote?`<span class="badge b-done" style="font-size:11px;">📋</span>`:""}</div>
         <span class="mc-chevron" id="mcc_t${t.id}">▼</span>
       </div>
@@ -1397,33 +1461,35 @@ function renderProjectResults(){
         <div class="mc-fields">
           <div class="mc-field"><span class="mc-label">접수일</span><span class="mc-val">${esc(t.receiptDate)||"-"}</span></div>
           <div class="mc-field"><span class="mc-label">AS 구분</span><span class="mc-val">${getSiteAS(t.siteName)||"-"}</span></div>
-          <div class="mc-field"><span class="mc-label">담당자</span><span class="mc-val">${esc(t.manager)||"-"}</span></div>
-          <div class="mc-field"><span class="mc-label">연락처</span><span class="mc-val">${esc(t.phone)||"-"}</span></div>
+          <div class="mc-field"><span class="mc-label">담당자</span><span class="mc-val">${esc(t.manager)||"-"} ${esc(t.phone||"")}</span></div>
           <div class="mc-field"><span class="mc-label">PM</span><span class="mc-val">${esc(t.pm)||"-"}</span></div>
+          <div class="mc-field"><span class="mc-label">원인</span><span class="mc-val">${t.causeType?esc(t.causeType):"<span style='color:var(--ink-5);font-size:11px;'>미입력</span>"}</span></div>
+          <div class="mc-field"><span class="mc-label">조치유형</span><span class="mc-val">${t.actionType?actionTag(t.actionType):"<span style='color:var(--ink-5);font-size:11px;'>미입력</span>"}</span></div>
+          <div class="mc-field"><span class="mc-label">방문일</span><span class="mc-val">${t.visitDate?`${esc(t.visitDate)} ${esc(t.visitTime||"")} ${ddayBadge(t.visitDate)}`:"<span style='color:var(--ink-5);font-size:11px;'>미정</span>"}</span></div>
           <div class="mc-field"><span class="mc-label">처리시간</span><span class="mc-val">${t.processTime||0}h</span></div>
           <div class="mc-field"><span class="mc-label">견적서</span><span class="mc-val">${hasQuote?"✅ 작성완료":"미작성"}</span></div>
         </div>
         <div class="mc-actions">
-          <button class="btn btn-secondary btn-sm" onclick="_openEditProject('${t.id}')">✏️ 수정</button>
+          <button class="btn btn-primary btn-sm" onclick="_openDetailModal('${t.id}')">📂 AS 이력카드</button>
           <button class="btn btn-sm" style="background:var(--blue-lt);color:var(--blue);" onclick="_openQuoteModal('${t.id}')">📋 견적서</button>
-          ${!isDone?`<button class="btn btn-primary btn-sm" onclick="_completeProject('${t.id}')">✅ 완료</button>`:`<span style="font-size:12px;color:var(--ink-5);">처리 완료됨</span>`}
+          ${!isDone?`<button class="btn btn-primary btn-sm" onclick="_completeProject('${t.id}')">✅ 완료</button>`:""}
         </div>
       </div>
     </div>`;
   }).join("");
 
   ra.innerHTML=`
-    <div class="tbl-wrap">
-      <table class="tbl"><thead><tr>
-        ${thSort("siteName","현장명")}${thSort("receiptDate","접수일")}
-        <th>증상</th><th>담당자</th><th>연락처</th><th>PM</th>
-        <th>상태</th>
-        <th style="background:linear-gradient(to bottom,#f0fdf4,var(--bg));color:var(--teal-dk);">AS 구분</th>
-        <th>처리시간</th>
-        <th style="background:linear-gradient(to bottom,#eff6ff,var(--bg));color:var(--blue);">견적서</th>
-        <th>관리</th>
-      </tr></thead><tbody>${tBodyRows}</tbody></table>
-    </div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr>
+      ${thSort("siteName","현장명")}${thSort("receiptDate","접수일")}
+      <th>증상</th><th>담당자</th><th>연락처</th><th>PM</th>
+      <th>상태</th>
+      <th style="color:var(--teal-dk);">AS 구분</th>
+      <th>원인 / 조치유형</th>
+      <th style="color:var(--blue);">방문 일정</th>
+      <th>처리시간</th>
+      <th style="color:var(--blue);">견적서</th>
+      <th>관리</th>
+    </tr></thead><tbody>${tBodyRows}</tbody></table></div>
     <div class="mc-list">${mCards}</div>`;
 }
 _renderers.project=renderProjectResults;
@@ -1433,27 +1499,34 @@ function renderProject(){
   const pending=total-done;
   const avg=total?(tasks.reduce((a,b)=>a+(b.processTime||0),0)/total).toFixed(1):"0.0";
   const quoted=tasks.filter(t=>t.quoteItems&&t.quoteItems.length>0).length;
+  const visitToday=tasks.filter(t=>t.visitDate&&calcDday(t.visitDate)===0).length;
+  const visitSoon=tasks.filter(t=>t.visitDate&&calcDday(t.visitDate)>0&&calcDday(t.visitDate)<=3).length;
 
   $content.innerHTML=`
     <div class="page-head">
-      <div class="page-head-left"><div class="page-title">Project 접수관리</div><div class="page-subtitle">접수된 현장 요청을 추적합니다</div></div>
+      <div><div class="page-title">Project 접수관리</div><div class="page-subtitle">접수된 현장 요청을 추적합니다</div></div>
       <div class="page-actions"><button class="btn btn-primary" onclick="_openAddProject()">+ 접수 등록</button></div>
     </div>
-    ${!site.length?`<div class="no-sites">⚠️ 등록된 현장이 없습니다. <strong>Site</strong> 메뉴에서 먼저 현장을 추가해주세요.</div>`:""}
-    <div class="kpi-grid" style="grid-template-columns:repeat(5,1fr);">
+    ${!site.length?`<div class="no-sites">⚠️ Site 메뉴에서 먼저 현장을 등록해주세요.</div>`:""}
+    <div class="kpi-grid" style="grid-template-columns:repeat(6,1fr);">
       ${kpiHtml(total,"전체 접수","c-blue")}
       ${kpiHtml(done,"처리 완료","c-teal")}
       ${kpiHtml(pending,"미처리","c-amber")}
       ${kpiHtml(avg+"h","평균 처리시간","c-violet")}
+      ${kpiHtml(visitToday+(visitSoon?`<span style="font-size:13px;color:var(--blue);font-weight:500;margin-left:4px;">(+${visitSoon})</span>`:"")+""  ,"오늘 방문","c-rose",visitSoon>0?`3일 내 ${visitSoon}건 더`:"")}
       ${kpiHtml(quoted,"견적서 발행","c-green")}
     </div>
-    ${!tasks.length?`<div class="card"><div class="card-body">${empty("🛠️","접수된 항목이 없습니다","+ 접수 등록 버튼으로 새 접수를 추가해보세요")}</div></div>`:`
+    ${visitToday>0||visitSoon>0?`<div style="background:var(--blue-lt);border:1px solid rgba(37,99,235,.2);border-radius:var(--r-lg);padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--blue);">
+      <span style="font-size:18px;">📅</span>
+      <span>${visitToday>0?`<strong>오늘 방문</strong> 현장 ${visitToday}건`:""}${visitToday>0&&visitSoon>0?" · ":""}${visitSoon>0?`3일 내 방문 예정 ${visitSoon}건`:""}</span>
+    </div>`:""}
+    ${!tasks.length?`<div class="card"><div class="card-body">${empty("🛠️","접수된 항목이 없습니다","+ 접수 등록 버튼으로 추가해보세요")}</div></div>`:`
     <div class="card">
       <div class="card-header">
         <div class="card-title">접수 목록</div>
-        <div style="font-size:12px;color:var(--ink-5);">📋 견적서 버튼으로 견적서 작성 및 인쇄</div>
+        <div style="font-size:12px;color:var(--ink-5);">📂 상세 버튼 → AS 이력카드 (원인·조치·방문일정·완료처리)</div>
       </div>
-      <div class="card-body">${searchBox("project","현장명, 증상, 담당자, 연락처로 검색")}<div id="projRA"></div></div>
+      <div class="card-body">${searchBox("project","현장명, 증상, 원인유형, 조치유형으로 검색")}<div id="projRA"></div></div>
     </div>`}`;
   renderProjectResults();
 }
@@ -1462,79 +1535,70 @@ function renderProject(){
    ISSUE
 ════════════════════════════════════ */
 const ISSUE_FIELDS=[
-  {key:"siteName",  label:"현장명",   type:"select",opts:[],req:true,err:"현장을 선택해주세요"},
-  {key:"issueType", label:"유형",     type:"select",opts:["기술","일정","자재","고객"],req:true,err:"유형을 선택해주세요"},
-  {key:"title",     label:"이슈 내용",req:true,ph:"이슈를 간략히 설명해주세요"},
-  {key:"reporter",  label:"등록자",   req:true,ph:"이름"},
+  {key:"siteName",label:"현장명",type:"select",opts:[],req:true,err:"현장을 선택해주세요"},
+  {key:"issueType",label:"유형",type:"select",opts:["기술","일정","자재","고객"],req:true,err:"유형을 선택"},
+  {key:"title",label:"이슈 내용",req:true,ph:"이슈를 간략히 설명해주세요"},
+  {key:"reporter",label:"등록자",req:true,ph:"이름"},
 ];
 function issueFields(){return ISSUE_FIELDS.map(f=>f.key==="siteName"?{...f,opts:site.map(s=>s.name).filter(Boolean)}:f);}
-
 window._openAddIssue=()=>{
   if(!site.length){toast("먼저 Site 메뉴에서 현장을 등록해주세요","error");return;}
   openModal({title:"이슈 등록",fields:issueFields(),
-    onSave:async d=>{await addDoc(collection(db,COL.issues),{...d,status:"New",createdAt:serverTimestamp()});toast("이슈가 등록되었습니다","success");}
-  });
+    onSave:async d=>{await addDoc(collection(db,COL.issues),{...d,status:"New",createdAt:serverTimestamp()});toast("이슈가 등록되었습니다","success");}});
 };
 window._openEditIssue=id=>{
   const iss=issues.find(x=>x.id===id);if(!iss)return;
   openModal({title:"이슈 수정",fields:issueFields(),values:iss,
-    onSave:async d=>{await updateDoc(doc(db,COL.issues,id),d);toast("이슈가 수정되었습니다","success");}
-  });
+    onSave:async d=>{await updateDoc(doc(db,COL.issues,id),d);toast("수정되었습니다","success");}});
 };
 window._toggleIssue=async(id,cur)=>{
   const next=cur==="Closed"?"New":"Closed";
   try{await updateDoc(doc(db,COL.issues,id),{status:next});toast(`이슈: ${next}`);}
   catch(e){toast("변경 실패","error");}
 };
-
 function renderIssueResults(){
-  const q=sq.issue;
-  const list=issues.filter(i=>match(q,[i.title,i.siteName,i.reporter,i.issueType]));
-  const ra=document.getElementById("issueRA");
-  const ma=document.getElementById("sm_issue");
-  if(!ra)return;
-  if(ma)ma.textContent=q?`${list.length}건 검색됨`:"";
+  const q=sq.issue;const list=issues.filter(i=>match(q,[i.title,i.siteName,i.reporter,i.issueType]));
+  const ra=document.getElementById("issueRA");const ma=document.getElementById("sm_issue");
+  if(!ra)return;if(ma)ma.textContent=q?`${list.length}건 검색됨`:"";
   if(!list.length){ra.innerHTML=noResults(q);return;}
-  ra.innerHTML=list.map(i=>`
-    <div class="mc">
-      <div class="mc-head" onclick="_toggleMC('i${i.id}')">
-        <div class="mc-title"><div class="mc-name">${esc(i.title)}</div><div class="mc-sub">${esc(i.siteName)||"-"} · ${esc(i.reporter)||"-"}</div></div>
-        <div class="mc-badges">${bIssueType(i.issueType)}${bIssue(i.status)}</div>
-        <span class="mc-chevron" id="mcc_i${i.id}">▼</span>
+  ra.innerHTML=list.map(i=>`<div class="mc">
+    <div class="mc-head" onclick="_toggleMC('i${i.id}')">
+      <div class="mc-title"><div class="mc-name">${esc(i.title)}</div><div class="mc-sub">${esc(i.siteName)||"-"} · ${esc(i.reporter)||"-"}</div></div>
+      <div class="mc-badges">${bIssueType(i.issueType)}${bIssue(i.status)}</div>
+      <span class="mc-chevron" id="mcc_i${i.id}">▼</span>
+    </div>
+    <div class="mc-body" id="mcb_i${i.id}">
+      <hr class="mc-divider"/>
+      <div class="mc-fields">
+        <div class="mc-field"><span class="mc-label">현장명</span><span class="mc-val">${esc(i.siteName)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">유형</span><span class="mc-val">${esc(i.issueType)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">등록자</span><span class="mc-val">${esc(i.reporter)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">등록일</span><span class="mc-val">${fmtDate(i.createdAt)}</span></div>
       </div>
-      <div class="mc-body" id="mcb_i${i.id}">
-        <hr class="mc-divider"/>
-        <div class="mc-fields">
-          <div class="mc-field"><span class="mc-label">현장명</span><span class="mc-val">${esc(i.siteName)||"-"}</span></div>
-          <div class="mc-field"><span class="mc-label">유형</span><span class="mc-val">${esc(i.issueType)||"-"}</span></div>
-          <div class="mc-field"><span class="mc-label">등록자</span><span class="mc-val">${esc(i.reporter)||"-"}</span></div>
-          <div class="mc-field"><span class="mc-label">등록일</span><span class="mc-val">${fmtDate(i.createdAt)}</span></div>
-        </div>
-        <div class="mc-actions">
-          <button class="btn btn-secondary btn-sm" onclick="_openEditIssue('${i.id}')">✏️ 수정</button>
-          <button class="btn btn-sm" style="${i.status==="Closed"?"background:var(--blue-lt);color:var(--blue)":"background:var(--teal-lt);color:var(--teal-dk)"}" onclick="_toggleIssue('${i.id}','${esc(i.status)}')">
-            ${i.status==="Closed"?"🔄 다시 열기":"✅ 종결"}
-          </button>
-        </div>
+      <div class="mc-actions">
+        <button class="btn btn-secondary btn-sm" onclick="_openEditIssue('${i.id}')">✏️ 수정</button>
+        <button class="btn btn-sm" style="${i.status==="Closed"?"background:var(--blue-lt);color:var(--blue)":"background:var(--teal-lt);color:var(--teal-dk)"}" onclick="_toggleIssue('${i.id}','${esc(i.status)}')">
+          ${i.status==="Closed"?"🔄 다시 열기":"✅ 종결"}
+        </button>
       </div>
-    </div>`).join("");
+    </div>
+  </div>`).join("");
 }
 _renderers.issue=renderIssueResults;
-
 function renderIssue(){
   const total=issues.length,closed=issues.filter(i=>i.status==="Closed").length,open=total-closed;
   const rate=total?(closed/total*100).toFixed(1):"0.0";
   $content.innerHTML=`
     <div class="page-head">
-      <div class="page-head-left"><div class="page-title">Issues</div><div class="page-subtitle">현장 이슈를 등록하고 추적합니다</div></div>
+      <div><div class="page-title">Issues</div><div class="page-subtitle">현장 이슈를 등록하고 추적합니다</div></div>
       <div class="page-actions"><button class="btn btn-primary" onclick="_openAddIssue()">+ 이슈 등록</button></div>
     </div>
-    ${!site.length?`<div class="no-sites">⚠️ 등록된 현장이 없습니다. <strong>Site</strong> 메뉴에서 먼저 현장을 추가해주세요.</div>`:""}
+    ${!site.length?`<div class="no-sites">⚠️ Site 메뉴에서 먼저 현장을 등록해주세요.</div>`:""}
     <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
       ${kpiHtml(total,"전체 이슈","c-violet")}${kpiHtml(open,"진행 중","c-amber")}
       ${kpiHtml(closed,"종결","c-teal")}${kpiHtml(rate+"%","종결률","c-blue")}
     </div>
-    ${!issues.length?`<div class="card"><div class="card-body">${empty("⚠️","등록된 이슈가 없습니다","+ 이슈 등록 버튼으로 이슈를 추가해보세요")}</div></div>`:`
+    ${!issues.length?`<div class="card"><div class="card-body">${empty("⚠️","등록된 이슈가 없습니다","+ 이슈 등록 버튼으로 추가해보세요")}</div></div>`:`
     <div class="card">
       <div class="card-header"><div class="card-title">이슈 목록</div></div>
       <div class="card-body">${searchBox("issue","현장명, 이슈 내용, 등록자, 유형으로 검색")}<div id="issueRA"></div></div>
@@ -1545,23 +1609,10 @@ function renderIssue(){
 /* ════════════════════════════════════
    STATISTICS
 ════════════════════════════════════ */
-function byPeriod(type){
-  const now=new Date();
-  return tasks.filter(t=>{
-    const d=toDate(t.createdAt);if(!d)return false;
-    if(type==="day")return d.toDateString()===now.toDateString();
-    if(type==="week"){const w=new Date(now);w.setDate(w.getDate()-7);return d>=w;}
-    if(type==="month")return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
-    if(type==="year") return d.getFullYear()===now.getFullYear();
-    return false;
-  });
-}
-
 window._setStatPeriod=p=>{
   statPeriod=p;renderStatPeriodSection();
   document.querySelectorAll(".stat-tab").forEach(el=>el.classList.toggle("stat-tab-active",el.dataset.period===p));
 };
-
 function renderStatPeriodSection(){
   const el=document.getElementById("statPeriodBody");if(!el)return;
   const now=new Date();let data,groups;
@@ -1589,16 +1640,14 @@ function renderStatPeriodSection(){
   const rateAll=totalAll?((doneAll/totalAll)*100).toFixed(1):"0.0";
   const avgAll=totalAll?(data.reduce((a,b)=>a+(b.processTime||0),0)/totalAll).toFixed(1):"0.0";
   const maxTotal=Math.max(...groups.map(r=>r.total),1);
-  const kpiStrip=`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
-    <div class="kpi-card c-blue"  style="padding:14px 16px;"><div class="kpi-eyebrow">전체 접수</div><div class="kpi-num" style="font-size:24px;">${totalAll}</div></div>
-    <div class="kpi-card c-teal"  style="padding:14px 16px;"><div class="kpi-eyebrow">처리 완료</div><div class="kpi-num" style="font-size:24px;">${doneAll}</div></div>
-    <div class="kpi-card c-violet"style="padding:14px 16px;"><div class="kpi-eyebrow">완료율</div><div class="kpi-num" style="font-size:24px;">${rateAll}%</div></div>
+  const kpiStrip=`<div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
+    <div class="kpi-card c-blue" style="padding:14px 16px;"><div class="kpi-eyebrow">전체 접수</div><div class="kpi-num" style="font-size:24px;">${totalAll}</div></div>
+    <div class="kpi-card c-teal" style="padding:14px 16px;"><div class="kpi-eyebrow">처리 완료</div><div class="kpi-num" style="font-size:24px;">${doneAll}</div></div>
+    <div class="kpi-card c-violet" style="padding:14px 16px;"><div class="kpi-eyebrow">완료율</div><div class="kpi-num" style="font-size:24px;">${rateAll}%</div></div>
     <div class="kpi-card c-amber" style="padding:14px 16px;"><div class="kpi-eyebrow">평균처리시간</div><div class="kpi-num" style="font-size:24px;">${avgAll}h</div></div>
   </div>`;
   const bars=groups.map(r=>{
-    const pct=(r.total/maxTotal*100).toFixed(1);
-    const donePct=r.total?(r.done/r.total*100).toFixed(0):0;
-    const avg=r.total?(r.time/r.total).toFixed(1):"0.0";
+    const pct=(r.total/maxTotal*100).toFixed(1);const donePct=r.total?(r.done/r.total*100).toFixed(0):0;const avg=r.total?(r.time/r.total).toFixed(1):"0.0";
     return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px;">
       <div style="width:72px;font-size:12px;color:var(--ink-3);text-align:right;flex-shrink:0;font-weight:500;">${esc(r.label)}</div>
       <div style="flex:1;height:22px;background:var(--bg-2);border-radius:6px;overflow:hidden;position:relative;">
@@ -1609,20 +1658,31 @@ function renderStatPeriodSection(){
       <div style="width:34px;font-size:11.5px;color:var(--ink-5);flex-shrink:0;">${avg}h</div>
     </div>`;
   }).join("");
-  const barHeader=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--line);"><div style="width:72px;"></div><div style="flex:1;font-size:11px;font-weight:700;color:var(--ink-5);text-transform:uppercase;letter-spacing:.4px;">접수 건수</div><div style="width:38px;font-size:11px;font-weight:700;color:var(--ink-5);">완료율</div><div style="width:34px;font-size:11px;font-weight:700;color:var(--ink-5);">평균</div></div>`;
-  el.innerHTML=kpiStrip+`<div>${barHeader}${bars||`<div class="empty" style="padding:24px;"><div class="empty-icon" style="font-size:24px;">📭</div><div class="empty-body">해당 기간 데이터가 없습니다</div></div>`}</div>`;
+  el.innerHTML=kpiStrip+`<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--line);">
+    <div style="width:72px;"></div><div style="flex:1;font-size:11px;font-weight:700;color:var(--ink-5);text-transform:uppercase;letter-spacing:.4px;">접수 건수</div>
+    <div style="width:38px;font-size:11px;font-weight:700;color:var(--ink-5);">완료율</div>
+    <div style="width:34px;font-size:11px;font-weight:700;color:var(--ink-5);">평균</div>
+  </div>${bars||`<div class="empty" style="padding:24px;"><div class="empty-icon" style="font-size:24px;">📭</div><div class="empty-body">해당 기간 데이터가 없습니다</div></div>`}`;
 }
-
 function renderStatistics(){
   const sMap={};
   tasks.forEach(t=>{const n=t.siteName||"미등록";if(!sMap[n])sMap[n]={total:0,done:0,time:0};sMap[n].total++;if(t.status==="완료")sMap[n].done++;sMap[n].time+=(t.processTime||0);});
+  /* 원인 유형별 집계 */
+  const causeMap={};
+  tasks.forEach(t=>{if(!t.causeType)return;if(!causeMap[t.causeType])causeMap[t.causeType]=0;causeMap[t.causeType]++;});
+  const causeTotal=Object.values(causeMap).reduce((a,b)=>a+b,0);
+  const causeBars=Object.entries(causeMap).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="width:120px;font-size:12px;color:var(--ink-3);text-align:right;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${esc(k)}">${esc(k)}</div>
+      <div style="flex:1;height:16px;background:var(--bg-2);border-radius:4px;overflow:hidden;">
+        <div style="height:100%;width:${causeTotal?(v/causeTotal*100).toFixed(1):0}%;background:linear-gradient(90deg,#7c3aed,#a855f7);border-radius:4px;"></div>
+      </div>
+      <div style="width:28px;font-size:12px;color:var(--violet);font-weight:700;flex-shrink:0;">${v}건</div>
+    </div>`).join("");
   const maxSiteTotal=Math.max(...Object.values(sMap).map(s=>s.total),1);
   const sPerf=Object.keys(sMap).map(k=>{
-    const s=sMap[k];
-    const avg=s.total?(s.time/s.total).toFixed(1):"0.0";
-    const rate=s.total?((s.done/s.total)*100).toFixed(0):0;
-    const linkedSite=site.find(x=>x.name===k);
-    const asBadge=linkedSite?bAS(linkedSite.contractStart,linkedSite.maintenancePeriod):"";
+    const s=sMap[k];const avg=s.total?(s.time/s.total).toFixed(1):"0.0";const rate=s.total?((s.done/s.total)*100).toFixed(0):0;
+    const linkedSite=site.find(x=>x.name===k);const asBadge=linkedSite?bAS(linkedSite.contractStart,linkedSite.maintenancePeriod):"";
     return`<div class="site-bar" style="align-items:center;">
       <div class="site-bar-label" title="${esc(k)}">${esc(k)}</div>
       <div class="site-bar-track"><div class="site-bar-fill" style="width:${(s.total/maxSiteTotal*100).toFixed(1)}%"></div></div>
@@ -1632,28 +1692,25 @@ function renderStatistics(){
     </div>`;
   }).join("");
   const tabs=[["week","이번 주"],["month","이번 달"],["year","올해"]].map(([p,l])=>
-    `<button class="stat-tab${statPeriod===p?" stat-tab-active":""}" data-period="${p}" onclick="_setStatPeriod('${p}')">${l}</button>`
-  ).join("");
+    `<button class="stat-tab${statPeriod===p?" stat-tab-active":""}" data-period="${p}" onclick="_setStatPeriod('${p}')">${l}</button>`).join("");
   $content.innerHTML=`
-    <div class="page-head">
-      <div class="page-head-left"><div class="page-title">Statistics</div><div class="page-subtitle">기간별·현장별 처리 현황을 분석합니다</div></div>
-    </div>
+    <div class="page-head"><div><div class="page-title">Statistics</div><div class="page-subtitle">기간별·현장별·원인별 현황을 분석합니다</div></div></div>
     <div class="card" style="margin-bottom:16px;">
       <div class="card-header"><div class="card-title">기간별 분석</div><div class="stat-tab-group">${tabs}</div></div>
       <div class="card-body" id="statPeriodBody"></div>
     </div>
-    <div class="card">
-      <div class="card-header"><div class="card-title">현장별 전체 현황</div></div>
-      <div class="card-body">
-        ${Object.keys(sMap).length
-          ?`<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--line);">
-               <div style="width:120px;"></div>
-               <div style="flex:1;font-size:11px;font-weight:700;color:var(--ink-5);text-transform:uppercase;letter-spacing:.4px;">접수 건수</div>
-               <div style="width:30px;font-size:11px;font-weight:700;color:var(--ink-5);">건</div>
-               <div style="width:36px;font-size:11px;font-weight:700;color:var(--ink-5);">완료율</div>
-               <div style="width:80px;font-size:11px;font-weight:700;color:var(--teal-dk);text-align:right;">AS 구분</div>
-             </div>${sPerf}`
-          :`<div class="empty"><div class="empty-icon">📊</div><div class="empty-title">집계 데이터 없음</div><div class="empty-body">접수 데이터가 쌓이면 자동으로 분석됩니다.</div></div>`}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+      <div class="card" style="margin:0;">
+        <div class="card-header"><div class="card-title">원인 유형별 분포</div></div>
+        <div class="card-body">
+          ${causeTotal?causeBars:`<div class="empty" style="padding:24px;"><div class="empty-icon" style="font-size:24px;">🔍</div><div class="empty-body">원인 분석 데이터가 없습니다</div></div>`}
+        </div>
+      </div>
+      <div class="card" style="margin:0;">
+        <div class="card-header"><div class="card-title">현장별 전체 현황</div></div>
+        <div class="card-body">
+          ${Object.keys(sMap).length?sPerf:`<div class="empty" style="padding:24px;"><div class="empty-icon" style="font-size:24px;">📊</div><div class="empty-body">접수 데이터가 없습니다</div></div>`}
+        </div>
       </div>
     </div>`;
   renderStatPeriodSection();
@@ -1664,7 +1721,6 @@ function renderStatistics(){
 ════════════════════════════════════ */
 function renderDashboard(){
   const now=new Date();
-  const openIssues=issues.filter(i=>i.status==="New").length;
   const pendingTasks=tasks.filter(t=>t.status==="접수").length;
   const issueRate=issues.length?((issues.filter(i=>i.status==="Closed").length/issues.length)*100).toFixed(1):"0.0";
   const asStats=site.reduce((acc,s)=>{
@@ -1673,7 +1729,8 @@ function renderDashboard(){
     if(type==="무상"&&daysLeft!==null&&daysLeft<=30)acc.soon++;
     return acc;
   },{free:0,paid:0,soon:0});
-
+  const visitToday=tasks.filter(t=>t.visitDate&&calcDday(t.visitDate)===0);
+  const visitSoon=tasks.filter(t=>t.visitDate&&calcDday(t.visitDate)>0&&calcDday(t.visitDate)<=3);
   const recentTasks=tasks.slice().sort((a,b)=>{const ta=toDate(a.createdAt)||new Date(0),tb=toDate(b.createdAt)||new Date(0);return tb-ta;}).slice(0,5);
   const recentIssues=issues.slice().sort((a,b)=>{const ta=toDate(a.createdAt)||new Date(0),tb=toDate(b.createdAt)||new Date(0);return tb-ta;}).slice(0,4);
 
@@ -1688,18 +1745,29 @@ function renderDashboard(){
       ${kpiHtml(pendingTasks,"미처리 접수","c-amber")}
       ${kpiHtml(issueRate+"%","이슈 종결률","c-violet")}
     </div>
-    ${asStats.soon>0?`<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:var(--r-lg);padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px;color:#92400e;cursor:pointer;" onclick="navigate('site')"><span style="font-size:18px;">⏰</span><span>무상 AS 만료 임박 현장이 <strong>${asStats.soon}건</strong> 있습니다. <u>Site Master에서 확인</u></span></div>`:""}
+    ${visitToday.length>0||visitSoon.length>0?`<div style="background:var(--blue-lt);border:1px solid rgba(37,99,235,.2);border-radius:var(--r-lg);padding:12px 16px;margin-bottom:16px;cursor:pointer;" onclick="navigate('project')">
+      <div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:6px;">📅 방문 일정 알림</div>
+      ${visitToday.map(t=>`<div style="font-size:12.5px;color:var(--ink-2);margin-bottom:3px;">🔴 <strong>오늘</strong> · ${esc(t.siteName)} ${esc(t.visitTime||"")} — ${esc(t.actionType||"방문")}</div>`).join("")}
+      ${visitSoon.map(t=>`<div style="font-size:12.5px;color:var(--ink-4);margin-bottom:3px;">🟡 D-${calcDday(t.visitDate)} · ${esc(t.siteName)} ${esc(t.visitDate)} — ${esc(t.actionType||"방문")}</div>`).join("")}
+    </div>`:""}
+    ${asStats.soon>0?`<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:var(--r-lg);padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px;color:#92400e;cursor:pointer;" onclick="navigate('site')"><span style="font-size:18px;">⏰</span><span>무상 AS 만료 임박 현장 <strong>${asStats.soon}건</strong> — Site Master에서 확인</span></div>`:""}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;" id="dashGrid">
       <div class="card" style="margin:0;">
         <div class="card-header"><div class="card-title">최근 접수</div><button class="btn btn-ghost btn-sm" onclick="navigate('project')">전체 보기 →</button></div>
         <div class="card-body card-body-flush">
-          ${recentTasks.length?`<table class="tbl"><thead><tr><th>현장</th><th>증상</th><th>상태</th></tr></thead><tbody>${recentTasks.map(t=>`<tr><td style="font-weight:600;max-width:90px;overflow:hidden;text-overflow:ellipsis;">${esc(t.siteName)||"-"}</td><td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(t.symptom)||"-"}</td><td>${bTask(t.status)}</td></tr>`).join("")}</tbody></table>`:`<div class="empty" style="padding:32px 16px;"><div class="empty-icon" style="font-size:28px">🛠️</div><div class="empty-body">접수 내역이 없습니다</div></div>`}
+          ${recentTasks.length?`<table class="tbl"><thead><tr><th>현장</th><th>증상</th><th>원인</th><th>상태</th></tr></thead><tbody>
+          ${recentTasks.map(t=>`<tr>
+            <td style="font-weight:600;max-width:80px;overflow:hidden;text-overflow:ellipsis;">${esc(t.siteName)||"-"}</td>
+            <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(t.symptom)||"-"}</td>
+            <td style="font-size:11px;color:var(--ink-5);">${esc(t.causeType||"-")}</td>
+            <td>${bTask(t.status)}</td>
+          </tr>`).join("")}</tbody></table>`:`<div class="empty" style="padding:32px 16px;"><div class="empty-icon" style="font-size:28px">🛠️</div><div class="empty-body">접수 내역이 없습니다</div></div>`}
         </div>
       </div>
       <div class="card" style="margin:0;">
         <div class="card-header"><div class="card-title">AS 현황</div><button class="btn btn-ghost btn-sm" onclick="navigate('site')">현장 보기 →</button></div>
         <div class="card-body">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
             <div style="background:var(--free-lt);border:1px solid rgba(13,148,136,.15);border-radius:var(--r-lg);padding:14px;text-align:center;">
               <div style="font-size:24px;font-weight:700;color:var(--free);">${asStats.free}</div>
               <div style="font-size:12px;color:var(--free);font-weight:600;margin-top:3px;">✅ 무상 AS</div>
@@ -1709,14 +1777,15 @@ function renderDashboard(){
               <div style="font-size:12px;color:var(--paid);font-weight:600;margin-top:3px;">💰 유상 AS</div>
             </div>
           </div>
-          ${asStats.soon>0?`<div style="margin-top:10px;padding:10px 12px;background:var(--warn-lt);border:1px solid rgba(217,119,6,.2);border-radius:var(--r);font-size:12.5px;color:var(--warn);font-weight:600;">⚠️ 30일 내 무상 만료 ${asStats.soon}건</div>`:`<div style="margin-top:10px;padding:10px 12px;background:var(--teal-lt);border:1px solid rgba(13,148,136,.15);border-radius:var(--r);font-size:12.5px;color:var(--teal-dk);">✅ 임박 만료 현장 없음</div>`}
+          ${asStats.soon>0?`<div style="padding:10px 12px;background:var(--warn-lt);border:1px solid rgba(217,119,6,.2);border-radius:var(--r);font-size:12.5px;color:var(--warn);font-weight:600;">⚠️ 30일 내 무상 만료 ${asStats.soon}건</div>`:`<div style="padding:10px 12px;background:var(--teal-lt);border:1px solid rgba(13,148,136,.15);border-radius:var(--r);font-size:12.5px;color:var(--teal-dk);">✅ 임박 만료 현장 없음</div>`}
         </div>
       </div>
     </div>
     <div class="card">
       <div class="card-header"><div class="card-title">최근 이슈</div><button class="btn btn-ghost btn-sm" onclick="navigate('issue')">전체 보기 →</button></div>
       <div class="card-body card-body-flush">
-        ${recentIssues.length?`<table class="tbl"><thead><tr><th>이슈</th><th>유형</th><th>상태</th></tr></thead><tbody>${recentIssues.map(i=>`<tr><td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;">${esc(i.title)||"-"}</td><td>${bIssueType(i.issueType)}</td><td>${bIssue(i.status)}</td></tr>`).join("")}</tbody></table>`:`<div class="empty" style="padding:32px 16px;"><div class="empty-icon" style="font-size:28px">⚠️</div><div class="empty-body">등록된 이슈가 없습니다</div></div>`}
+        ${recentIssues.length?`<table class="tbl"><thead><tr><th>이슈</th><th>유형</th><th>상태</th></tr></thead><tbody>
+        ${recentIssues.map(i=>`<tr><td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;">${esc(i.title)||"-"}</td><td>${bIssueType(i.issueType)}</td><td>${bIssue(i.status)}</td></tr>`).join("")}</tbody></table>`:`<div class="empty" style="padding:32px 16px;"><div class="empty-icon" style="font-size:28px">⚠️</div><div class="empty-body">등록된 이슈가 없습니다</div></div>`}
       </div>
     </div>`;
   const g=document.getElementById("dashGrid");
@@ -1727,26 +1796,22 @@ function empty(icon,title,body){return`<div class="empty"><div class="empty-icon
 
 const PAGES={
   dashboard:{fn:renderDashboard,label:"Dashboard"},
-  site:     {fn:renderSite,     label:"Site Master"},
-  project:  {fn:renderProject,  label:"Project"},
+  site:{fn:renderSite,label:"Site Master"},
+  project:{fn:renderProject,label:"Project"},
   statistics:{fn:renderStatistics,label:"Statistics"},
-  issue:    {fn:renderIssue,    label:"Issue"},
+  issue:{fn:renderIssue,label:"Issue"},
 };
-
 function render(page){
-  curPage=page;
-  const p=PAGES[page]||PAGES.dashboard;
+  curPage=page;const p=PAGES[page]||PAGES.dashboard;
   document.getElementById("topTitle").textContent=p.label;
   document.getElementById("topBreadcrumb").textContent=p.label;
   document.getElementById("mTopTitle").textContent=p.label;
   p.fn();
 }
-
 window.navigate=function(page){setActive(page);render(page);$content.scrollTop=0;};
 function setActive(page){document.querySelectorAll(".nav-item,.m-tab").forEach(el=>el.classList.toggle("active",el.dataset.page===page));}
 document.querySelectorAll(".nav-item,.m-tab").forEach(el=>{el.onclick=()=>navigate(el.dataset.page);});
-setActive("dashboard");
-render("dashboard");
+setActive("dashboard");render("dashboard");
 </script>
 </body>
 </html>
