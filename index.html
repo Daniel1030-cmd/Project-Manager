@@ -348,6 +348,39 @@ input,select,textarea{font-family:inherit;}
 .quote-preview-actions{display:flex;gap:8px;flex-wrap:wrap;}
 .quote-preview-content{padding:16px;}
 
+/* ════ STAT CAUSE/PARTS/ERROR DETAIL ════ */
+.stat-rank-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.stat-rank-label{width:120px;font-size:12px;color:var(--ink-3);text-align:right;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.stat-rank-track{flex:1;height:16px;background:var(--bg-2);border-radius:4px;overflow:hidden;}
+.stat-rank-fill{height:100%;border-radius:4px;}
+.stat-rank-count{width:34px;font-size:12px;font-weight:700;flex-shrink:0;}
+.stat-mini-table{width:100%;border-collapse:collapse;font-size:12px;}
+.stat-mini-table th{background:var(--bg);padding:6px 8px;text-align:left;font-size:10.5px;font-weight:700;color:var(--ink-4);text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid var(--line);}
+.stat-mini-table td{padding:6px 8px;border-bottom:1px solid var(--line-2);color:var(--ink-2);}
+.stat-mini-table tr:last-child td{border-bottom:none;}
+
+/* ════ 브랜드 배지 (NEO / SPARKOZ) ════ */
+.b-neo{background:var(--blue-lt);color:var(--blue);font-weight:700;border:1px solid rgba(37,99,235,.18);}
+.b-sparkoz{background:var(--violet-lt);color:var(--violet);font-weight:700;border:1px solid rgba(124,58,237,.18);}
+
+/* ════ 브랜드별 재고 카드 ════ */
+.brand-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.brand-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh-xs);}
+.brand-card-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line);}
+.brand-card-head.neo{background:linear-gradient(135deg,#eff6ff,#dbeafe);}
+.brand-card-head.sparkoz{background:linear-gradient(135deg,#faf5ff,#ede9fe);}
+.brand-card-name{font-size:15px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:8px;letter-spacing:-.2px;}
+.brand-card-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;}
+.brand-card-total{font-size:24px;font-weight:800;line-height:1;}
+.brand-card-total span{font-size:11px;color:var(--ink-5);font-weight:600;margin-left:3px;}
+.brand-card-body{padding:16px 18px 18px;}
+.brand-stat-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+.brand-stat-row:last-child{margin-bottom:0;}
+.brand-stat-label{width:56px;font-size:12.5px;color:var(--ink-3);font-weight:600;flex-shrink:0;}
+.brand-stat-track{flex:1;height:18px;background:var(--bg-2);border-radius:5px;overflow:hidden;}
+.brand-stat-fill{height:100%;border-radius:5px;transition:width .4s ease;}
+.brand-stat-count{width:30px;text-align:right;font-size:12.5px;font-weight:700;flex-shrink:0;}
+
 /* ════ MOBILE ════ */
 @media(max-width:768px){
   :root{--sidebar-w:0px;}
@@ -413,6 +446,9 @@ input,select,textarea{font-family:inherit;}
   .as-tabs{gap:1px;}
   .quote-preview-actions .btn{font-size:12px;padding:8px 10px;}
   .quote-preview-content{padding:8px 6px;}
+  .stat-rank-label{width:88px;font-size:11px;}
+  .stat-mini-table{font-size:11px;}
+  .brand-grid{grid-template-columns:1fr;}
 }
 @media(min-width:769px){.m-topbar{display:none;}.m-tabbar{display:none;}}
 ::-webkit-scrollbar{width:5px;height:5px;}
@@ -444,12 +480,13 @@ input,select,textarea{font-family:inherit;}
         <li class="sidebar-section">관리</li>
         <li class="nav-item" data-page="site"><span class="nav-ic">🏗️</span>Site Master</li>
         <li class="nav-item" data-page="project"><span class="nav-ic">🛠️</span>Project</li>
+        <li class="nav-item" data-page="inventory"><span class="nav-ic">📦</span>Inventory</li>
         <li class="nav-item" data-page="issue"><span class="nav-ic">⚠️</span>Issue</li>
         <li class="sidebar-section">분석</li>
         <li class="nav-item" data-page="statistics"><span class="nav-ic">📊</span>Statistics</li>
       </ul>
     </nav>
-    <div class="sidebar-footer">PMO System v3.0</div>
+    <div class="sidebar-footer">PMO System v3.2</div>
   </aside>
 
   <div class="main">
@@ -479,6 +516,7 @@ input,select,textarea{font-family:inherit;}
     <li class="m-tab" data-page="dashboard"><span class="m-tab-ic">🏠</span>Home</li>
     <li class="m-tab" data-page="site"><span class="m-tab-ic">🏗️</span>Site</li>
     <li class="m-tab" data-page="project"><span class="m-tab-ic">🛠️</span>Project</li>
+    <li class="m-tab" data-page="inventory"><span class="m-tab-ic">📦</span>Stock</li>
     <li class="m-tab" data-page="statistics"><span class="m-tab-ic">📊</span>Stats</li>
     <li class="m-tab" data-page="issue"><span class="m-tab-ic">⚠️</span>Issue</li>
   </ul>
@@ -519,18 +557,18 @@ const fbCfg={
   appId:"1:808738416305:web:b366ad2258471790852490"
 };
 const db=getFirestore(initializeApp(fbCfg));
-const COL={site:"site",tasks:"tasks",issues:"issues"};
+const COL={site:"site",tasks:"tasks",issues:"issues",inventory:"inventory"};
 
-let site=[],tasks=[],issues=[];
+let site=[],tasks=[],issues=[],inventoryList=[];
 let curPage="dashboard";
-let sq={site:"",project:"",issue:""};
+let sq={site:"",project:"",issue:"",inventory:""};
 let projSort={col:"receiptDate",dir:"desc"};
 let statPeriod="week";
 
 const $content=document.getElementById("content");
 const isMobile=()=>window.innerWidth<=768;
 
-const COMPANY_LOGO="data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="220" height="64" viewBox="0 0 220 64"><rect width="220" height="64" rx="10" fill="#1a73c8"/><text x="20" y="40" font-family="Arial, sans-serif" font-size="26" font-weight="800" fill="#ffffff">성주컴텍</text><text x="20" y="54" font-family="Arial, sans-serif" font-size="9" fill="#cfe3fa">SUNGJU COMTECH</text></svg>');
+const COMPANY_LOGO="data:image/png;base64,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";
 const COMPANY_NAME="(주)성주컴텍";
 const COMPANY_CEO="은 시 형";
 const COMPANY_ADDR="서울특별시 구로구 부광로 88, 구로SK V1 Center A동 310호";
@@ -548,6 +586,9 @@ const CHECKLIST_ITEMS=[
   "소프트웨어 버전 확인","청소 구역 맵 정합성 확인","기계적 이상음·진동 확인",
   "부품 체결 상태 확인","고객 확인 서명 수령"
 ];
+/* ════ 재고 브랜드 / 현황 구분 ════ */
+const INV_BRANDS=["NEO","SPARKOZ"];
+const INV_STATUS_LIST=["판매","렌탈","재고","데모","대체"];
 
 const esc=v=>v==null?"":String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
 
@@ -633,12 +674,13 @@ function actionTag(t){
 onSnapshot(collection(db,COL.site),s=>{site=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
 onSnapshot(collection(db,COL.tasks),s=>{tasks=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
 onSnapshot(collection(db,COL.issues),s=>{issues=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
+onSnapshot(collection(db,COL.inventory),s=>{inventoryList=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
 
 const $overlay=document.getElementById("modalOverlay");
 const $modal=document.getElementById("modalEl");
 
 /* ════════════════════════════════════
-   기본 모달 (현장/이슈 등록)
+   기본 모달 (현장/이슈/재고 등록)
 ════════════════════════════════════ */
 function openModal({title,fields,values={},onSave,hint="",wide=false}){
   $modal.className="modal"+(wide?" modal-wide":"");
@@ -727,6 +769,39 @@ function bIssue(s){const m={"New":"b-new","Closed":"b-done"};return`<span class=
 function bIssueType(t){const m={"기술":"b-progress","일정":"b-received","자재":"b-ready","고객":"b-new"};return`<span class="badge ${m[t]||"b-ready"}">${esc(t||"-")}</span>`;}
 function kpiHtml(num,label,cls="",sub=""){return`<div class="kpi-card ${cls}"><div class="kpi-eyebrow">${label}</div><div class="kpi-num">${num}</div>${sub?`<div class="kpi-sub">${sub}</div>`:""}</div>`;}
 
+/* ════ 재고 관련 배지 ════ */
+function bInvStatus(s){const m={"대체":"b-renew","데모":"b-new","렌탈":"b-rental","재고":"b-ready","판매":"b-sale"};return s?`<span class="badge ${m[s]||"b-ready"}"><span class="badge-dot"></span>${esc(s)}</span>`:`<span class="badge b-ready">-</span>`;}
+function bInvCondition(c){const m={"정상":"b-done","수리":"b-expired"};return c?`<span class="badge ${m[c]||"b-ready"}">${c==="수리"?"🔧":"✅"} ${esc(c)}</span>`:`<span class="badge b-ready">-</span>`;}
+function bBrand(b){
+  if(b==="NEO")return`<span class="badge b-neo">🅽 NEO</span>`;
+  if(b==="SPARKOZ")return`<span class="badge b-sparkoz">🆂 SPARKOZ</span>`;
+  return`<span class="badge b-ready">미지정</span>`;
+}
+
+/* ════ 브랜드별 재고 요약 카드 ════ */
+function brandCardHtml(brand,stats){
+  const theme=brand==="NEO"
+    ?{cls:"neo",color:"#2563eb",iconBg:"#2563eb",label:"N"}
+    :{cls:"sparkoz",color:"#7c3aed",iconBg:"#7c3aed",label:"S"};
+  const statusColor={"판매":"#059669","렌탈":"#7c3aed","재고":"#475569","데모":"#2563eb","대체":"#d97706"};
+  const maxVal=Math.max(...INV_STATUS_LIST.map(s=>stats[s]||0),1);
+  const rows=INV_STATUS_LIST.map(s=>{
+    const v=stats[s]||0;const pct=(v/maxVal*100).toFixed(1);
+    return`<div class="brand-stat-row">
+      <div class="brand-stat-label">${esc(s)}</div>
+      <div class="brand-stat-track"><div class="brand-stat-fill" style="width:${pct}%;background:${statusColor[s]};"></div></div>
+      <div class="brand-stat-count" style="color:${statusColor[s]};">${v}</div>
+    </div>`;
+  }).join("");
+  return`<div class="brand-card">
+    <div class="brand-card-head ${theme.cls}">
+      <div class="brand-card-name"><span class="brand-card-icon" style="background:${theme.iconBg};">${theme.label}</span>${esc(brand)}</div>
+      <div class="brand-card-total" style="color:${theme.color};">${stats.total||0}<span>대</span></div>
+    </div>
+    <div class="brand-card-body">${rows}</div>
+  </div>`;
+}
+
 /* ════════════════════════════════════
    AS 이력카드 모달
 ════════════════════════════════════ */
@@ -796,7 +871,7 @@ function _renderDetailModal(task,linkedSite,asRes,activeTab){
           <div class="as-section-title"><span>2</span>접수 증상</div>
           <div class="field">
             <label>증상 설명 <span style="color:var(--rose)">*</span></label>
-            <textarea id="dd_symptom" rows="3" placeholder="고객이 보고한 증상을 구체적으로 기록하세요 (예: 2층 복도에서 충전 스테이션 미인식, 약 3회/일 발생)">${esc(task.symptom||"")}</textarea>
+            <textarea id="dd_symptom" rows="3" placeholder="고객이 보고한 증상을 구체적으로 기록하세요">${esc(task.symptom||"")}</textarea>
           </div>
           <div class="field-row">
             <div class="field"><label>최초 발생일</label><input id="dd_firstOccur" type="date" value="${esc(task.firstOccur||"")}"/></div>
@@ -806,7 +881,7 @@ function _renderDetailModal(task,linkedSite,asRes,activeTab){
               </select>
             </div>
           </div>
-          <div class="field"><label>재현 조건</label><textarea id="dd_reproStep" rows="2" placeholder="증상이 재현되는 조건 (예: 청소 시작 후 20분, 특정 구역 진입 시)">${esc(task.reproStep||"")}</textarea></div>
+          <div class="field"><label>재현 조건</label><textarea id="dd_reproStep" rows="2" placeholder="증상이 재현되는 조건">${esc(task.reproStep||"")}</textarea></div>
         </div>
       </div>
 
@@ -824,20 +899,20 @@ function _renderDetailModal(task,linkedSite,asRes,activeTab){
             <div class="field"><label>분석 담당자</label><input id="dd_diagEngineer" value="${esc(task.diagEngineer||task.pm||"")}" placeholder="엔지니어 이름"/></div>
           </div>
           <div class="field"><label>원인 상세 <span style="color:var(--rose)">*</span></label>
-            <textarea id="dd_causeDetail" rows="3" placeholder="근본 원인을 구체적으로 기술하세요 (예: IR 근접 센서 수광부 먼지 누적으로 감지 거리 저하, 정상 150cm → 실측 40cm)">${esc(task.causeDetail||"")}</textarea>
+            <textarea id="dd_causeDetail" rows="3" placeholder="근본 원인을 구체적으로 기술하세요">${esc(task.causeDetail||"")}</textarea>
           </div>
           <div class="field-row">
             <div class="field"><label>불량 부품·모듈</label><input id="dd_faultyPart" value="${esc(task.faultyPart||"")}" placeholder="예: IR 센서 보드 #3, 배터리 팩 B"/></div>
             <div class="field"><label>에러 코드</label><input id="dd_errorCode" value="${esc(task.errorCode||"")}" placeholder="예: ERR-0x1F, Fault 12"/></div>
           </div>
           <div class="field"><label>진단 근거 · 측정값</label>
-            <textarea id="dd_diagEvidence" rows="2" placeholder="예: 배터리 전압 측정 22.1V (정상 24V), 로그 분석 결과 3번 센서 타임아웃 12회 기록">${esc(task.diagEvidence||"")}</textarea>
+            <textarea id="dd_diagEvidence" rows="2" placeholder="예: 배터리 전압 측정 22.1V (정상 24V)">${esc(task.diagEvidence||"")}</textarea>
           </div>
         </div>
         <div class="as-section">
           <div class="as-section-title"><span>4</span>재발 방지 검토</div>
           <div class="field"><label>재발 방지 대책</label>
-            <textarea id="dd_recurrence" rows="2" placeholder="예: 월 1회 센서부 에어 클리닝 정기 점검 항목 추가, 알람 임계값 조정">${esc(task.recurrence||"")}</textarea>
+            <textarea id="dd_recurrence" rows="2" placeholder="예: 월 1회 센서부 에어 클리닝 정기 점검 항목 추가">${esc(task.recurrence||"")}</textarea>
           </div>
         </div>
       </div>
@@ -872,10 +947,10 @@ function _renderDetailModal(task,linkedSite,asRes,activeTab){
             </select>
           </div>
           <div class="field"><label>준비 부품·자재</label>
-            <textarea id="dd_prepParts" rows="2" placeholder="방문 전 준비할 교체 부품이나 공구 목록 (예: IR 센서 보드 x2, 전동 드라이버, 태블릿)">${esc(task.prepParts||"")}</textarea>
+            <textarea id="dd_prepParts" rows="2" placeholder="방문 전 준비할 교체 부품이나 공구 목록">${esc(task.prepParts||"")}</textarea>
           </div>
           <div class="field"><label>고객 전달 사항</label>
-            <textarea id="dd_customerMsg" rows="2" placeholder="방문 전 고객에게 안내할 내용 (예: 방문 당일 오전 8시까지 해당 구역 청소 완료 및 기기 대기 요청)">${esc(task.customerMsg||"")}</textarea>
+            <textarea id="dd_customerMsg" rows="2" placeholder="방문 전 고객에게 안내할 내용">${esc(task.customerMsg||"")}</textarea>
           </div>
         </div>
       </div>
@@ -885,7 +960,7 @@ function _renderDetailModal(task,linkedSite,asRes,activeTab){
         <div class="as-section">
           <div class="as-section-title"><span>6</span>조치 결과</div>
           <div class="field"><label>조치 내용 요약 <span style="color:var(--rose)">*</span></label>
-            <textarea id="dd_actionResult" rows="3" placeholder="실제 수행한 조치 내용 (예: IR 센서 보드 교체 후 캘리브레이션, 배터리 셀 1번 교체, 소프트웨어 v2.3.1 → v2.4.0 업데이트)">${esc(task.actionResult||"")}</textarea>
+            <textarea id="dd_actionResult" rows="3" placeholder="실제 수행한 조치 내용">${esc(task.actionResult||"")}</textarea>
           </div>
           <div class="field-row">
             <div class="field"><label>사용 부품 (실제)</label><input id="dd_usedParts" value="${esc(task.usedParts||"")}" placeholder="예: IR센서 보드 1EA, 나사 M3 4EA"/></div>
@@ -986,7 +1061,7 @@ window._saveDetail=async function(){
 };
 
 /* ════════════════════════════════════
-   견적서 엔진 (원본 유지)
+   견적서 엔진
 ════════════════════════════════════ */
 let quoteItems=[],quoteTaskId=null;
 function quoteItemsTotal(){return quoteItems.reduce((s,it)=>s+((parseInt(it.qty)||0)*(parseInt(it.unitPrice)||0)),0);}
@@ -1240,14 +1315,15 @@ window._printQuote=async function(){
 };
 
 /* ════════════════════════════════════
-   SITE
+   SITE  (시리얼 필드 포함)
 ════════════════════════════════════ */
 const SITE_FIELDS=[
   {key:"name",label:"현장명",req:true},
   {key:"client",label:"고객사",req:true},
   {key:"equipment",label:"장비",ph:"장비명 입력",pair:true},
   {key:"quantity",label:"수량",type:"number",pair:true},
-  {key:"contractType",label:"계약 방식",type:"select",opts:["신규","유지보수","연장","렌탈","판매"]},
+  {key:"serial",label:"시리얼",ph:"시리얼번호 직접 입력",pair:true},
+  {key:"contractType",label:"계약 방식",type:"select",opts:["신규","유지보수","연장","렌탈","판매"],pair:true},
   {key:"contractStart",label:"계약 시작",type:"date",pair:true},
   {key:"contractEnd",label:"계약 종료",type:"date",pair:true},
   {key:"maintenancePeriod",label:"유지보수 기간",ph:"예: 12개월, 2년, 1년6개월"},
@@ -1265,13 +1341,14 @@ window._updateSiteStatus=async(id,status)=>{
   catch(e){toast("변경 실패","error");}
 };
 function renderSiteResults(){
-  const q=sq.site;const list=site.filter(s=>match(q,[s.name,s.client,s.equipment,s.pm,s.contractType]));
+  const q=sq.site;const list=site.filter(s=>match(q,[s.name,s.client,s.equipment,s.serial,s.pm,s.contractType]));
   const ra=document.getElementById("siteRA");const ma=document.getElementById("sm_site");
   if(!ra)return;if(ma)ma.textContent=q?`${list.length}건 검색됨`:"";
   if(!list.length){ra.innerHTML=noResults(q);return;}
   const tBody=list.map(s=>`<tr>
     <td style="font-weight:600;">${esc(s.name)}</td><td>${esc(s.client)}</td>
     <td>${esc(s.equipment)||"-"}</td><td>${esc(s.quantity)||"-"}</td>
+    <td style="font-family:monospace;">${esc(s.serial)||"-"}</td>
     <td>${bContract(s.contractType)}</td><td>${esc(s.contractStart)||"-"}</td>
     <td>${esc(s.contractEnd)||"-"}</td>
     <td><div style="line-height:1.3;">${esc(s.maintenancePeriod)||"-"}${asExpireText(s.contractStart,s.maintenancePeriod)}</div></td>
@@ -1293,6 +1370,7 @@ function renderSiteResults(){
       <hr class="mc-divider"/>
       <div class="mc-fields">
         <div class="mc-field"><span class="mc-label">장비</span><span class="mc-val">${esc(s.equipment)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">시리얼</span><span class="mc-val">${esc(s.serial)||"-"}</span></div>
         <div class="mc-field"><span class="mc-label">계약기간</span><span class="mc-val">${esc(s.contractStart)||"-"} ~ ${esc(s.contractEnd)||"-"}</span></div>
         <div class="mc-field"><span class="mc-label">유지보수</span><span class="mc-val">${esc(s.maintenancePeriod)||"-"}${asExpireText(s.contractStart,s.maintenancePeriod)}</span></div>
         <div class="mc-field"><span class="mc-label">AS 구분</span><span class="mc-val">${bAS(s.contractStart,s.maintenancePeriod)}</span></div>
@@ -1305,7 +1383,7 @@ function renderSiteResults(){
     </div>
   </div>`).join("");
   ra.innerHTML=`<div class="tbl-wrap"><table class="tbl"><thead><tr>
-    <th>현장명</th><th>고객사</th><th>장비</th><th>수량</th><th>계약방식</th>
+    <th>현장명</th><th>고객사</th><th>장비</th><th>수량</th><th>시리얼</th><th>계약방식</th>
     <th>계약시작</th><th>계약종료</th><th>유지보수기간</th><th>PM</th>
     <th>상태</th><th style="color:var(--teal-dk);">AS 구분</th><th>관리</th>
   </tr></thead><tbody>${tBody}</tbody></table></div>
@@ -1335,7 +1413,7 @@ function renderSite(){
     ${!site.length?`<div class="card"><div class="card-body">${empty("🏗️","등록된 현장이 없습니다","+ 현장 등록 버튼으로 추가해보세요")}</div></div>`:`
     <div class="card">
       <div class="card-header"><div class="card-title">현장 목록</div></div>
-      <div class="card-body">${searchBox("site","현장명, 고객사, 장비, PM으로 검색")}<div id="siteRA"></div></div>
+      <div class="card-body">${searchBox("site","현장명, 고객사, 장비, 시리얼, PM으로 검색")}<div id="siteRA"></div></div>
     </div>`}`;
   renderSiteResults();
 }
@@ -1401,14 +1479,17 @@ function renderProjectResults(){
   const doneCount=list.length-pendingCount;
   const thSort=(col,label)=>`<th style="cursor:pointer;user-select:none;white-space:nowrap;" onclick="_projSortBy('${col}')">${label}${sortIcon(col)}</th>`;
 
+  let _pendingSeq=0,_doneSeq=0;
   const tBodyRows=list.map((t,idx)=>{
     const isDone=t.status==="완료";
+    if(isDone)_doneSeq++;else _pendingSeq++;
+    const seqNum=isDone?_doneSeq:_pendingSeq;
     const sep=(isDone&&idx===pendingCount&&doneCount>0)
-      ?`<tr><td colspan="13" style="padding:4px 14px;background:var(--bg-2);font-size:11.5px;color:var(--ink-5);font-weight:600;letter-spacing:.4px;border-bottom:2px solid var(--line);">처리 완료 ${doneCount}건</td></tr>`:"";
+      ?`<tr><td colspan="14" style="padding:4px 14px;background:var(--bg-2);font-size:11.5px;color:var(--ink-5);font-weight:600;letter-spacing:.4px;border-bottom:2px solid var(--line);">처리 완료 ${doneCount}건</td></tr>`:"";
     const visitBadge=t.visitDate?ddayBadge(t.visitDate):"";
-    const causeIcon=t.causeType?`<div style="font-size:10.5px;color:var(--ink-5);margin-top:2px;">${esc(t.causeType)}</div>`:"";
     const actionIcon=t.actionType?`<div style="margin-top:3px;">${actionTag(t.actionType)}</div>`:"";
     return sep+`<tr style="${isDone?"opacity:.62;":""}">
+      <td style="text-align:center;font-size:12px;color:var(--ink-5);font-weight:700;width:42px;">${seqNum}</td>
       <td style="font-weight:600;">${esc(t.siteName)||"-"}</td>
       <td>${esc(t.receiptDate)||"-"}</td>
       <td style="width:180px;min-width:180px;max-width:220px;white-space:normal;word-break:keep-all;line-height:1.4;">${esc(t.symptom)}</td>
@@ -1440,8 +1521,10 @@ function renderProjectResults(){
     </tr>`;
   }).join("");
 
+  let _mcPendingSeq=0,_mcDoneSeq=0;
   const mCards=list.map((t,idx)=>{
     const isDone=t.status==="완료";
+    if(isDone)_mcDoneSeq++;else _mcPendingSeq++;
     const divH=(isDone&&idx===pendingCount&&doneCount>0)?`<div style="text-align:center;font-size:11.5px;color:var(--ink-5);font-weight:600;padding:6px 0 2px;">── 처리 완료 ${doneCount}건 ──</div>`:"";
     const hasQuote=t.quoteItems&&t.quoteItems.length>0;
     const visitBadge=t.visitDate?`<div style="font-size:11.5px;color:var(--blue);font-weight:600;margin-top:2px;">📅 ${esc(t.visitDate)} ${esc(t.visitTime||"")} ${ddayBadge(t.visitDate)}</div>`:"";
@@ -1449,7 +1532,7 @@ function renderProjectResults(){
     <div class="mc" style="${isDone?"opacity:.65;":""}">
       <div class="mc-head" onclick="_toggleMC('t${t.id}')">
         <div class="mc-title">
-          <div class="mc-name">${esc(t.siteName)||"미등록 현장"}</div>
+          <div class="mc-name"><span style="display:inline-block;background:var(--bg-2);color:var(--ink-5);font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;margin-right:5px;">${isDone?_mcDoneSeq:_mcPendingSeq}</span>${esc(t.siteName)||"미등록 현장"}</div>
           <div class="mc-sub">${esc(t.receiptDate)||"-"} · ${esc(t.symptom)||"-"}</div>
           ${visitBadge}
         </div>
@@ -1480,6 +1563,7 @@ function renderProjectResults(){
 
   ra.innerHTML=`
     <div class="tbl-wrap"><table class="tbl"><thead><tr>
+      <th style="width:42px;text-align:center;">No</th>
       ${thSort("siteName","현장명")}${thSort("receiptDate","접수일")}
       <th>증상</th><th>담당자</th><th>연락처</th><th>PM</th>
       <th>상태</th>
@@ -1529,6 +1613,199 @@ function renderProject(){
       <div class="card-body">${searchBox("project","현장명, 증상, 원인유형, 조치유형으로 검색")}<div id="projRA"></div></div>
     </div>`}`;
   renderProjectResults();
+}
+
+/* ════════════════════════════════════
+   INVENTORY (재고 현황)
+════════════════════════════════════ */
+const INVENTORY_FIELDS=[
+  {key:"brand",label:"브랜드",type:"select",opts:["NEO","SPARKOZ"],req:true,err:"브랜드를 선택해주세요",pair:true},
+  {key:"model",label:"모델",req:true,ph:"모델명 직접 입력"},
+  {key:"serial",label:"시리얼",req:true,ph:"시리얼번호 직접 입력",err:"시리얼을 입력해주세요",pair:true},
+  {key:"type",label:"타입",type:"select",opts:["디스크","실린더"],req:true,err:"타입을 선택해주세요"},
+  {key:"status",label:"현황",type:"select",opts:["대체","데모","렌탈","재고","판매"],req:true,err:"현황을 선택해주세요",pair:true},
+  {key:"location",label:"현위치",ph:"현재 위치 직접 입력"},
+  {key:"condition",label:"상태",type:"select",opts:["정상","수리"]},
+  {key:"note",label:"비고",type:"textarea",ph:"비고 사항을 입력하세요"},
+];
+window._openAddInventory=()=>openModal({title:"재고 등록",fields:INVENTORY_FIELDS,hint:"브랜드(NEO/SPARKOZ)와 시리얼을 반드시 지정해주세요. 등록 이후 시리얼별 사용 이력을 추가로 기록할 수 있습니다.",
+  onSave:async d=>{await addDoc(collection(db,COL.inventory),{...d,usageHistory:[],createdAt:serverTimestamp()});toast("재고가 등록되었습니다","success");}});
+window._openEditInventory=id=>{
+  const it=inventoryList.find(x=>x.id===id);if(!it)return;
+  openModal({title:"재고 수정",fields:INVENTORY_FIELDS,values:it,
+    onSave:async d=>{await updateDoc(doc(db,COL.inventory,id),d);toast("수정되었습니다","success");}});
+};
+window._updateInvField=async(id,field,value)=>{
+  try{await updateDoc(doc(db,COL.inventory,id),{[field]:value});toast("변경되었습니다","success");}
+  catch(e){console.error(e);toast("변경 실패","error");}
+};
+
+/* ── 장비 사용 이력 모달 ── */
+let _invHistoryId=null;
+window._openInventoryHistory=function(id){
+  const it=inventoryList.find(x=>x.id===id);
+  if(!it){toast("재고 정보를 찾을 수 없습니다","error");return;}
+  _invHistoryId=id;
+  $modal.className="modal modal-xl";
+  $overlay.classList.remove("hidden");
+  _renderInvHistoryModal(it);
+};
+function _renderInvHistoryModal(it){
+  const history=(it.usageHistory||[]).slice().sort((a,b)=>{
+    const da=a.date||"",db_=b.date||"";
+    if(da!==db_)return da<db_?1:-1;
+    return(b.ts||0)-(a.ts||0);
+  });
+  $modal.innerHTML=`
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">장비 사용 이력</div>
+        <div style="font-size:12px;color:var(--ink-5);margin-top:2px;">${esc(it.model||"-")} · ${esc(it.serial||"-")} · ${esc(it.type||"-")}</div>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.add('hidden')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="as-section">
+        <div class="as-section-title"><span>+</span>이력 추가</div>
+        <div class="field-row">
+          <div class="field"><label>일자</label><input id="ih_date" type="date" value="${new Date().toISOString().slice(0,10)}"/></div>
+          <div class="field"><label>현장/용도</label><input id="ih_place" placeholder="예: 삼성영종 데모 파견"/></div>
+        </div>
+        <div class="field"><label>사용 내용 <span style="color:var(--rose)">*</span></label><textarea id="ih_note" rows="2" placeholder="사용 목적, 대여/반납, 특이사항 등을 입력하세요"></textarea></div>
+        <button class="btn btn-primary btn-sm" onclick="window._addInvHistory()">+ 이력 추가</button>
+      </div>
+      <div class="as-section">
+        <div class="as-section-title"><span>📜</span>이력 목록 (${history.length}건)</div>
+        <div class="history-list" id="ihList">
+          ${history.length?history.map((h,i)=>`
+            <div class="history-item">
+              <div class="history-dot-col"><div class="history-dot"></div>${i<history.length-1?'<div class="history-line"></div>':""}</div>
+              <div class="history-content">
+                <div class="history-meta">${esc(h.date)||"-"}${h.place?` · ${esc(h.place)}`:""}</div>
+                <div class="history-text">${esc(h.note)||"-"}</div>
+              </div>
+            </div>`).join(""):`<div style="font-size:12.5px;color:var(--ink-5);padding:6px 0;">등록된 사용 이력이 없습니다</div>`}
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="document.getElementById('modalOverlay').classList.add('hidden')">닫기</button>
+    </div>`;
+}
+window._addInvHistory=async function(){
+  if(!_invHistoryId)return;
+  const date=document.getElementById("ih_date").value;
+  const place=document.getElementById("ih_place").value.trim();
+  const note=document.getElementById("ih_note").value.trim();
+  if(!note){toast("사용 내용을 입력해주세요","error");return;}
+  const it=inventoryList.find(x=>x.id===_invHistoryId);if(!it)return;
+  const newHistory=[...(it.usageHistory||[]),{date,place,note,ts:Date.now()}];
+  try{
+    await updateDoc(doc(db,COL.inventory,_invHistoryId),{usageHistory:newHistory});
+    toast("사용 이력이 추가되었습니다","success");
+    _renderInvHistoryModal({...it,usageHistory:newHistory});
+  }catch(e){console.error(e);toast("추가 실패","error");}
+};
+
+function renderInventoryResults(){
+  const q=sq.inventory;
+  const list=inventoryList.filter(x=>match(q,[x.serial,x.location,x.model,x.type,x.status,x.condition,x.note,x.brand]));
+  const ra=document.getElementById("invRA");const ma=document.getElementById("sm_inventory");
+  if(!ra)return;if(ma)ma.textContent=q?`${list.length}건 검색됨`:"";
+  if(!list.length){ra.innerHTML=noResults(q);return;}
+
+  const tBody=list.map(x=>`<tr>
+    <td>${bBrand(x.brand)}</td>
+    <td style="font-weight:600;">${esc(x.model)||"-"}</td>
+    <td style="font-weight:700;font-family:monospace;">${esc(x.serial)}</td>
+    <td>${esc(x.type)||"-"}</td>
+    <td>${bInvStatus(x.status)}</td>
+    <td>${esc(x.location)||"-"}</td>
+    <td>${bInvCondition(x.condition)}</td>
+    <td style="max-width:180px;white-space:normal;word-break:keep-all;line-height:1.4;">${esc(x.note)||"-"}</td>
+    <td style="text-align:center;">${(x.usageHistory||[]).length}건</td>
+    <td><div class="td-actions">
+      <button class="btn-icon edit" onclick="_openEditInventory('${x.id}')">✏️</button>
+      <button class="btn btn-sm btn-secondary" onclick="_openInventoryHistory('${x.id}')">📜 이력</button>
+    </div></td>
+  </tr>`).join("");
+
+  const mCards=list.map(x=>`<div class="mc">
+    <div class="mc-head" onclick="_toggleMC('inv${x.id}')">
+      <div class="mc-title"><div class="mc-name">${esc(x.model)||"모델 미지정"}</div><div class="mc-sub">${esc(x.serial)||"-"} · ${esc(x.type)||"-"} · ${esc(x.location)||"미지정 위치"}</div></div>
+      <div class="mc-badges">${bBrand(x.brand)}${bInvStatus(x.status)}${bInvCondition(x.condition)}</div>
+      <span class="mc-chevron" id="mcc_inv${x.id}">▼</span>
+    </div>
+    <div class="mc-body" id="mcb_inv${x.id}">
+      <hr class="mc-divider"/>
+      <div class="mc-fields">
+        <div class="mc-field"><span class="mc-label">브랜드</span><span class="mc-val">${bBrand(x.brand)}</span></div>
+        <div class="mc-field"><span class="mc-label">모델</span><span class="mc-val">${esc(x.model)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">시리얼</span><span class="mc-val">${esc(x.serial)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">타입</span><span class="mc-val">${esc(x.type)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">현황</span><span class="mc-val">${bInvStatus(x.status)}</span></div>
+        <div class="mc-field"><span class="mc-label">현위치</span><span class="mc-val">${esc(x.location)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">상태</span><span class="mc-val">${bInvCondition(x.condition)}</span></div>
+        <div class="mc-field"><span class="mc-label">비고</span><span class="mc-val">${esc(x.note)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">사용이력</span><span class="mc-val">${(x.usageHistory||[]).length}건</span></div>
+      </div>
+      <div class="mc-actions">
+        <button class="btn btn-secondary btn-sm" onclick="_openEditInventory('${x.id}')">✏️ 수정</button>
+        <button class="btn btn-primary btn-sm" onclick="_openInventoryHistory('${x.id}')">📜 사용 이력</button>
+      </div>
+    </div>
+  </div>`).join("");
+
+  ra.innerHTML=`<div class="tbl-wrap"><table class="tbl"><thead><tr>
+    <th>브랜드</th><th>모델</th><th>시리얼</th><th>타입</th><th>현황</th><th>현위치</th><th>상태</th><th>비고</th><th>이력</th><th>관리</th>
+  </tr></thead><tbody>${tBody}</tbody></table></div>
+  <div class="mc-list">${mCards}</div>`;
+}
+_renderers.inventory=renderInventoryResults;
+
+function renderInventory(){
+  const total=inventoryList.length;
+  const diskCount=inventoryList.filter(x=>x.type==="디스크").length;
+  const cylinderCount=inventoryList.filter(x=>x.type==="실린더").length;
+  const repair=inventoryList.filter(x=>x.condition==="수리").length;
+
+  const brandStats={};
+  INV_BRANDS.forEach(b=>{brandStats[b]={total:0};INV_STATUS_LIST.forEach(s=>brandStats[b][s]=0);});
+  let unassigned=0;
+  inventoryList.forEach(x=>{
+    if(INV_BRANDS.includes(x.brand)){
+      brandStats[x.brand].total++;
+      if(INV_STATUS_LIST.includes(x.status))brandStats[x.brand][x.status]++;
+    }else{unassigned++;}
+  });
+
+  $content.innerHTML=`
+    <div class="page-head">
+      <div><div class="page-title">재고 현황</div><div class="page-subtitle">브랜드(NEO/SPARKOZ)별 재고와 시리얼별 사용 이력을 관리합니다</div></div>
+      <div class="page-actions"><button class="btn btn-primary" onclick="_openAddInventory()">+ 재고 등록</button></div>
+    </div>
+    <div class="kpi-grid">
+      ${kpiHtml(total,"전체 재고","c-teal")}${kpiHtml(diskCount,"디스크","c-blue")}
+      ${kpiHtml(cylinderCount,"실린더","c-green")}${kpiHtml(repair,"수리 중","c-rose")}
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header">
+        <div class="card-title">브랜드별 재고 현황</div>
+        ${unassigned>0?`<div style="font-size:12px;color:var(--amber);font-weight:600;">⚠️ 브랜드 미지정 ${unassigned}건</div>`:""}
+      </div>
+      <div class="card-body">
+        <div class="brand-grid">
+          ${brandCardHtml("NEO",brandStats.NEO)}
+          ${brandCardHtml("SPARKOZ",brandStats.SPARKOZ)}
+        </div>
+      </div>
+    </div>
+    ${!inventoryList.length?`<div class="card"><div class="card-body">${empty("📦","등록된 재고가 없습니다","+ 재고 등록 버튼으로 추가해보세요")}</div></div>`:`
+    <div class="card">
+      <div class="card-header"><div class="card-title">재고 목록</div></div>
+      <div class="card-body">${searchBox("inventory","브랜드, 모델, 시리얼, 위치, 구분, 타입, 비고로 검색")}<div id="invRA"></div></div>
+    </div>`}`;
+  renderInventoryResults();
 }
 
 /* ════════════════════════════════════
@@ -1609,10 +1886,25 @@ function renderIssue(){
 /* ════════════════════════════════════
    STATISTICS
 ════════════════════════════════════ */
+function getStatPeriodData(){
+  const now=new Date();
+  if(statPeriod==="week"){
+    const weekAgo=new Date(now);weekAgo.setDate(weekAgo.getDate()-6);weekAgo.setHours(0,0,0,0);
+    return tasks.filter(t=>{const d=toDate(t.createdAt);return d&&d>=weekAgo;});
+  }else if(statPeriod==="month"){
+    return tasks.filter(t=>{const d=toDate(t.createdAt);return d&&d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
+  }else{
+    return tasks.filter(t=>{const d=toDate(t.createdAt);return d&&d.getFullYear()===now.getFullYear();});
+  }
+}
+
 window._setStatPeriod=p=>{
-  statPeriod=p;renderStatPeriodSection();
+  statPeriod=p;
   document.querySelectorAll(".stat-tab").forEach(el=>el.classList.toggle("stat-tab-active",el.dataset.period===p));
+  renderStatPeriodSection();
+  renderStatCauseSection();
 };
+
 function renderStatPeriodSection(){
   const el=document.getElementById("statPeriodBody");if(!el)return;
   const now=new Date();let data,groups;
@@ -1664,21 +1956,72 @@ function renderStatPeriodSection(){
     <div style="width:34px;font-size:11px;font-weight:700;color:var(--ink-5);">평균</div>
   </div>${bars||`<div class="empty" style="padding:24px;"><div class="empty-icon" style="font-size:24px;">📭</div><div class="empty-body">해당 기간 데이터가 없습니다</div></div>`}`;
 }
+
+function renderStatCauseSection(){
+  const el=document.getElementById("statCauseBody");if(!el)return;
+  const data=getStatPeriodData();
+
+  const causeMap={};
+  data.forEach(t=>{if(!t.causeType)return;if(!causeMap[t.causeType])causeMap[t.causeType]=0;causeMap[t.causeType]++;});
+  const causeTotal=Object.values(causeMap).reduce((a,b)=>a+b,0);
+  const causeEntries=Object.entries(causeMap).sort((a,b)=>b[1]-a[1]);
+  const causeColors=["#7c3aed","#a855f7","#c084fc","#d8b4fe","#e9d5ff","#f3e8ff"];
+  const causeBars=causeEntries.map(([k,v],i)=>`
+    <div class="stat-rank-row">
+      <div class="stat-rank-label" title="${esc(k)}">${esc(k)}</div>
+      <div class="stat-rank-track"><div class="stat-rank-fill" style="width:${causeTotal?(v/causeTotal*100).toFixed(1):0}%;background:${causeColors[i%causeColors.length]};"></div></div>
+      <div class="stat-rank-count" style="color:#7c3aed;">${v}건</div>
+    </div>`).join("");
+
+  const partMap={};
+  data.forEach(t=>{
+    if(!t.faultyPart)return;
+    const key=String(t.faultyPart).trim();
+    if(!key)return;
+    if(!partMap[key])partMap[key]=0;
+    partMap[key]++;
+  });
+  const partEntries=Object.entries(partMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const errMap={};
+  data.forEach(t=>{
+    if(!t.errorCode)return;
+    const key=String(t.errorCode).trim();
+    if(!key)return;
+    if(!errMap[key])errMap[key]=0;
+    errMap[key]++;
+  });
+  const errEntries=Object.entries(errMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const partRows=partEntries.map(([k,v],i)=>`<tr><td>${i+1}</td><td title="${esc(k)}" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(k)}</td><td style="text-align:right;font-weight:700;color:var(--amber);">${v}건</td></tr>`).join("");
+  const errRows=errEntries.map(([k,v],i)=>`<tr><td>${i+1}</td><td title="${esc(k)}" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;">${esc(k)}</td><td style="text-align:right;font-weight:700;color:var(--rose);">${v}건</td></tr>`).join("");
+
+  const noCause=data.length-causeTotal;
+  const periodLabel=statPeriod==="week"?"이번 주":statPeriod==="month"?"이번 달":"올해";
+
+  el.innerHTML=`
+    <div style="font-size:12px;color:var(--ink-5);margin-bottom:14px;">📊 <strong>${periodLabel}</strong> 접수 건 ${data.length}건 중 원인 분석 완료 <strong style="color:var(--violet);">${causeTotal}건</strong>${noCause>0?` · 원인 미입력 <strong style="color:var(--ink-4);">${noCause}건</strong>`:""}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-5);margin-bottom:10px;">🔍 원인 구분별 분포</div>
+        ${causeEntries.length?causeBars:`<div class="empty" style="padding:20px;"><div class="empty-icon" style="font-size:22px;">🔍</div><div class="empty-body" style="font-size:12px;">${periodLabel} 원인 분석 데이터가 없습니다</div></div>`}
+      </div>
+      <div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div>
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-5);margin-bottom:8px;">🔩 불량 부품·모듈 TOP ${partEntries.length||0}</div>
+            ${partEntries.length?`<table class="stat-mini-table"><thead><tr><th style="width:24px;">#</th><th>부품·모듈</th><th style="text-align:right;width:50px;">건수</th></tr></thead><tbody>${partRows}</tbody></table>`:`<div style="font-size:12px;color:var(--ink-5);padding:8px 0;">${periodLabel} 불량 부품 데이터가 없습니다</div>`}
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-5);margin-bottom:8px;">⚠️ 에러 코드 TOP ${errEntries.length||0}</div>
+            ${errEntries.length?`<table class="stat-mini-table"><thead><tr><th style="width:24px;">#</th><th>에러 코드</th><th style="text-align:right;width:50px;">건수</th></tr></thead><tbody>${errRows}</tbody></table>`:`<div style="font-size:12px;color:var(--ink-5);padding:8px 0;">${periodLabel} 에러 코드 데이터가 없습니다</div>`}
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
 function renderStatistics(){
   const sMap={};
   tasks.forEach(t=>{const n=t.siteName||"미등록";if(!sMap[n])sMap[n]={total:0,done:0,time:0};sMap[n].total++;if(t.status==="완료")sMap[n].done++;sMap[n].time+=(t.processTime||0);});
-  /* 원인 유형별 집계 */
-  const causeMap={};
-  tasks.forEach(t=>{if(!t.causeType)return;if(!causeMap[t.causeType])causeMap[t.causeType]=0;causeMap[t.causeType]++;});
-  const causeTotal=Object.values(causeMap).reduce((a,b)=>a+b,0);
-  const causeBars=Object.entries(causeMap).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-      <div style="width:120px;font-size:12px;color:var(--ink-3);text-align:right;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${esc(k)}">${esc(k)}</div>
-      <div style="flex:1;height:16px;background:var(--bg-2);border-radius:4px;overflow:hidden;">
-        <div style="height:100%;width:${causeTotal?(v/causeTotal*100).toFixed(1):0}%;background:linear-gradient(90deg,#7c3aed,#a855f7);border-radius:4px;"></div>
-      </div>
-      <div style="width:28px;font-size:12px;color:var(--violet);font-weight:700;flex-shrink:0;">${v}건</div>
-    </div>`).join("");
   const maxSiteTotal=Math.max(...Object.values(sMap).map(s=>s.total),1);
   const sPerf=Object.keys(sMap).map(k=>{
     const s=sMap[k];const avg=s.total?(s.time/s.total).toFixed(1):"0.0";const rate=s.total?((s.done/s.total)*100).toFixed(0):0;
@@ -1699,21 +2042,21 @@ function renderStatistics(){
       <div class="card-header"><div class="card-title">기간별 분석</div><div class="stat-tab-group">${tabs}</div></div>
       <div class="card-body" id="statPeriodBody"></div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
-      <div class="card" style="margin:0;">
-        <div class="card-header"><div class="card-title">원인 유형별 분포</div></div>
-        <div class="card-body">
-          ${causeTotal?causeBars:`<div class="empty" style="padding:24px;"><div class="empty-icon" style="font-size:24px;">🔍</div><div class="empty-body">원인 분석 데이터가 없습니다</div></div>`}
-        </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header">
+        <div class="card-title">🛠️ AS 이력카드 분석 (원인구분 · 불량부품 · 에러코드)</div>
+        <div style="font-size:11.5px;color:var(--ink-5);">상단 기간 탭과 연동됩니다</div>
       </div>
-      <div class="card" style="margin:0;">
-        <div class="card-header"><div class="card-title">현장별 전체 현황</div></div>
-        <div class="card-body">
-          ${Object.keys(sMap).length?sPerf:`<div class="empty" style="padding:24px;"><div class="empty-icon" style="font-size:24px;">📊</div><div class="empty-body">접수 데이터가 없습니다</div></div>`}
-        </div>
+      <div class="card-body" id="statCauseBody"></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">현장별 전체 현황</div></div>
+      <div class="card-body">
+        ${Object.keys(sMap).length?sPerf:`<div class="empty" style="padding:24px;"><div class="empty-icon" style="font-size:24px;">📊</div><div class="empty-body">접수 데이터가 없습니다</div></div>`}
       </div>
     </div>`;
   renderStatPeriodSection();
+  renderStatCauseSection();
 }
 
 /* ════════════════════════════════════
@@ -1733,6 +2076,7 @@ function renderDashboard(){
   const visitSoon=tasks.filter(t=>t.visitDate&&calcDday(t.visitDate)>0&&calcDday(t.visitDate)<=3);
   const recentTasks=tasks.slice().sort((a,b)=>{const ta=toDate(a.createdAt)||new Date(0),tb=toDate(b.createdAt)||new Date(0);return tb-ta;}).slice(0,5);
   const recentIssues=issues.slice().sort((a,b)=>{const ta=toDate(a.createdAt)||new Date(0),tb=toDate(b.createdAt)||new Date(0);return tb-ta;}).slice(0,4);
+  const repairCount=inventoryList.filter(x=>x.condition==="수리").length;
 
   $content.innerHTML=`
     <div class="dash-welcome">
@@ -1751,6 +2095,7 @@ function renderDashboard(){
       ${visitSoon.map(t=>`<div style="font-size:12.5px;color:var(--ink-4);margin-bottom:3px;">🟡 D-${calcDday(t.visitDate)} · ${esc(t.siteName)} ${esc(t.visitDate)} — ${esc(t.actionType||"방문")}</div>`).join("")}
     </div>`:""}
     ${asStats.soon>0?`<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:var(--r-lg);padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px;color:#92400e;cursor:pointer;" onclick="navigate('site')"><span style="font-size:18px;">⏰</span><span>무상 AS 만료 임박 현장 <strong>${asStats.soon}건</strong> — Site Master에서 확인</span></div>`:""}
+    ${repairCount>0?`<div style="background:var(--rose-lt);border:1px solid rgba(225,29,72,.18);border-radius:var(--r-lg);padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--rose);cursor:pointer;" onclick="navigate('inventory')"><span style="font-size:18px;">🔧</span><span>수리 중인 재고 장비 <strong>${repairCount}건</strong> — Inventory에서 확인</span></div>`:""}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;" id="dashGrid">
       <div class="card" style="margin:0;">
         <div class="card-header"><div class="card-title">최근 접수</div><button class="btn btn-ghost btn-sm" onclick="navigate('project')">전체 보기 →</button></div>
@@ -1798,20 +2143,28 @@ const PAGES={
   dashboard:{fn:renderDashboard,label:"Dashboard"},
   site:{fn:renderSite,label:"Site Master"},
   project:{fn:renderProject,label:"Project"},
+  inventory:{fn:renderInventory,label:"Inventory"},
   statistics:{fn:renderStatistics,label:"Statistics"},
   issue:{fn:renderIssue,label:"Issue"},
 };
+
 function render(page){
   curPage=page;const p=PAGES[page]||PAGES.dashboard;
   document.getElementById("topTitle").textContent=p.label;
   document.getElementById("topBreadcrumb").textContent=p.label;
   document.getElementById("mTopTitle").textContent=p.label;
+  document.querySelectorAll(".nav-item").forEach(el=>el.classList.toggle("active",el.dataset.page===page));
+  document.querySelectorAll(".m-tab").forEach(el=>el.classList.toggle("active",el.dataset.page===page));
   p.fn();
+  document.getElementById("content").scrollTop=0;
 }
-window.navigate=function(page){setActive(page);render(page);$content.scrollTop=0;};
-function setActive(page){document.querySelectorAll(".nav-item,.m-tab").forEach(el=>el.classList.toggle("active",el.dataset.page===page));}
-document.querySelectorAll(".nav-item,.m-tab").forEach(el=>{el.onclick=()=>navigate(el.dataset.page);});
-setActive("dashboard");render("dashboard");
+window.navigate=render;
+
+document.querySelectorAll(".nav-item,.m-tab").forEach(el=>{
+  el.addEventListener("click",()=>navigate(el.dataset.page));
+});
+
+render("dashboard");
 </script>
 </body>
 </html>
