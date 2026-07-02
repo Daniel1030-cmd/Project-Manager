@@ -541,6 +541,9 @@ input,select,textarea{font-family:inherit;}
 <div id="quotePrintArea"></div>
 <div class="toast" id="toast"></div>
 
+<!-- SheetJS: 통계 엑셀(.xlsx) 내보내기용 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
 import {
@@ -1887,15 +1890,7 @@ function renderIssue(){
    STATISTICS
 ════════════════════════════════════ */
 function getStatPeriodData(){
-  const now=new Date();
-  if(statPeriod==="week"){
-    const weekAgo=new Date(now);weekAgo.setDate(weekAgo.getDate()-6);weekAgo.setHours(0,0,0,0);
-    return tasks.filter(t=>{const d=toDate(t.createdAt);return d&&d>=weekAgo;});
-  }else if(statPeriod==="month"){
-    return tasks.filter(t=>{const d=toDate(t.createdAt);return d&&d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
-  }else{
-    return tasks.filter(t=>{const d=toDate(t.createdAt);return d&&d.getFullYear()===now.getFullYear();});
-  }
+  return computePeriodStats().data;
 }
 
 window._setStatPeriod=p=>{
@@ -1905,8 +1900,10 @@ window._setStatPeriod=p=>{
   renderStatCauseSection();
 };
 
-function renderStatPeriodSection(){
-  const el=document.getElementById("statPeriodBody");if(!el)return;
+/* ════════════════════════════════════
+   통계 데이터 계산 (화면 렌더링 + 엑셀 내보내기가 공유하는 단일 소스)
+════════════════════════════════════ */
+function computePeriodStats(){
   const now=new Date();let data,groups;
   if(statPeriod==="week"){
     const weekAgo=new Date(now);weekAgo.setDate(weekAgo.getDate()-6);weekAgo.setHours(0,0,0,0);
@@ -1931,6 +1928,56 @@ function renderStatPeriodSection(){
   const totalAll=data.length,doneAll=data.filter(x=>x.status==="완료").length;
   const rateAll=totalAll?((doneAll/totalAll)*100).toFixed(1):"0.0";
   const avgAll=totalAll?(data.reduce((a,b)=>a+(b.processTime||0),0)/totalAll).toFixed(1):"0.0";
+  const periodLabel=statPeriod==="week"?"이번 주":statPeriod==="month"?"이번 달":"올해";
+  return{data,groups,totalAll,doneAll,rateAll,avgAll,periodLabel};
+}
+
+function computeCauseStats(periodData){
+  const causeMap={};
+  periodData.forEach(t=>{if(!t.causeType)return;if(!causeMap[t.causeType])causeMap[t.causeType]=0;causeMap[t.causeType]++;});
+  const causeTotal=Object.values(causeMap).reduce((a,b)=>a+b,0);
+  const causeEntries=Object.entries(causeMap).sort((a,b)=>b[1]-a[1]);
+
+  const partMap={};
+  periodData.forEach(t=>{
+    if(!t.faultyPart)return;
+    const key=String(t.faultyPart).trim();
+    if(!key)return;
+    if(!partMap[key])partMap[key]=0;
+    partMap[key]++;
+  });
+  const partEntries=Object.entries(partMap).sort((a,b)=>b[1]-a[1]);
+
+  const errMap={};
+  periodData.forEach(t=>{
+    if(!t.errorCode)return;
+    const key=String(t.errorCode).trim();
+    if(!key)return;
+    if(!errMap[key])errMap[key]=0;
+    errMap[key]++;
+  });
+  const errEntries=Object.entries(errMap).sort((a,b)=>b[1]-a[1]);
+
+  const noCause=periodData.length-causeTotal;
+  return{causeEntries,causeTotal,partEntries,errEntries,noCause};
+}
+
+function computeSitePerf(){
+  const sMap={};
+  tasks.forEach(t=>{const n=t.siteName||"미등록";if(!sMap[n])sMap[n]={total:0,done:0,time:0};sMap[n].total++;if(t.status==="완료")sMap[n].done++;sMap[n].time+=(t.processTime||0);});
+  return Object.keys(sMap).map(k=>{
+    const s=sMap[k];
+    const avg=s.total?(s.time/s.total).toFixed(1):"0.0";
+    const rate=s.total?((s.done/s.total)*100).toFixed(0):0;
+    const linkedSite=site.find(x=>x.name===k);
+    const asRes=linkedSite?calcAS(linkedSite.contractStart,linkedSite.maintenancePeriod):{type:"알수없음"};
+    return{name:k,total:s.total,done:s.done,rate,avg,asType:asRes.type,linkedSite};
+  });
+}
+
+function renderStatPeriodSection(){
+  const el=document.getElementById("statPeriodBody");if(!el)return;
+  const{groups,totalAll,doneAll,rateAll,avgAll}=computePeriodStats();
   const maxTotal=Math.max(...groups.map(r=>r.total),1);
   const kpiStrip=`<div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
     <div class="kpi-card c-blue" style="padding:14px 16px;"><div class="kpi-eyebrow">전체 접수</div><div class="kpi-num" style="font-size:24px;">${totalAll}</div></div>
@@ -1959,12 +2006,10 @@ function renderStatPeriodSection(){
 
 function renderStatCauseSection(){
   const el=document.getElementById("statCauseBody");if(!el)return;
-  const data=getStatPeriodData();
-
-  const causeMap={};
-  data.forEach(t=>{if(!t.causeType)return;if(!causeMap[t.causeType])causeMap[t.causeType]=0;causeMap[t.causeType]++;});
-  const causeTotal=Object.values(causeMap).reduce((a,b)=>a+b,0);
-  const causeEntries=Object.entries(causeMap).sort((a,b)=>b[1]-a[1]);
+  const{data,periodLabel}=computePeriodStats();
+  const{causeEntries,causeTotal,partEntries,errEntries,noCause}=computeCauseStats(data);
+  const partEntriesTop=partEntries.slice(0,8);
+  const errEntriesTop=errEntries.slice(0,8);
   const causeColors=["#7c3aed","#a855f7","#c084fc","#d8b4fe","#e9d5ff","#f3e8ff"];
   const causeBars=causeEntries.map(([k,v],i)=>`
     <div class="stat-rank-row">
@@ -1972,30 +2017,8 @@ function renderStatCauseSection(){
       <div class="stat-rank-track"><div class="stat-rank-fill" style="width:${causeTotal?(v/causeTotal*100).toFixed(1):0}%;background:${causeColors[i%causeColors.length]};"></div></div>
       <div class="stat-rank-count" style="color:#7c3aed;">${v}건</div>
     </div>`).join("");
-
-  const partMap={};
-  data.forEach(t=>{
-    if(!t.faultyPart)return;
-    const key=String(t.faultyPart).trim();
-    if(!key)return;
-    if(!partMap[key])partMap[key]=0;
-    partMap[key]++;
-  });
-  const partEntries=Object.entries(partMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  const errMap={};
-  data.forEach(t=>{
-    if(!t.errorCode)return;
-    const key=String(t.errorCode).trim();
-    if(!key)return;
-    if(!errMap[key])errMap[key]=0;
-    errMap[key]++;
-  });
-  const errEntries=Object.entries(errMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  const partRows=partEntries.map(([k,v],i)=>`<tr><td>${i+1}</td><td title="${esc(k)}" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(k)}</td><td style="text-align:right;font-weight:700;color:var(--amber);">${v}건</td></tr>`).join("");
-  const errRows=errEntries.map(([k,v],i)=>`<tr><td>${i+1}</td><td title="${esc(k)}" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;">${esc(k)}</td><td style="text-align:right;font-weight:700;color:var(--rose);">${v}건</td></tr>`).join("");
-
-  const noCause=data.length-causeTotal;
-  const periodLabel=statPeriod==="week"?"이번 주":statPeriod==="month"?"이번 달":"올해";
+  const partRows=partEntriesTop.map(([k,v],i)=>`<tr><td>${i+1}</td><td title="${esc(k)}" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(k)}</td><td style="text-align:right;font-weight:700;color:var(--amber);">${v}건</td></tr>`).join("");
+  const errRows=errEntriesTop.map(([k,v],i)=>`<tr><td>${i+1}</td><td title="${esc(k)}" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;">${esc(k)}</td><td style="text-align:right;font-weight:700;color:var(--rose);">${v}건</td></tr>`).join("");
 
   el.innerHTML=`
     <div style="font-size:12px;color:var(--ink-5);margin-bottom:14px;">📊 <strong>${periodLabel}</strong> 접수 건 ${data.length}건 중 원인 분석 완료 <strong style="color:var(--violet);">${causeTotal}건</strong>${noCause>0?` · 원인 미입력 <strong style="color:var(--ink-4);">${noCause}건</strong>`:""}</div>
@@ -2007,37 +2030,117 @@ function renderStatCauseSection(){
       <div>
         <div style="display:flex;flex-direction:column;gap:16px;">
           <div>
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-5);margin-bottom:8px;">🔩 불량 부품·모듈 TOP ${partEntries.length||0}</div>
-            ${partEntries.length?`<table class="stat-mini-table"><thead><tr><th style="width:24px;">#</th><th>부품·모듈</th><th style="text-align:right;width:50px;">건수</th></tr></thead><tbody>${partRows}</tbody></table>`:`<div style="font-size:12px;color:var(--ink-5);padding:8px 0;">${periodLabel} 불량 부품 데이터가 없습니다</div>`}
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-5);margin-bottom:8px;">🔩 불량 부품·모듈 TOP ${partEntriesTop.length||0}</div>
+            ${partEntriesTop.length?`<table class="stat-mini-table"><thead><tr><th style="width:24px;">#</th><th>부품·모듈</th><th style="text-align:right;width:50px;">건수</th></tr></thead><tbody>${partRows}</tbody></table>`:`<div style="font-size:12px;color:var(--ink-5);padding:8px 0;">${periodLabel} 불량 부품 데이터가 없습니다</div>`}
           </div>
           <div>
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-5);margin-bottom:8px;">⚠️ 에러 코드 TOP ${errEntries.length||0}</div>
-            ${errEntries.length?`<table class="stat-mini-table"><thead><tr><th style="width:24px;">#</th><th>에러 코드</th><th style="text-align:right;width:50px;">건수</th></tr></thead><tbody>${errRows}</tbody></table>`:`<div style="font-size:12px;color:var(--ink-5);padding:8px 0;">${periodLabel} 에러 코드 데이터가 없습니다</div>`}
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-5);margin-bottom:8px;">⚠️ 에러 코드 TOP ${errEntriesTop.length||0}</div>
+            ${errEntriesTop.length?`<table class="stat-mini-table"><thead><tr><th style="width:24px;">#</th><th>에러 코드</th><th style="text-align:right;width:50px;">건수</th></tr></thead><tbody>${errRows}</tbody></table>`:`<div style="font-size:12px;color:var(--ink-5);padding:8px 0;">${periodLabel} 에러 코드 데이터가 없습니다</div>`}
           </div>
         </div>
       </div>
     </div>`;
 }
 
+/* ════════════════════════════════════
+   통계 엑셀(.xlsx) 다운로드
+════════════════════════════════════ */
+window._exportStatisticsExcel=function(){
+  if(typeof XLSX==="undefined"){toast("엑셀 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인해주세요","error");return;}
+  const btn=document.getElementById("statExportBtn");
+  if(btn){btn.disabled=true;btn.textContent="⏳ 생성 중…";}
+  try{
+    const periodStats=computePeriodStats();
+    const causeStats=computeCauseStats(periodStats.data);
+    const sitePerf=computeSitePerf();
+    const periodLabel=periodStats.periodLabel;
+    const todayStr=new Date().toLocaleDateString("ko-KR",{year:"numeric",month:"2-digit",day:"2-digit"});
+
+    const wb=XLSX.utils.book_new();
+
+    /* ── Sheet 1: 기간별 분석 ── */
+    const s1=[
+      ["PMO System 통계 리포트 - 기간별 분석"],
+      [`기준 기간: ${periodLabel}`,`생성일: ${todayStr}`],
+      [],
+      ["구분","값"],
+      ["전체 접수",periodStats.totalAll],
+      ["처리 완료",periodStats.doneAll],
+      ["완료율(%)",Number(periodStats.rateAll)],
+      ["평균 처리시간(h)",Number(periodStats.avgAll)],
+      [],
+      ["기간","접수 건수","완료 건수","완료율(%)","평균 처리시간(h)"],
+      ...periodStats.groups.map(g=>[g.label,g.total,g.done,g.total?Number((g.done/g.total*100).toFixed(1)):0,g.total?Number((g.time/g.total).toFixed(1)):0])
+    ];
+    const ws1=XLSX.utils.aoa_to_sheet(s1);
+    ws1["!cols"]=[{wch:16},{wch:14},{wch:14},{wch:14},{wch:16}];
+    XLSX.utils.book_append_sheet(wb,ws1,"기간별분석");
+
+    /* ── Sheet 2: AS 원인 분석 ── */
+    const s2=[
+      ["AS 이력카드 분석"],
+      [`기준 기간: ${periodLabel}`,`생성일: ${todayStr}`],
+      [`접수 ${periodStats.data.length}건 중 원인 분석 완료 ${causeStats.causeTotal}건, 원인 미입력 ${causeStats.noCause}건`],
+      [],
+      ["■ 원인 구분별 분포"],
+      ["원인 구분","건수","비율(%)"],
+      ...(causeStats.causeEntries.length?causeStats.causeEntries.map(([k,v])=>[k,v,causeStats.causeTotal?Number((v/causeStats.causeTotal*100).toFixed(1)):0]):[["데이터 없음","",""]]),
+      [],
+      ["■ 불량 부품·모듈"],
+      ["순위","부품·모듈","건수"],
+      ...(causeStats.partEntries.length?causeStats.partEntries.map(([k,v],i)=>[i+1,k,v]):[["","데이터 없음",""]]),
+      [],
+      ["■ 에러 코드"],
+      ["순위","에러 코드","건수"],
+      ...(causeStats.errEntries.length?causeStats.errEntries.map(([k,v],i)=>[i+1,k,v]):[["","데이터 없음",""]]),
+    ];
+    const ws2=XLSX.utils.aoa_to_sheet(s2);
+    ws2["!cols"]=[{wch:10},{wch:30},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,ws2,"AS원인분석");
+
+    /* ── Sheet 3: 현장별 전체 현황 ── */
+    const s3=[
+      ["현장별 전체 현황"],
+      [`생성일: ${todayStr}`],
+      [],
+      ["현장명","전체 접수","처리 완료","완료율(%)","평균 처리시간(h)","AS 구분"],
+      ...(sitePerf.length?sitePerf.map(s=>[s.name,s.total,s.done,Number(s.rate),Number(s.avg),s.asType]):[["데이터 없음","","","","",""]])
+    ];
+    const ws3=XLSX.utils.aoa_to_sheet(s3);
+    ws3["!cols"]=[{wch:26},{wch:12},{wch:12},{wch:12},{wch:16},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,ws3,"현장별현황");
+
+    const fileDate=new Date().toISOString().slice(0,10).replace(/-/g,"");
+    XLSX.writeFile(wb,`PMO_통계_${fileDate}.xlsx`);
+    toast("엑셀 파일이 다운로드되었습니다","success");
+  }catch(e){
+    console.error(e);
+    toast("엑셀 생성 중 오류가 발생했습니다","error");
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent="📥 엑셀 다운로드";}
+  }
+};
+
 function renderStatistics(){
-  const sMap={};
-  tasks.forEach(t=>{const n=t.siteName||"미등록";if(!sMap[n])sMap[n]={total:0,done:0,time:0};sMap[n].total++;if(t.status==="완료")sMap[n].done++;sMap[n].time+=(t.processTime||0);});
-  const maxSiteTotal=Math.max(...Object.values(sMap).map(s=>s.total),1);
-  const sPerf=Object.keys(sMap).map(k=>{
-    const s=sMap[k];const avg=s.total?(s.time/s.total).toFixed(1):"0.0";const rate=s.total?((s.done/s.total)*100).toFixed(0):0;
-    const linkedSite=site.find(x=>x.name===k);const asBadge=linkedSite?bAS(linkedSite.contractStart,linkedSite.maintenancePeriod):"";
+  const sPerf=computeSitePerf();
+  const maxSiteTotal=Math.max(...sPerf.map(s=>s.total),1);
+  const sPerfHtml=sPerf.map(s=>{
+    const asBadge=s.linkedSite?bAS(s.linkedSite.contractStart,s.linkedSite.maintenancePeriod):`<span class="badge b-ready">-</span>`;
     return`<div class="site-bar" style="align-items:center;">
-      <div class="site-bar-label" title="${esc(k)}">${esc(k)}</div>
+      <div class="site-bar-label" title="${esc(s.name)}">${esc(s.name)}</div>
       <div class="site-bar-track"><div class="site-bar-fill" style="width:${(s.total/maxSiteTotal*100).toFixed(1)}%"></div></div>
       <div class="site-bar-count">${s.total}</div>
-      <div style="width:36px;font-size:12px;color:var(--teal-dk);font-weight:600;">${rate}%</div>
+      <div style="width:36px;font-size:12px;color:var(--teal-dk);font-weight:600;">${s.rate}%</div>
       <div style="width:80px;display:flex;justify-content:flex-end;">${asBadge}</div>
     </div>`;
   }).join("");
   const tabs=[["week","이번 주"],["month","이번 달"],["year","올해"]].map(([p,l])=>
     `<button class="stat-tab${statPeriod===p?" stat-tab-active":""}" data-period="${p}" onclick="_setStatPeriod('${p}')">${l}</button>`).join("");
   $content.innerHTML=`
-    <div class="page-head"><div><div class="page-title">Statistics</div><div class="page-subtitle">기간별·현장별·원인별 현황을 분석합니다</div></div></div>
+    <div class="page-head">
+      <div><div class="page-title">Statistics</div><div class="page-subtitle">기간별·현장별·원인별 현황을 분석합니다</div></div>
+      <div class="page-actions"><button class="btn btn-secondary" id="statExportBtn" onclick="window._exportStatisticsExcel()">📥 엑셀 다운로드</button></div>
+    </div>
     <div class="card" style="margin-bottom:16px;">
       <div class="card-header"><div class="card-title">기간별 분석</div><div class="stat-tab-group">${tabs}</div></div>
       <div class="card-body" id="statPeriodBody"></div>
@@ -2052,7 +2155,7 @@ function renderStatistics(){
     <div class="card">
       <div class="card-header"><div class="card-title">현장별 전체 현황</div></div>
       <div class="card-body">
-        ${Object.keys(sMap).length?sPerf:`<div class="empty" style="padding:24px;"><div class="empty-icon" style="font-size:24px;">📊</div><div class="empty-body">접수 데이터가 없습니다</div></div>`}
+        ${sPerf.length?sPerfHtml:`<div class="empty" style="padding:24px;"><div class="empty-icon" style="font-size:24px;">📊</div><div class="empty-body">접수 데이터가 없습니다</div></div>`}
       </div>
     </div>`;
   renderStatPeriodSection();
