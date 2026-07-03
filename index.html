@@ -363,6 +363,13 @@ input,select,textarea{font-family:inherit;}
 .b-neo{background:var(--blue-lt);color:var(--blue);font-weight:700;border:1px solid rgba(37,99,235,.18);}
 .b-sparkoz{background:var(--violet-lt);color:var(--violet);font-weight:700;border:1px solid rgba(124,58,237,.18);}
 
+/* ════ 재고 모바일 정렬 바 (기본 숨김, 모바일에서만 표시) ════ */
+.inv-mobile-sort{display:none;gap:8px;margin-bottom:14px;}
+.inv-mobile-sort select{flex:1;padding:9px 10px;border:1px solid var(--line);border-radius:var(--r);font-size:13px;color:var(--ink);background:var(--surface);-webkit-appearance:none;appearance:none;}
+.inv-mobile-sort select:focus{outline:none;border-color:var(--teal);}
+.inv-mobile-sort button{padding:9px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink-3);font-size:12.5px;font-weight:700;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;}
+.inv-mobile-sort button:active{background:var(--bg-2);}
+
 /* ════ 브랜드별 재고 카드 ════ */
 .brand-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 .brand-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh-xs);}
@@ -449,6 +456,12 @@ input,select,textarea{font-family:inherit;}
   .stat-rank-label{width:88px;font-size:11px;}
   .stat-mini-table{font-size:11px;}
   .brand-grid{grid-template-columns:1fr;}
+  .inv-mobile-sort{display:flex;}
+  .mc-inv .mc-head{flex-wrap:wrap;row-gap:8px;position:relative;padding-right:34px;}
+  .mc-inv .mc-title{flex:1 1 100%;}
+  .mc-inv .mc-sub{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.45;}
+  .mc-inv .mc-badges{flex:1 1 100%;justify-content:flex-start;}
+  .mc-inv .mc-chevron{position:absolute;top:14px;right:16px;}
 }
 @media(min-width:769px){.m-topbar{display:none;}.m-tabbar{display:none;}}
 ::-webkit-scrollbar{width:5px;height:5px;}
@@ -566,12 +579,13 @@ let site=[],tasks=[],issues=[],inventoryList=[];
 let curPage="dashboard";
 let sq={site:"",project:"",issue:"",inventory:""};
 let projSort={col:"receiptDate",dir:"desc"};
+let invSort={col:"model",dir:"asc"};
 let statPeriod="week";
 
 const $content=document.getElementById("content");
 const isMobile=()=>window.innerWidth<=768;
 
-const COMPANY_LOGO="data:image/png;base64,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";
+const COMPANY_LOGO="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGNgAAACAAEA//8DAAAGAAVXv6vUAAAAAElFTkSuQmCC";
 const COMPANY_NAME="(주)성주컴텍";
 const COMPANY_CEO="은 시 형";
 const COMPANY_ADDR="서울특별시 구로구 부광로 88, 구로SK V1 Center A동 310호";
@@ -1710,12 +1724,31 @@ window._addInvHistory=async function(){
   }catch(e){console.error(e);toast("추가 실패","error");}
 };
 
+window._invSortBy=col=>{
+  if(invSort.col===col){invSort.dir=invSort.dir==="asc"?"desc":"asc";}
+  else{invSort.col=col;invSort.dir="asc";}
+  renderInventoryResults();
+};
+function invSortIcon(col){
+  if(invSort.col!==col)return`<span style="opacity:.3;font-size:10px;margin-left:3px;">↕</span>`;
+  return invSort.dir==="asc"?`<span style="color:var(--teal);font-size:10px;margin-left:3px;">↑</span>`:`<span style="color:var(--teal);font-size:10px;margin-left:3px;">↓</span>`;
+}
+const INV_SORT_OPTIONS=[["model","모델"],["brand","브랜드"],["serial","시리얼"],["type","타입"],["status","현황"],["location","현위치"],["condition","상태"]];
+window._invSortSelect=col=>{invSort.col=col;renderInventoryResults();};
+window._invSortToggleDir=()=>{invSort.dir=invSort.dir==="asc"?"desc":"asc";renderInventoryResults();};
+
 function renderInventoryResults(){
   const q=sq.inventory;
-  const list=inventoryList.filter(x=>match(q,[x.serial,x.location,x.model,x.type,x.status,x.condition,x.note,x.brand]));
+  let list=inventoryList.filter(x=>match(q,[x.serial,x.location,x.model,x.type,x.status,x.condition,x.note,x.brand]));
   const ra=document.getElementById("invRA");const ma=document.getElementById("sm_inventory");
   if(!ra)return;if(ma)ma.textContent=q?`${list.length}건 검색됨`:"";
   if(!list.length){ra.innerHTML=noResults(q);return;}
+
+  list=list.slice().sort((a,b)=>{
+    let va=a[invSort.col]||"",vb=b[invSort.col]||"";
+    const cmp=va<vb?-1:va>vb?1:0;
+    return invSort.dir==="asc"?cmp:-cmp;
+  });
 
   const tBody=list.map(x=>`<tr>
     <td>${bBrand(x.brand)}</td>
@@ -1733,7 +1766,7 @@ function renderInventoryResults(){
     </div></td>
   </tr>`).join("");
 
-  const mCards=list.map(x=>`<div class="mc">
+  const mCards=list.map(x=>`<div class="mc mc-inv">
     <div class="mc-head" onclick="_toggleMC('inv${x.id}')">
       <div class="mc-title"><div class="mc-name">${esc(x.model)||"모델 미지정"}</div><div class="mc-sub">${esc(x.serial)||"-"} · ${esc(x.type)||"-"} · ${esc(x.location)||"미지정 위치"}</div></div>
       <div class="mc-badges">${bBrand(x.brand)}${bInvStatus(x.status)}${bInvCondition(x.condition)}</div>
@@ -1759,9 +1792,19 @@ function renderInventoryResults(){
     </div>
   </div>`).join("");
 
+  const invTh=(col,label)=>`<th style="cursor:pointer;user-select:none;white-space:nowrap;" onclick="_invSortBy('${col}')">${label}${invSortIcon(col)}</th>`;
+
+  const invMobileSort=`<div class="inv-mobile-sort">
+    <select onchange="window._invSortSelect(this.value)">
+      ${INV_SORT_OPTIONS.map(([c,l])=>`<option value="${c}"${invSort.col===c?" selected":""}>${esc(l)} 순</option>`).join("")}
+    </select>
+    <button onclick="window._invSortToggleDir()">${invSort.dir==="asc"?"↑ 오름차순":"↓ 내림차순"}</button>
+  </div>`;
+
   ra.innerHTML=`<div class="tbl-wrap"><table class="tbl"><thead><tr>
-    <th>브랜드</th><th>모델</th><th>시리얼</th><th>타입</th><th>현황</th><th>현위치</th><th>상태</th><th>비고</th><th>이력</th><th>관리</th>
+    ${invTh("brand","브랜드")}${invTh("model","모델")}${invTh("serial","시리얼")}${invTh("type","타입")}${invTh("status","현황")}${invTh("location","현위치")}${invTh("condition","상태")}<th>비고</th><th>이력</th><th>관리</th>
   </tr></thead><tbody>${tBody}</tbody></table></div>
+  ${invMobileSort}
   <div class="mc-list">${mCards}</div>`;
 }
 _renderers.inventory=renderInventoryResults;
