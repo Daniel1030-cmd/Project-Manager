@@ -272,6 +272,34 @@ input,select,textarea{font-family:inherit;}
 .symptom-card-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-5);margin-bottom:5px;}
 .symptom-card-text{font-size:13.5px;color:var(--ink-2);line-height:1.6;}
 
+/* ════ 주간업무보고 : 일자별 업무 카드 ════ */
+.rpt-daily-wrap{margin-bottom:22px;}
+.rpt-daily-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.rpt-daily-title{font-size:13.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:7px;}
+.rpt-daily-title .num{width:20px;height:20px;border-radius:50%;background:var(--teal-lt);color:var(--teal-dk);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;}
+.rpt-daily-sub{font-size:11.5px;color:var(--ink-5);}
+.rpt-daily-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+.rpt-day-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh-xs);display:flex;flex-direction:column;position:relative;transition:box-shadow .15s,border-color .15s;}
+.rpt-day-card:focus-within{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,148,136,.12);}
+.rpt-day-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.rpt-day-card.rpt-mon::before{background:var(--teal);}
+.rpt-day-card.rpt-tue::before{background:var(--blue);}
+.rpt-day-card.rpt-wed::before{background:var(--violet);}
+.rpt-day-card.rpt-thu::before{background:var(--amber);}
+.rpt-day-card.rpt-fri::before{background:var(--rose);}
+.rpt-day-label{display:flex;align-items:baseline;justify-content:space-between;padding:9px 10px 7px;border-bottom:1px solid var(--line-2);margin-top:3px;}
+.rpt-day-name{font-size:13px;font-weight:800;color:var(--ink-2);}
+.rpt-day-card.rpt-mon .rpt-day-name{color:var(--teal-dk);}
+.rpt-day-card.rpt-tue .rpt-day-name{color:var(--blue);}
+.rpt-day-card.rpt-wed .rpt-day-name{color:var(--violet);}
+.rpt-day-card.rpt-thu .rpt-day-name{color:var(--amber);}
+.rpt-day-card.rpt-fri .rpt-day-name{color:var(--rose);}
+.rpt-day-date{font-size:10.5px;color:var(--ink-5);font-weight:600;}
+.rpt-day-card textarea{border:none;border-radius:0;flex:1;resize:vertical;min-height:118px;padding:9px 10px;font-size:12.5px;line-height:1.55;background:transparent;box-shadow:none!important;}
+.rpt-day-card textarea:focus{outline:none;background:var(--bg);}
+.rpt-day-card textarea::placeholder{color:var(--ink-5);font-size:12px;}
+.rpt-day-count{position:absolute;bottom:5px;right:8px;font-size:10px;color:var(--ink-5);background:var(--surface);padding:0 3px;pointer-events:none;}
+
 /* ════ QUOTE STYLES ════ */
 .qform-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
 .qform-grid .field{margin:0;}
@@ -462,6 +490,8 @@ input,select,textarea{font-family:inherit;}
   .mc-inv .mc-sub{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.45;}
   .mc-inv .mc-badges{flex:1 1 100%;justify-content:flex-start;}
   .mc-inv .mc-chevron{position:absolute;top:14px;right:16px;}
+  .rpt-daily-grid{grid-template-columns:1fr;}
+  .rpt-day-card textarea{min-height:90px;}
 }
 @media(min-width:769px){.m-topbar{display:none;}.m-tabbar{display:none;}}
 ::-webkit-scrollbar{width:5px;height:5px;}
@@ -730,6 +760,25 @@ function weekInfo(anchorDate){
     label:`${yr}년 ${wk}주차 (${start.toLocaleDateString("ko-KR",{month:"2-digit",day:"2-digit"})} ~ ${end.toLocaleDateString("ko-KR",{month:"2-digit",day:"2-digit"})})`,
     shortLabel:`${start.toLocaleDateString("ko-KR",{month:"2-digit",day:"2-digit"})}~${end.toLocaleDateString("ko-KR",{month:"2-digit",day:"2-digit"})}`,
   };
+}
+/* 선택된 주(週)의 월~금 5일 목록을 반환 — 주간업무보고 일자별 입력에 사용 */
+function weekdayList(wi){
+  const names=["월","화","수","목","금"];
+  const cls=["rpt-mon","rpt-tue","rpt-wed","rpt-thu","rpt-fri"];
+  return names.map((label,i)=>{
+    const dt=new Date(wi.start);dt.setDate(dt.getDate()+i);
+    return{
+      key:ymd(dt),
+      label,
+      cls:cls[i],
+      dateLabel:dt.toLocaleDateString("ko-KR",{month:"2-digit",day:"2-digit"}),
+    };
+  });
+}
+/* 일자별 업무요약 객체를 미리보기/이력용 한 줄 텍스트로 변환 */
+function dailySummaryText(dailySummary){
+  if(!dailySummary)return"";
+  return Object.values(dailySummary).map(v=>(v||"").trim()).filter(Boolean).join(" / ");
 }
 function inRange(dateVal,start,end){
   const d=toDate(dateVal);if(!d)return false;
@@ -2334,16 +2383,17 @@ window._reportLoadFromHistory=(id)=>{
 window._saveReport=async function(){
   if(!reportPM){toast("담당자(작성자)를 먼저 선택 또는 입력해주세요","error");return;}
   const wi=weekInfo(reportAnchor);
+  const days=weekdayList(wi);
+  const dailySummary={};
+  days.forEach((d,idx)=>{dailySummary[d.key]=document.getElementById("rf_daily_"+idx)?.value.trim()||"";});
   const g=id=>document.getElementById(id)?.value.trim()||"";
   const data={
     pm:reportPM,
     weekKey:wi.key,
     weekStart:wi.startStr,
     weekEnd:wi.endStr,
-    summary:g("rf_summary"),
+    dailySummary,
     issuesNote:g("rf_issuesNote"),
-    nextPlan:g("rf_nextPlan"),
-    requestNote:g("rf_requestNote"),
     updatedAt:serverTimestamp(),
   };
   const id=reportDocId(reportPM,wi.key);
@@ -2368,6 +2418,15 @@ function _buildReportHTML(reportDoc,pmName,wi,stats){
     <td class="ctr">${esc(t.status)||"-"}</td>
     <td class="ctr">${esc(t.visitDate)||"-"}</td>
   </tr>`).join("")||`<tr><td colspan="5" style="text-align:center;color:#888;">해당 주간 활동 내역이 없습니다</td></tr>`;
+  const days=weekdayList(wi);
+  const dailyRows=days.map(d=>{
+    const val=(reportDoc.dailySummary&&reportDoc.dailySummary[d.key])||"";
+    return`<tr>
+      <td class="ctr" style="width:44px;font-weight:800;color:#1a3a6b;">${esc(d.label)}</td>
+      <td class="ctr" style="width:66px;color:#666;">${esc(d.dateLabel)}</td>
+      <td style="text-align:left;white-space:pre-wrap;">${val?esc(val).replace(/\n/g,"<br/>"):"<span style='color:#aaa'>내용 없음</span>"}</td>
+    </tr>`;
+  }).join("");
   const textBlock=(label,val)=>`<div style="margin-bottom:12px;">
     <div style="font-size:10.5px;font-weight:800;color:#1a3a6b;background:#eef4fc;padding:5px 10px;border-radius:4px 4px 0 0;border:1px solid #c5d3e8;border-bottom:none;">${esc(label)}</div>
     <div style="border:1px solid #c5d3e8;border-radius:0 0 4px 4px;padding:10px 12px;font-size:12px;line-height:1.7;color:#222;min-height:28px;white-space:pre-wrap;">${esc(val)||"<span style=\\'color:#aaa\\'>내용 없음</span>"}</div>
@@ -2404,12 +2463,14 @@ function _buildReportHTML(reportDoc,pmName,wi,stats){
       <thead><tr><th style="width:34px;">No</th><th style="min-width:90px;">현장명</th><th style="text-align:left;min-width:140px;">증상/내용</th><th style="width:60px;">상태</th><th style="width:80px;">방문일</th></tr></thead>
       <tbody>${actRows}</tbody>
     </table>
-    <div class="qdoc-section-title">■ 보고 내용</div>
+    <div class="qdoc-section-title">■ 금주 주요 업무 요약 (일자별)</div>
+    <table class="qdoc-items-table" style="margin-bottom:14px;">
+      <thead><tr><th style="width:44px;">요일</th><th style="width:66px;">일자</th><th style="text-align:left;">업무 내용</th></tr></thead>
+      <tbody>${dailyRows}</tbody>
+    </table>
+    <div class="qdoc-section-title">■ 특이사항 · 애로사항</div>
     <div style="margin-top:10px;">
-      ${textBlock("① 금주 주요 업무 요약",reportDoc.summary)}
-      ${textBlock("② 특이사항 · 애로사항",reportDoc.issuesNote)}
-      ${textBlock("③ 차주 업무 계획",reportDoc.nextPlan)}
-      ${textBlock("④ 건의 · 지원 요청사항",reportDoc.requestNote)}
+      ${textBlock("특이사항 · 애로사항",reportDoc.issuesNote)}
     </div>
     <div class="qdoc-footer">
       <div class="qdoc-footer-company">
@@ -2430,8 +2491,11 @@ window._previewReport=function(){
   _previewKind="report";
   const wi=weekInfo(reportAnchor);
   const stats=computeReportStats(reportPM,wi);
+  const days=weekdayList(wi);
+  const dailySummary={};
+  days.forEach((d,idx)=>{dailySummary[d.key]=document.getElementById("rf_daily_"+idx)?.value.trim()||"";});
   const g=id=>document.getElementById(id)?.value.trim()||"";
-  const draft={summary:g("rf_summary"),issuesNote:g("rf_issuesNote"),nextPlan:g("rf_nextPlan"),requestNote:g("rf_requestNote")};
+  const draft={dailySummary,issuesNote:g("rf_issuesNote")};
   const html=_buildReportHTML(draft,reportPM,wi,stats);
   if(isMobile()){
     const overlay=document.getElementById("quotePreviewOverlay");
@@ -2493,15 +2557,16 @@ window._exportReportExcel=function(){
     ws1["!cols"]=[{wch:14},{wch:10},{wch:10},{wch:10},{wch:10},{wch:14},{wch:14},{wch:10},{wch:10},{wch:12}];
     XLSX.utils.book_append_sheet(wb,ws1,"팀주간현황");
 
+    const days=weekdayList(wi);
     const s2=[
       ["개인별 주간업무보고 상세"],
       [`보고 기간: ${wi.label}`],
       [],
-      ["담당자","금주 주요업무 요약","특이사항·애로사항","차주 계획","건의·지원요청"],
-      ...weeklyReports.filter(r=>r.weekKey===wi.key).map(r=>[r.pm,r.summary||"",r.issuesNote||"",r.nextPlan||"",r.requestNote||""])
+      ["담당자",...days.map(d=>`${d.label}(${d.dateLabel})`),"특이사항·애로사항"],
+      ...weeklyReports.filter(r=>r.weekKey===wi.key).map(r=>[r.pm,...days.map(d=>(r.dailySummary&&r.dailySummary[d.key])||""),r.issuesNote||""])
     ];
     const ws2=XLSX.utils.aoa_to_sheet(s2);
-    ws2["!cols"]=[{wch:12},{wch:34},{wch:28},{wch:28},{wch:28}];
+    ws2["!cols"]=[{wch:12},{wch:26},{wch:26},{wch:26},{wch:26},{wch:26},{wch:28}];
     XLSX.utils.book_append_sheet(wb,ws2,"보고서상세");
 
     const fileDate=wi.key.replace(/-/g,"");
@@ -2518,6 +2583,7 @@ function renderReport(){
   const stats=computeReportStats(reportPM,wi);
   const savedReport=reportPM?(findReportDoc(reportPM,wi.key)||{}):{};
   const isCurrentWeek=weekInfo(new Date()).key===wi.key;
+  const days=weekdayList(wi);
 
   // 담당자 본인의 보고서 이력 (최근 8건)
   const myHistory=reportPM?weeklyReports.filter(r=>r.pm===reportPM).slice().sort((a,b)=>(b.weekKey||"").localeCompare(a.weekKey||"")).slice(0,8):[];
@@ -2605,17 +2671,21 @@ function renderReport(){
         <div style="font-size:11.5px;color:var(--ink-5);">${savedReport.updatedAt?`최근 저장: ${fmtDatetime(savedReport.updatedAt)}`:"아직 저장되지 않았습니다"}</div>
       </div>
       <div class="card-body">
-        <div class="field"><label>① 금주 주요 업무 요약</label>
-          <textarea id="rf_summary" rows="4" placeholder="이번 주 수행한 주요 업무를 항목별로 정리하세요 (예: 현장 방문 3건 완료, 신규 현장 계약 협의 등)">${esc(savedReport.summary||"")}</textarea>
+        <div class="rpt-daily-wrap">
+          <div class="rpt-daily-head">
+            <div class="rpt-daily-title"><span class="num">1</span>금주 주요 업무 요약</div>
+            <div class="rpt-daily-sub">요일별로 그날 수행한 업무를 간단히 기록하세요</div>
+          </div>
+          <div class="rpt-daily-grid">
+            ${days.map((d,idx)=>`
+              <div class="rpt-day-card ${d.cls}">
+                <div class="rpt-day-label"><span class="rpt-day-name">${esc(d.label)}</span><span class="rpt-day-date">${esc(d.dateLabel)}</span></div>
+                <textarea id="rf_daily_${idx}" placeholder="${esc(d.label)}요일 업무 내용">${esc((savedReport.dailySummary&&savedReport.dailySummary[d.key])||"")}</textarea>
+              </div>`).join("")}
+          </div>
         </div>
-        <div class="field"><label>② 특이사항 · 애로사항</label>
+        <div class="field" style="margin-bottom:0;"><label>② 특이사항 · 애로사항</label>
           <textarea id="rf_issuesNote" rows="3" placeholder="업무 중 발생한 특이사항, 애로사항, 리스크를 기록하세요">${esc(savedReport.issuesNote||"")}</textarea>
-        </div>
-        <div class="field"><label>③ 차주 업무 계획</label>
-          <textarea id="rf_nextPlan" rows="3" placeholder="다음 주 예정된 업무 계획을 입력하세요">${esc(savedReport.nextPlan||"")}</textarea>
-        </div>
-        <div class="field" style="margin-bottom:0;"><label>④ 건의 · 지원 요청사항</label>
-          <textarea id="rf_requestNote" rows="2" placeholder="지원이 필요한 사항이나 건의사항을 입력하세요">${esc(savedReport.requestNote||"")}</textarea>
         </div>
       </div>
       <div class="mc-actions" style="border-radius:0 0 var(--r-lg) var(--r-lg);">
@@ -2634,7 +2704,7 @@ function renderReport(){
             <div class="history-content" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
               <div>
                 <div class="history-meta">${esc(r.weekKey)} · ${esc(r.weekStart)} ~ ${esc(r.weekEnd)}${r.weekKey===wi.key?` <span class="history-tag">현재 보는 주</span>`:""}</div>
-                <div class="history-text">${esc((r.summary||"").slice(0,60))||"<span style='color:var(--ink-5)'>요약 미작성</span>"}${(r.summary||"").length>60?"…":""}</div>
+                <div class="history-text">${esc(dailySummaryText(r.dailySummary).slice(0,60))||"<span style='color:var(--ink-5)'>요약 미작성</span>"}${dailySummaryText(r.dailySummary).length>60?"…":""}</div>
               </div>
               <button class="btn btn-secondary btn-sm" onclick="window._reportLoadFromHistory('${r.id}')">불러오기</button>
             </div>
