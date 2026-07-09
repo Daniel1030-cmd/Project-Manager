@@ -390,6 +390,8 @@ input,select,textarea{font-family:inherit;}
 /* ════ 브랜드 배지 (NEO / SPARKOZ) ════ */
 .b-neo{background:var(--blue-lt);color:var(--blue);font-weight:700;border:1px solid rgba(37,99,235,.18);}
 .b-sparkoz{background:var(--violet-lt);color:var(--violet);font-weight:700;border:1px solid rgba(124,58,237,.18);}
+.b-tn70{background:var(--amber-lt);color:var(--amber);font-weight:700;border:1px solid rgba(217,119,6,.18);}
+.b-tn10{background:#ecfdf5;color:#059669;font-weight:700;border:1px solid rgba(5,150,105,.18);}
 
 /* ════ 재고 모바일 정렬 바 (기본 숨김, 모바일에서만 표시) ════ */
 .inv-mobile-sort{display:none;gap:8px;margin-bottom:14px;}
@@ -425,8 +427,8 @@ input,select,textarea{font-family:inherit;}
   .m-topbar{display:flex;align-items:center;justify-content:space-between;height:54px;padding:0 16px;background:var(--sidebar-bg);color:#fff;position:sticky;top:0;z-index:200;gap:12px;}
   .m-topbar-title{font-size:15px;font-weight:700;flex:1;}
   .m-topbar-brand{display:flex;align-items:center;gap:8px;}
-  .m-tabbar{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--sidebar-bg);z-index:200;box-shadow:0 -1px 0 rgba(255,255,255,.06);padding-bottom:env(safe-area-inset-bottom);}
-  .m-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:9px 4px 8px;cursor:pointer;color:rgba(255,255,255,.45);font-size:10.5px;font-weight:500;user-select:none;transition:color .15s;}
+  .m-tabbar{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--sidebar-bg);z-index:200;box-shadow:0 -1px 0 rgba(255,255,255,.06);padding-bottom:env(safe-area-inset-bottom);overflow-x:auto;}
+  .m-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:9px 4px 8px;cursor:pointer;color:rgba(255,255,255,.45);font-size:10.5px;font-weight:500;user-select:none;transition:color .15s;min-width:52px;}
   .m-tab .m-tab-ic{font-size:18px;line-height:1;}
   .m-tab.active{color:var(--teal);}
   .content{padding:14px 14px 84px;}
@@ -524,6 +526,7 @@ input,select,textarea{font-family:inherit;}
         <li class="nav-item" data-page="site"><span class="nav-ic">🏗️</span>Site Master</li>
         <li class="nav-item" data-page="project"><span class="nav-ic">🛠️</span>Project</li>
         <li class="nav-item" data-page="inventory"><span class="nav-ic">📦</span>Inventory</li>
+        <li class="nav-item" data-page="errorcode"><span class="nav-ic">📕</span>오류코드 가이드</li>
         <li class="nav-item" data-page="issue"><span class="nav-ic">⚠️</span>Issue</li>
         <li class="sidebar-section">분석</li>
         <li class="nav-item" data-page="statistics"><span class="nav-ic">📊</span>Statistics</li>
@@ -561,6 +564,7 @@ input,select,textarea{font-family:inherit;}
     <li class="m-tab" data-page="site"><span class="m-tab-ic">🏗️</span>Site</li>
     <li class="m-tab" data-page="project"><span class="m-tab-ic">🛠️</span>Project</li>
     <li class="m-tab" data-page="inventory"><span class="m-tab-ic">📦</span>Stock</li>
+    <li class="m-tab" data-page="errorcode"><span class="m-tab-ic">📕</span>오류</li>
     <li class="m-tab" data-page="statistics"><span class="m-tab-ic">📊</span>Stats</li>
     <li class="m-tab" data-page="report"><span class="m-tab-ic">📝</span>Report</li>
     <li class="m-tab" data-page="issue"><span class="m-tab-ic">⚠️</span>Issue</li>
@@ -593,7 +597,7 @@ input,select,textarea{font-family:inherit;}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
 import {
   getFirestore, collection, addDoc, updateDoc,
-  doc, onSnapshot, serverTimestamp, setDoc
+  doc, onSnapshot, serverTimestamp, setDoc, deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
 const fbCfg={
@@ -605,17 +609,18 @@ const fbCfg={
   appId:"1:808738416305:web:b366ad2258471790852490"
 };
 const db=getFirestore(initializeApp(fbCfg));
-const COL={site:"site",tasks:"tasks",issues:"issues",inventory:"inventory",weeklyReports:"weeklyReports"};
+const COL={site:"site",tasks:"tasks",issues:"issues",inventory:"inventory",weeklyReports:"weeklyReports",errorCodes:"errorCodes"};
 
-let site=[],tasks=[],issues=[],inventoryList=[],weeklyReports=[];
+let site=[],tasks=[],issues=[],inventoryList=[],weeklyReports=[],errorCodes=[];
 let curPage="dashboard";
-let sq={site:"",project:"",issue:"",inventory:""};
+let sq={site:"",project:"",issue:"",inventory:"",errorcode:""};
 let projSort={col:"receiptDate",dir:"desc"};
 let invSort={col:"model",dir:"asc"};
 let statPeriod="week";
 let reportPM=""; // 선택된 담당자(작성자)
 let reportAnchor=new Date(); // 선택된 주(週)의 기준일
 let reportHistOpenId=null;
+let errCodeFilterBrand="all"; // 오류코드 가이드 브랜드 필터
 
 const $content=document.getElementById("content");
 const isMobile=()=>window.innerWidth<=768;
@@ -642,6 +647,9 @@ const CHECKLIST_ITEMS=[
 /* ════ 재고 브랜드 / 현황 구분 ════ */
 const INV_BRANDS=["NEO","SPARKOZ"];
 const INV_STATUS_LIST=["판매","렌탈","재고","데모","대체"];
+/* ════ 오류코드 가이드 : 브랜드 구분 (NEO / SPARKOZ) ════ */
+const ERROR_BRANDS=["NEO","SPARKOZ"];
+const ERROR_SEVERITY=["긴급","높음","보통","낮음"];
 
 const esc=v=>v==null?"":String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
 
@@ -724,6 +732,16 @@ function actionTag(t){
   return`<span class="action-tag ${parts[0]}">${parts[1]||""} ${esc(t)}</span>`;
 }
 
+/* ════ 오류코드 가이드 : 브랜드/심각도 배지 ════ */
+function bModelSeries(b){
+  const m={"NEO":"b-neo","SPARKOZ":"b-sparkoz"};
+  return b?`<span class="badge ${m[b]||"b-ready"}">${esc(b)}</span>`:`<span class="badge b-ready">미지정</span>`;
+}
+function bSeverity(s){
+  const m={"긴급":"b-paid","높음":"b-warn-soon","보통":"b-progress","낮음":"b-ready"};
+  return s?`<span class="badge ${m[s]||"b-ready"}">${esc(s)}</span>`:`<span class="badge b-ready">-</span>`;
+}
+
 /* ════════════════════════════════════
    ISO 주차(週) 계산 유틸 — 주간업무보고에서 사용
 ════════════════════════════════════ */
@@ -804,6 +822,7 @@ onSnapshot(collection(db,COL.tasks),s=>{tasks=s.docs.map(d=>({id:d.id,...d.data(
 onSnapshot(collection(db,COL.issues),s=>{issues=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
 onSnapshot(collection(db,COL.inventory),s=>{inventoryList=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
 onSnapshot(collection(db,COL.weeklyReports),s=>{weeklyReports=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
+onSnapshot(collection(db,COL.errorCodes),s=>{errorCodes=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
 
 const $overlay=document.getElementById("modalOverlay");
 const $modal=document.getElementById("modalEl");
@@ -986,7 +1005,7 @@ function _renderDetailModal(task,linkedSite,asRes,activeTab){
           </div>
           <div class="field-row">
             <div class="field"><label>담당 PM</label><input id="dd_pm" value="${esc(task.pm||"")}" placeholder="PM 이름"/></div>
-            <div class="field"><label>장비모델</label><input id="dd_equipModel" value="${esc(task.equipModel||"")}" placeholder="예: KEENON T-10"/></div>
+            <div class="field"><label>장비모델(상세)</label><input id="dd_equipModel" value="${esc(task.equipModel||"")}" placeholder="예: KEENON T-10"/></div>
           </div>
           <div class="field-row">
             <div class="field"><label>장비 S/N</label><input id="dd_equipSN" value="${esc(task.equipSN||"")}" placeholder="시리얼넘버"/></div>
@@ -994,6 +1013,14 @@ function _renderDetailModal(task,linkedSite,asRes,activeTab){
               <div style="padding-top:6px;">${bAS(linkedSite?.contractStart,linkedSite?.maintenancePeriod)}
               ${asRes.expireDate?`<span style="font-size:11px;color:var(--ink-5);margin-left:6px;">만료: ${fmtDate(asRes.expireDate)}</span>`:""}</div>
             </div>
+          </div>
+          <div class="field">
+            <label>브랜드 (오류코드 조회 기준) <span style="color:var(--rose)">*</span></label>
+            <select id="dd_modelSeries" onchange="window._lookupErrorGuide()">
+              <option value="">선택 안함</option>
+              ${ERROR_BRANDS.map(o=>`<option value="${esc(o)}"${task.modelSeries===o?" selected":""}>${esc(o)}</option>`).join("")}
+              <option value="기타"${task.modelSeries==="기타"?" selected":""}>기타</option>
+            </select>
           </div>
         </div>
         <div class="as-section">
@@ -1032,8 +1059,14 @@ function _renderDetailModal(task,linkedSite,asRes,activeTab){
           </div>
           <div class="field-row">
             <div class="field"><label>불량 부품·모듈</label><input id="dd_faultyPart" value="${esc(task.faultyPart||"")}" placeholder="예: IR 센서 보드 #3, 배터리 팩 B"/></div>
-            <div class="field"><label>에러 코드</label><input id="dd_errorCode" value="${esc(task.errorCode||"")}" placeholder="예: ERR-0x1F, Fault 12"/></div>
+            <div class="field"><label>에러 코드</label>
+              <div style="display:flex;gap:6px;">
+                <input id="dd_errorCode" style="flex:1;" value="${esc(task.errorCode||"")}" placeholder="예: ERR-0x1F, Fault 12"/>
+                <button type="button" class="btn btn-secondary btn-sm" style="flex-shrink:0;" onclick="window._lookupErrorGuide()">🔍 조치법</button>
+              </div>
+            </div>
           </div>
+          <div id="errGuideResult"></div>
           <div class="field"><label>진단 근거 · 측정값</label>
             <textarea id="dd_diagEvidence" rows="2" placeholder="예: 배터리 전압 측정 22.1V (정상 24V)">${esc(task.diagEvidence||"")}</textarea>
           </div>
@@ -1131,6 +1164,8 @@ function _renderDetailModal(task,linkedSite,asRes,activeTab){
       <button class="btn btn-primary" onclick="window._saveDetail()">💾 저장</button>
       ${task.status!=="완료"?`<button class="btn btn-primary" style="background:var(--green);" onclick="window._completeProject('${task.id}')">✅ 완료 처리</button>`:""}
     </div>`;
+
+  if(task.errorCode)setTimeout(()=>window._lookupErrorGuide(),0);
 }
 
 window._switchDetailTab=function(tabId){
@@ -1162,13 +1197,53 @@ window._updateDday=function(){
   else display.textContent="방문 일정을 입력해주세요";
 };
 
+/* ════ 오류코드 조치법 조회 (AS 이력카드 · 원인분석 탭에서 사용) ════ */
+window._lookupErrorGuide=function(){
+  const modelEl=document.getElementById("dd_modelSeries");
+  const codeEl=document.getElementById("dd_errorCode");
+  const resEl=document.getElementById("errGuideResult");
+  if(!resEl)return;
+  const brand=modelEl?modelEl.value:"";
+  const code=(codeEl?codeEl.value:"").trim();
+  if(!code){
+    resEl.innerHTML=`<div style="font-size:12px;color:var(--ink-5);padding:2px 0 10px;">에러 코드를 입력한 뒤 "🔍 조치법" 버튼을 눌러 조회하세요</div>`;
+    return;
+  }
+  const lc=code.toLowerCase();
+  let matches=errorCodes.filter(e=>(e.errorCode||"").trim().toLowerCase()===lc);
+  if(brand&&brand!=="기타")matches=matches.filter(e=>e.brand===brand);
+  if(!matches.length){
+    matches=errorCodes.filter(e=>(!brand||brand==="기타"||e.brand===brand)&&(e.errorCode||"").toLowerCase().includes(lc));
+  }
+  if(!matches.length){
+    resEl.innerHTML=`<div class="symptom-card" style="background:var(--rose-lt);border-color:rgba(225,29,72,.2);margin-top:6px;">
+      <div class="symptom-card-label" style="color:var(--rose);">⚠️ 등록된 조치 안내 없음</div>
+      <div class="symptom-card-text">"${esc(code)}"${brand?` (${esc(brand)})`:""} 에 해당하는 오류코드 가이드를 찾을 수 없습니다.
+      <a href="javascript:void(0)" onclick="document.getElementById('modalOverlay').classList.add('hidden');navigate('errorcode');" style="color:var(--blue);font-weight:700;">오류코드 가이드에서 등록하기 →</a></div>
+    </div>`;
+    return;
+  }
+  resEl.innerHTML=matches.map(e=>`
+    <div class="symptom-card" style="background:var(--teal-lt);border-color:rgba(13,148,136,.2);margin-top:6px;">
+      <div class="symptom-card-label" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        ${bModelSeries(e.brand)}${bSeverity(e.severity)}
+        <span style="margin-left:auto;font-family:monospace;color:var(--ink-4);">${esc(e.errorCode)}</span>
+      </div>
+      <div class="symptom-card-text" style="margin-top:4px;"><strong>${esc(e.errorName)||"오류명 미등록"}</strong></div>
+      ${e.symptom?`<div class="symptom-card-text" style="margin-top:4px;">🔎 증상: ${esc(e.symptom)}</div>`:""}
+      ${e.cause?`<div class="symptom-card-text" style="margin-top:2px;">🧩 원인: ${esc(e.cause)}</div>`:""}
+      <div class="symptom-card-text" style="margin-top:4px;color:var(--teal-dk);font-weight:700;">🔧 조치방법: ${esc(e.solution)||"-"}</div>
+      ${e.note?`<div class="symptom-card-text" style="margin-top:2px;color:var(--ink-5);">📝 비고: ${esc(e.note)}</div>`:""}
+    </div>`).join("");
+};
+
 window._saveDetail=async function(){
   if(!_detailTaskId)return;
   const g=id=>document.getElementById(id)?.value.trim()||"";
   const data={
     siteName:g("dd_siteName"),receiptDate:g("dd_receiptDate"),
     manager:g("dd_manager"),phone:g("dd_phone"),pm:g("dd_pm"),
-    equipModel:g("dd_equipModel"),equipSN:g("dd_equipSN"),
+    equipModel:g("dd_equipModel"),equipSN:g("dd_equipSN"),modelSeries:g("dd_modelSeries"),
     symptom:g("dd_symptom"),firstOccur:g("dd_firstOccur"),
     occurFreq:g("dd_occurFreq"),reproStep:g("dd_reproStep"),
     causeType:g("dd_causeType"),diagEngineer:g("dd_diagEngineer"),
@@ -1970,6 +2045,119 @@ function renderInventory(){
 }
 
 /* ════════════════════════════════════
+   오류코드 가이드 (NEO / SPARKOZ)
+════════════════════════════════════ */
+const ERROR_CODE_FIELDS=[
+  {key:"brand",label:"브랜드",type:"select",opts:ERROR_BRANDS,req:true,err:"브랜드를 선택해주세요",pair:true},
+  {key:"errorCode",label:"오류코드",req:true,err:"오류코드를 입력해주세요",ph:"예: E-101, ERR_0x1F",pair:true},
+  {key:"errorName",label:"오류명",ph:"예: 배터리 저전압 오류",pair:true},
+  {key:"severity",label:"심각도",type:"select",opts:ERROR_SEVERITY,pair:true},
+  {key:"symptom",label:"증상",type:"textarea",ph:"현장에서 나타나는 증상을 입력하세요"},
+  {key:"cause",label:"발생 원인",type:"textarea",ph:"발생 원인을 입력하세요"},
+  {key:"solution",label:"조치 방법",type:"textarea",req:true,err:"조치 방법을 입력해주세요",ph:"단계별 조치 방법을 입력하세요",rows:4},
+  {key:"note",label:"비고",type:"textarea",ph:"참고사항 (부품 필요 여부, 협력사 연락처 등)"},
+];
+window._openAddErrorCode=()=>openModal({title:"오류코드 등록",fields:ERROR_CODE_FIELDS,hint:"브랜드(NEO/SPARKOZ)별 오류코드와 조치방법을 등록하면 AS 이력카드에서 바로 조회할 수 있습니다.",
+  onSave:async d=>{await addDoc(collection(db,COL.errorCodes),{...d,createdAt:serverTimestamp()});toast("오류코드가 등록되었습니다","success");}});
+window._openEditErrorCode=id=>{
+  const e=errorCodes.find(x=>x.id===id);if(!e)return;
+  openModal({title:"오류코드 수정",fields:ERROR_CODE_FIELDS,values:e,
+    onSave:async d=>{await updateDoc(doc(db,COL.errorCodes,id),d);toast("수정되었습니다","success");}});
+};
+window._deleteErrorCode=async id=>{
+  if(!confirm("이 오류코드 가이드를 삭제하시겠습니까?"))return;
+  try{await deleteDoc(doc(db,COL.errorCodes,id));toast("삭제되었습니다","success");}
+  catch(e){console.error(e);toast("삭제 실패","error");}
+};
+window._setErrBrandFilter=b=>{
+  errCodeFilterBrand=b;
+  document.querySelectorAll(".err-brand-tab").forEach(el=>el.classList.toggle("stat-tab-active",el.dataset.brand===b));
+  renderErrorCodeResults();
+};
+
+function renderErrorCodeResults(){
+  const q=sq.errorcode;
+  let list=errorCodes.filter(e=>errCodeFilterBrand==="all"||e.brand===errCodeFilterBrand);
+  list=list.filter(e=>match(q,[e.errorCode,e.errorName,e.symptom,e.cause,e.solution,e.brand]));
+  const ra=document.getElementById("errRA");const ma=document.getElementById("sm_errorcode");
+  if(!ra)return;if(ma)ma.textContent=q?`${list.length}건 검색됨`:"";
+  if(!list.length){ra.innerHTML=noResults(q||"오류코드");return;}
+  list=list.slice().sort((a,b)=>(a.brand||"").localeCompare(b.brand||"")||(a.errorCode||"").localeCompare(b.errorCode||""));
+
+  const tBody=list.map(e=>`<tr>
+    <td>${bModelSeries(e.brand)}</td>
+    <td style="font-weight:700;font-family:monospace;">${esc(e.errorCode)}</td>
+    <td style="font-weight:600;">${esc(e.errorName)||"-"}</td>
+    <td style="max-width:160px;white-space:normal;word-break:keep-all;">${esc(e.symptom)||"-"}</td>
+    <td style="max-width:160px;white-space:normal;word-break:keep-all;">${esc(e.cause)||"-"}</td>
+    <td style="max-width:240px;white-space:normal;word-break:keep-all;color:var(--teal-dk);font-weight:500;">${esc(e.solution)||"-"}</td>
+    <td>${bSeverity(e.severity)}</td>
+    <td><div class="td-actions">
+      <button class="btn-icon edit" onclick="_openEditErrorCode('${e.id}')">✏️</button>
+      <button class="btn-icon" style="color:var(--rose);" onclick="_deleteErrorCode('${e.id}')">🗑️</button>
+    </div></td>
+  </tr>`).join("");
+
+  const mCards=list.map(e=>`<div class="mc">
+    <div class="mc-head" onclick="_toggleMC('ec${e.id}')">
+      <div class="mc-title"><div class="mc-name">${esc(e.errorCode)}${e.errorName?" · "+esc(e.errorName):""}</div><div class="mc-sub">${esc(e.symptom)||"-"}</div></div>
+      <div class="mc-badges">${bModelSeries(e.brand)}${bSeverity(e.severity)}</div>
+      <span class="mc-chevron" id="mcc_ec${e.id}">▼</span>
+    </div>
+    <div class="mc-body" id="mcb_ec${e.id}">
+      <hr class="mc-divider"/>
+      <div class="mc-fields">
+        <div class="mc-field"><span class="mc-label">브랜드</span><span class="mc-val">${bModelSeries(e.brand)}</span></div>
+        <div class="mc-field"><span class="mc-label">심각도</span><span class="mc-val">${bSeverity(e.severity)}</span></div>
+        <div class="mc-field"><span class="mc-label">증상</span><span class="mc-val">${esc(e.symptom)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">원인</span><span class="mc-val">${esc(e.cause)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">조치방법</span><span class="mc-val">${esc(e.solution)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">비고</span><span class="mc-val">${esc(e.note)||"-"}</span></div>
+      </div>
+      <div class="mc-actions">
+        <button class="btn btn-secondary btn-sm" onclick="_openEditErrorCode('${e.id}')">✏️ 수정</button>
+        <button class="btn btn-sm" style="background:var(--rose-lt);color:var(--rose);" onclick="_deleteErrorCode('${e.id}')">🗑️ 삭제</button>
+      </div>
+    </div>
+  </div>`).join("");
+
+  ra.innerHTML=`<div class="tbl-wrap"><table class="tbl"><thead><tr>
+    <th>브랜드</th><th>오류코드</th><th>오류명</th><th>증상</th><th>원인</th><th>조치방법</th><th>심각도</th><th>관리</th>
+  </tr></thead><tbody>${tBody}</tbody></table></div>
+  <div class="mc-list">${mCards}</div>`;
+}
+_renderers.errorcode=renderErrorCodeResults;
+
+function renderErrorCode(){
+  const total=errorCodes.length;
+  const brandCounts={};ERROR_BRANDS.forEach(b=>brandCounts[b]=errorCodes.filter(e=>e.brand===b).length);
+  const tabsHtml=[["all","전체"],...ERROR_BRANDS.map(b=>[b,b])].map(([v,l])=>
+    `<button class="stat-tab err-brand-tab${errCodeFilterBrand===v?" stat-tab-active":""}" data-brand="${v}" onclick="_setErrBrandFilter('${v}')">${esc(l)}</button>`).join("");
+  $content.innerHTML=`
+    <div class="page-head">
+      <div><div class="page-title">오류코드 가이드</div><div class="page-subtitle">NEO / SPARKOZ 브랜드별 오류코드와 조치방법을 관리합니다. 현장에서 발생한 오류코드를 조회하면 조치방법이 표시됩니다.</div></div>
+      <div class="page-actions"><button class="btn btn-primary" onclick="_openAddErrorCode()">+ 오류코드 등록</button></div>
+    </div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
+      ${kpiHtml(total,"전체 오류코드","c-violet")}
+      ${kpiHtml(brandCounts["NEO"],"NEO","c-blue")}
+      ${kpiHtml(brandCounts["SPARKOZ"],"SPARKOZ","c-violet")}
+    </div>
+    ${!errorCodes.length?`<div class="card"><div class="card-body">${empty("📕","등록된 오류코드가 없습니다","+ 오류코드 등록 버튼으로 브랜드별 오류코드와 조치방법을 추가해보세요")}</div></div>`:`
+    <div class="card">
+      <div class="card-header"><div class="card-title">오류코드 목록</div><div class="stat-tab-group">${tabsHtml}</div></div>
+      <div class="card-body">${searchBox("errorcode","오류코드, 오류명, 증상, 원인, 조치방법으로 검색")}<div id="errRA"></div></div>
+    </div>`}
+    <div class="card">
+      <div class="card-body" style="font-size:12.5px;color:var(--ink-4);display:flex;align-items:center;gap:8px;">
+        <span style="font-size:16px;">💡</span>
+        <span>Project → 📂 상세 → AS 이력카드의 <strong>원인 분석</strong> 탭에서 브랜드와 에러코드를 입력하고 "🔍 조치법" 버튼을 누르면 여기 등록된 조치방법이 바로 표시됩니다.</span>
+      </div>
+    </div>`;
+  renderErrorCodeResults();
+}
+
+/* ════════════════════════════════════
    ISSUE
 ════════════════════════════════════ */
 const ISSUE_FIELDS=[
@@ -2267,6 +2455,18 @@ window._exportStatisticsExcel=function(){
     const ws3=XLSX.utils.aoa_to_sheet(s3);
     ws3["!cols"]=[{wch:26},{wch:12},{wch:12},{wch:12},{wch:16},{wch:12}];
     XLSX.utils.book_append_sheet(wb,ws3,"현장별현황");
+
+    /* ── Sheet 4: 오류코드 가이드 ── */
+    const s4=[
+      ["오류코드 가이드 (NEO / SPARKOZ)"],
+      [`생성일: ${todayStr}`],
+      [],
+      ["브랜드","오류코드","오류명","증상","원인","조치방법","심각도","비고"],
+      ...(errorCodes.length?errorCodes.slice().sort((a,b)=>(a.brand||"").localeCompare(b.brand||"")).map(e=>[e.brand||"",e.errorCode||"",e.errorName||"",e.symptom||"",e.cause||"",e.solution||"",e.severity||"",e.note||""]):[["데이터 없음","","","","","","",""]])
+    ];
+    const ws4=XLSX.utils.aoa_to_sheet(s4);
+    ws4["!cols"]=[{wch:10},{wch:14},{wch:20},{wch:26},{wch:26},{wch:34},{wch:10},{wch:20}];
+    XLSX.utils.book_append_sheet(wb,ws4,"오류코드가이드");
 
     const fileDate=new Date().toISOString().slice(0,10).replace(/-/g,"");
     XLSX.writeFile(wb,`PMO_통계_${fileDate}.xlsx`);
@@ -2822,6 +3022,7 @@ const PAGES={
   site:{fn:renderSite,label:"Site Master"},
   project:{fn:renderProject,label:"Project"},
   inventory:{fn:renderInventory,label:"Inventory"},
+  errorcode:{fn:renderErrorCode,label:"오류코드 가이드"},
   statistics:{fn:renderStatistics,label:"Statistics"},
   report:{fn:renderReport,label:"주간업무보고"},
   issue:{fn:renderIssue,label:"Issue"},
