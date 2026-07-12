@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>PMO System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -21,46 +21,56 @@
   --paid:#dc2626;--paid-lt:#fee2e2;
   --free:#0d9488;--free-lt:#ccfbf1;
   --warn:#d97706;--warn-lt:#fffbeb;
-  --sidebar-bg:#0f172a;--sidebar-hover:#1e293b;--sidebar-active:#0d9488;
+  --sidebar-bg:#0b1220;--sidebar-hover:#1a2536;--sidebar-active:#0d9488;
   --r-sm:6px;--r:10px;--r-lg:14px;--r-xl:20px;
   --sh-xs:0 1px 2px rgba(15,23,42,.06);
   --sh-sm:0 1px 4px rgba(15,23,42,.08),0 0 0 1px rgba(15,23,42,.04);
-  --sh-md:0 4px 12px rgba(15,23,42,.10),0 0 0 1px rgba(15,23,42,.05);
-  --sh-lg:0 8px 28px rgba(15,23,42,.14),0 0 0 1px rgba(15,23,42,.06);
+  --sh-md:0 6px 16px rgba(15,23,42,.10),0 0 0 1px rgba(15,23,42,.04);
+  --sh-lg:0 12px 32px rgba(15,23,42,.16),0 0 0 1px rgba(15,23,42,.05);
+  --ease:cubic-bezier(.4,0,.2,1);
+  --dur:.18s;
+  --focus-ring:0 0 0 3px rgba(13,148,136,.30);
   --sidebar-w:220px;
+  --tabbar-h:58px;
+  --safe-b:env(safe-area-inset-bottom,0px);
 }
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important;}}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Inter','Noto Sans KR',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-height:100vh;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;}
-button{font-family:inherit;cursor:pointer;border:none;outline:none;transition:all .15s ease;}
-button:focus-visible{box-shadow:0 0 0 3px rgba(13,148,136,.35);}
+body{font-family:'Inter','Noto Sans KR',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;min-height:100vh;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;overflow-x:hidden;}
+button{font-family:inherit;cursor:pointer;border:none;outline:none;transition:all var(--dur) var(--ease);}
+button:focus-visible{box-shadow:var(--focus-ring);}
+a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--teal);outline-offset:2px;}
 input,select,textarea{font-family:inherit;}
 .app{display:flex;min-height:100vh;}
-.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--sidebar-bg);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:200;overflow:hidden;}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:linear-gradient(180deg,var(--sidebar-bg) 0%,#0f1a2e 100%);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:200;overflow:hidden;}
 .sidebar-brand{display:flex;align-items:center;gap:10px;padding:22px 18px 18px;border-bottom:1px solid rgba(255,255,255,.07);}
-.brand-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--teal),#0891b2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.brand-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--teal),#0891b2);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(13,148,136,.4);}
 .brand-text{flex:1;min-width:0;}
 .brand-name{font-size:14px;font-weight:700;color:#fff;letter-spacing:-.2px;line-height:1.2;}
 .brand-url{font-size:10.5px;color:var(--teal);letter-spacing:.4px;font-weight:500;margin-top:1px;}
 .sidebar-nav{flex:1;padding:10px;overflow-y:auto;}
 .sidebar-nav ul{list-style:none;}
 .sidebar-section{font-size:10px;font-weight:700;letter-spacing:.8px;color:rgba(255,255,255,.28);text-transform:uppercase;padding:14px 8px 6px;}
-.nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--r);cursor:pointer;color:rgba(255,255,255,.62);font-size:13.5px;font-weight:500;transition:background .15s,color .15s;user-select:none;}
+.nav-item{position:relative;display:flex;align-items:center;gap:9px;padding:10px 10px 10px 13px;border-radius:var(--r);cursor:pointer;color:rgba(255,255,255,.62);font-size:13.5px;font-weight:500;transition:background var(--dur) var(--ease),color var(--dur) var(--ease);user-select:none;}
 .nav-item .nav-ic{width:20px;text-align:center;font-size:15px;flex-shrink:0;}
-.nav-item:hover{background:var(--sidebar-hover);color:rgba(255,255,255,.9);}
-.nav-item.active{background:var(--teal);color:#fff;font-weight:600;}
+.nav-item:hover{background:var(--sidebar-hover);color:rgba(255,255,255,.92);}
+.nav-item.active{background:rgba(13,148,136,.16);color:#fff;font-weight:600;}
+.nav-item.active::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--teal);}
 .sidebar-footer{padding:14px 18px;border-top:1px solid rgba(255,255,255,.07);font-size:11px;color:rgba(255,255,255,.25);}
 .main{flex:1;margin-left:var(--sidebar-w);display:flex;flex-direction:column;min-width:0;min-height:100vh;}
-.topbar{height:58px;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:100;}
-.topbar-title{font-size:15px;font-weight:700;color:var(--ink);flex:1;}
+.topbar{height:58px;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 1px 0 rgba(15,23,42,.03);}
+.topbar-title{font-size:15px;font-weight:700;color:var(--ink);flex:1;letter-spacing:-.2px;}
 .topbar-breadcrumb{font-size:12px;color:var(--ink-5);display:flex;align-items:center;gap:5px;}
-.content{flex:1;padding:24px 26px 40px;overflow-y:auto;}
+.content{flex:1;padding:24px 26px 40px;overflow-y:auto;overflow-x:hidden;}
 .m-topbar{display:none;}
 .page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap;}
 .page-title{font-size:22px;font-weight:700;color:var(--ink);letter-spacing:-.4px;line-height:1.2;}
 .page-subtitle{font-size:13px;color:var(--ink-4);margin-top:3px;}
 .page-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
-.kpi-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px 20px;box-shadow:var(--sh-xs);position:relative;overflow:hidden;}
+.kpi-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px 20px;box-shadow:var(--sh-xs);position:relative;overflow:hidden;transition:box-shadow var(--dur) var(--ease),transform var(--dur) var(--ease);}
+.kpi-card:hover{box-shadow:var(--sh-md);transform:translateY(-1px);}
 .kpi-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--line);border-radius:3px 0 0 3px;}
 .kpi-card.c-teal::before{background:var(--teal);}
 .kpi-card.c-blue::before{background:var(--blue);}
@@ -69,27 +79,27 @@ input,select,textarea{font-family:inherit;}
 .kpi-card.c-rose::before{background:var(--rose);}
 .kpi-card.c-green::before{background:var(--green);}
 .kpi-eyebrow{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-5);margin-bottom:8px;white-space:normal;word-break:keep-all;line-height:1.3;}
-.kpi-num{font-size:28px;font-weight:700;color:var(--ink);line-height:1;letter-spacing:-1px;}
+.kpi-num{font-size:28px;font-weight:700;color:var(--ink);line-height:1;letter-spacing:-.6px;font-variant-numeric:tabular-nums;}
 .kpi-card.c-teal .kpi-num{color:var(--teal-dk);}
 .kpi-card.c-blue .kpi-num{color:var(--blue);}
 .kpi-card.c-amber .kpi-num{color:var(--amber);}
 .kpi-card.c-rose .kpi-num{color:var(--rose);}
 .kpi-card.c-green .kpi-num{color:var(--green);}
 .kpi-sub{font-size:12px;color:var(--ink-5);margin-top:4px;}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-xs);margin-bottom:16px;}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-xs);margin-bottom:16px;transition:box-shadow var(--dur) var(--ease);}
 .card-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line);gap:12px;flex-wrap:wrap;}
-.card-title{font-size:14px;font-weight:700;color:var(--ink);}
+.card-title{font-size:14px;font-weight:700;color:var(--ink);letter-spacing:-.1px;}
 .card-body{padding:20px;}
 .card-body-flush{padding:0;}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--r);font-size:13px;font-weight:600;line-height:1;border:none;cursor:pointer;white-space:nowrap;transition:all .15s ease;}
-.btn-primary{background:var(--teal);color:#fff;box-shadow:0 1px 3px rgba(13,148,136,.35);}
-.btn-primary:hover{background:var(--teal-dk);}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--r);font-size:13px;font-weight:600;line-height:1;border:none;cursor:pointer;white-space:nowrap;transition:all var(--dur) var(--ease);}
+.btn-primary{background:linear-gradient(135deg,var(--teal),var(--teal-dk));color:#fff;box-shadow:0 1px 3px rgba(13,148,136,.35);}
+.btn-primary:hover{background:linear-gradient(135deg,var(--teal-dk),#0c5f58);box-shadow:0 4px 10px rgba(13,148,136,.32);transform:translateY(-1px);}
 .btn-secondary{background:var(--surface);color:var(--ink-3);border:1px solid var(--line);box-shadow:var(--sh-xs);}
 .btn-secondary:hover{background:var(--bg-2);border-color:var(--ink-5);}
 .btn-ghost{background:transparent;color:var(--ink-4);padding:6px 10px;}
 .btn-ghost:hover{background:var(--bg-2);color:var(--ink);}
 .btn-sm{padding:5px 10px;font-size:12px;border-radius:var(--r-sm);}
-.btn-icon{padding:7px;border-radius:var(--r-sm);display:inline-flex;align-items:center;justify-content:center;background:transparent;color:var(--ink-4);border:1px solid var(--line);}
+.btn-icon{padding:7px;min-width:32px;min-height:32px;border-radius:var(--r-sm);display:inline-flex;align-items:center;justify-content:center;background:transparent;color:var(--ink-4);border:1px solid var(--line);}
 .btn-icon:hover{background:var(--bg-2);color:var(--ink);}
 .btn-icon.edit:hover{background:var(--blue-lt);color:var(--blue);border-color:rgba(37,99,235,.2);}
 .btn:disabled{opacity:.45;cursor:not-allowed;}
@@ -97,18 +107,19 @@ input,select,textarea{font-family:inherit;}
 .search-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
 .search-wrap{position:relative;flex:1;max-width:360px;}
 .search-ic{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--ink-5);pointer-events:none;}
-.search-wrap input{width:100%;padding:9px 34px 9px 34px;border:1px solid var(--line);border-radius:var(--r);font-size:13.5px;background:var(--surface);color:var(--ink);box-shadow:var(--sh-xs);transition:border-color .15s,box-shadow .15s;}
+.search-wrap input{width:100%;padding:9px 34px 9px 34px;border:1px solid var(--line);border-radius:var(--r);font-size:13.5px;background:var(--surface);color:var(--ink);box-shadow:var(--sh-xs);transition:border-color var(--dur) var(--ease),box-shadow var(--dur) var(--ease);}
 .search-wrap input::placeholder{color:var(--ink-5);}
 .search-wrap input:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,148,136,.12);}
 .search-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--ink-5);font-size:12px;padding:3px 6px;cursor:pointer;display:none;border-radius:4px;}
 .search-wrap.has-val .search-clear{display:inline-flex;}
 .search-meta{font-size:12px;color:var(--ink-5);margin-bottom:12px;min-height:16px;}
-.tbl-wrap{overflow-x:auto;}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .tbl{width:100%;border-collapse:collapse;font-size:13px;}
 .tbl th{background:var(--bg);border-bottom:2px solid var(--line);padding:10px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-4);white-space:nowrap;}
 .tbl td{padding:11px 14px;border-bottom:1px solid var(--line);color:var(--ink-2);white-space:nowrap;vertical-align:middle;}
 .tbl tbody tr:last-child td{border-bottom:none;}
-.tbl tbody tr:hover td{background:var(--bg);}
+.tbl tbody tr:nth-child(even) td{background:rgba(248,250,252,.6);}
+.tbl tbody tr:hover td{background:var(--teal-lt);}
 .tbl .td-actions{display:flex;gap:5px;align-items:center;}
 .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:30px;font-size:11.5px;font-weight:600;white-space:nowrap;letter-spacing:.1px;}
 .badge-dot{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.7;}
@@ -154,7 +165,7 @@ input,select,textarea{font-family:inherit;}
 .empty-body{font-size:13px;line-height:1.6;}
 .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:500;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}
 .modal-overlay.hidden{display:none;}
-.modal{background:var(--surface);border-radius:var(--r-xl);width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:var(--sh-lg);animation:modalIn .2s ease;}
+.modal{background:var(--surface);border-radius:var(--r-xl);width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:var(--sh-lg);animation:modalIn .2s ease;position:relative;}
 @keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(6px);}to{opacity:1;transform:scale(1) translateY(0);}}
 .modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 22px 16px;border-bottom:1px solid var(--line);}
 .modal-title{font-size:16px;font-weight:700;color:var(--ink);}
@@ -251,7 +262,7 @@ input,select,textarea{font-family:inherit;}
 /* ════ 완료처리 체크리스트 ════ */
 .checklist{display:flex;flex-direction:column;gap:8px;}
 .check-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--bg);}
-.check-item input[type="checkbox"]{width:16px;height:16px;margin-top:2px;accent-color:var(--teal);flex-shrink:0;}
+.check-item input[type="checkbox"]{width:18px;height:18px;margin-top:2px;accent-color:var(--teal);flex-shrink:0;}
 .check-item-text{font-size:13px;color:var(--ink-2);line-height:1.4;}
 .check-item.done-item .check-item-text{text-decoration:line-through;color:var(--ink-5);}
 
@@ -348,9 +359,10 @@ input,select,textarea{font-family:inherit;}
 .qdoc-meta-label{background:#f5f7fa;font-weight:700;font-size:11px;padding:8px 12px;min-width:90px;color:#444;border-right:1px solid #eee;white-space:nowrap;}
 .qdoc-meta-val{padding:8px 12px;font-size:12px;color:#111;word-break:break-all;}
 .qdoc-section-title{font-size:12px;font-weight:800;background:#1a73c8;color:#fff;padding:7px 12px;margin:16px 0 0;letter-spacing:.3px;}
+.qdoc-table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .qdoc-items-table{width:100%;border-collapse:collapse;font-size:11.5px;}
 .qdoc-items-table th{background:#e8f0fe;color:#1a3a6b;font-weight:700;padding:8px 10px;border:1px solid #c5d3e8;text-align:center;white-space:nowrap;}
-.qdoc-items-table td{padding:7px 10px;border:1px solid #dde3ee;vertical-align:middle;}
+.qdoc-items-table td{padding:7px 10px;border:1px solid #dde3ee;vertical-align:middle;word-break:break-word;overflow-wrap:anywhere;}
 .qdoc-items-table tbody tr:nth-child(even) td{background:#fafbff;}
 .qdoc-items-table .num{text-align:right;}
 .qdoc-items-table .ctr{text-align:center;}
@@ -387,11 +399,133 @@ input,select,textarea{font-family:inherit;}
 .stat-mini-table td{padding:6px 8px;border-bottom:1px solid var(--line-2);color:var(--ink-2);}
 .stat-mini-table tr:last-child td{border-bottom:none;}
 
+/* ════ 통계 : 반응형 원인분석 그리드 ════ */
+.stat-cause-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+/* ════ 통계 : 기간별 분석 차트 (데스크톱 막대 / 모바일 카드) ════ */
+.stat-period-desktop{display:block;}
+.stat-period-mobile{display:none;}
+.stat-period-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+.stat-period-label{width:72px;font-size:12px;color:var(--ink-3);text-align:right;flex-shrink:0;font-weight:500;}
+.stat-period-track{flex:1;height:22px;background:var(--bg-2);border-radius:6px;overflow:hidden;position:relative;}
+.stat-period-fill{height:100%;background:linear-gradient(90deg,var(--teal),#0891b2);border-radius:6px;transition:width .4s ease;}
+.stat-period-count{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:11px;color:#fff;font-weight:600;}
+.stat-period-rate{width:38px;font-size:11.5px;color:var(--teal-dk);font-weight:700;flex-shrink:0;}
+.stat-period-avg{width:34px;font-size:11.5px;color:var(--ink-5);flex-shrink:0;}
+.stat-period-mcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;margin-bottom:8px;}
+.stat-period-mcard-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;}
+.stat-period-mcard-label{font-size:12.5px;font-weight:700;color:var(--ink-2);}
+.stat-period-mcard-meta{font-size:11.5px;color:var(--ink-4);text-align:right;}
+.stat-period-mcard-track{height:8px;background:var(--bg-2);border-radius:4px;overflow:hidden;}
+.stat-period-mcard-fill{height:100%;background:linear-gradient(90deg,var(--teal),#0891b2);border-radius:4px;}
+
+/* ════ 통계 : 현장별 현황 (데스크톱 막대 / 모바일 카드) ════ */
+.site-perf-desktop{display:block;}
+
 /* ════ 브랜드 배지 (NEO / SPARKOZ) ════ */
 .b-neo{background:var(--blue-lt);color:var(--blue);font-weight:700;border:1px solid rgba(37,99,235,.18);}
 .b-sparkoz{background:var(--violet-lt);color:var(--violet);font-weight:700;border:1px solid rgba(124,58,237,.18);}
 .b-tn70{background:var(--amber-lt);color:var(--amber);font-weight:700;border:1px solid rgba(217,119,6,.18);}
 .b-tn10{background:#ecfdf5;color:#059669;font-weight:700;border:1px solid rgba(5,150,105,.18);}
+
+/* ════ 통계 : 핵심 품질 지표 (MTTR·MTBF·SLA) ════ */
+.qkpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.qkpi-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;box-shadow:var(--sh-xs);position:relative;overflow:hidden;}
+.qkpi-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;border-radius:3px 0 0 3px;}
+.qkpi-card.q-mttr::before{background:var(--blue);}
+.qkpi-card.q-mtbf::before{background:var(--violet);}
+.qkpi-card.q-sla::before{background:var(--teal);}
+.qkpi-card.q-breach::before{background:var(--rose);}
+.qkpi-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-5);display:flex;align-items:center;gap:5px;margin-bottom:8px;}
+.qkpi-num{font-size:24px;font-weight:800;color:var(--ink);letter-spacing:-.5px;line-height:1;}
+.qkpi-card.q-mttr .qkpi-num{color:var(--blue);}
+.qkpi-card.q-mtbf .qkpi-num{color:var(--violet);}
+.qkpi-card.q-sla .qkpi-num{color:var(--teal-dk);}
+.qkpi-card.q-breach .qkpi-num{color:var(--rose);}
+.qkpi-unit{font-size:12px;font-weight:600;color:var(--ink-5);margin-left:3px;}
+.qkpi-sub{font-size:11.5px;color:var(--ink-5);margin-top:6px;line-height:1.4;}
+.qkpi-def{font-size:10.5px;color:var(--ink-5);margin-top:14px;padding-top:10px;border-top:1px dashed var(--line);line-height:1.6;}
+
+/* ── 품질 지표 판정 배지(우수/양호/주의/위험) 및 미니 게이지 ── */
+.qs-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:700;white-space:nowrap;letter-spacing:.2px;}
+.qs-badge.qs-excellent{background:var(--green-lt);color:var(--green);}
+.qs-badge.qs-good{background:var(--blue-lt);color:var(--blue);}
+.qs-badge.qs-warn{background:var(--amber-lt);color:var(--amber);}
+.qs-badge.qs-danger{background:var(--rose-lt);color:var(--rose);}
+.qs-badge.qs-unknown{background:var(--slate-lt);color:var(--ink-5);}
+.qkpi-gauge-track{width:100%;height:5px;border-radius:3px;background:var(--line-2);margin-top:9px;overflow:hidden;}
+.qkpi-gauge-fill{height:100%;border-radius:3px;transition:width .3s;}
+.qkpi-card{display:flex;flex-direction:column;}
+.qkpi-card .qs-badge{margin-top:2px;}
+
+/* ── 모델별 MTTR/MTBF 표의 상대 심각도 막대(브랜드 간 동일 축으로 비교) ── */
+.qm-bar-track{width:100%;height:4px;border-radius:2px;background:var(--line-2);margin-top:5px;overflow:hidden;}
+.qm-bar-fill{height:100%;border-radius:2px;transition:width .3s;}
+
+/* ── 신뢰성 관리 필요 TOP 모델 워치리스트 카드 ── */
+.qm-watch-card{margin-top:16px;padding:14px 16px;background:var(--bg-2);border:1px solid var(--line);border-radius:var(--r-lg);}
+.qm-watch-title{font-size:12.5px;font-weight:700;color:var(--ink-3);margin-bottom:10px;}
+.qm-watch-title-sub{font-weight:400;color:var(--ink-5);font-size:11px;}
+.qm-watch-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.qm-watch-col-h{font-size:10.5px;font-weight:700;color:var(--ink-5);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
+.qm-watch-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line-2);}
+.qm-watch-name{flex:1;font-size:12px;color:var(--ink-3);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.qm-watch-brand{font-size:10px;font-weight:700;color:var(--ink-5);margin-right:2px;}
+.qm-watch-val{font-size:12.5px;font-weight:700;white-space:nowrap;}
+.qm-watch-empty{font-size:11.5px;color:var(--ink-5);padding:8px 0;}
+@media(max-width:640px){.qm-watch-cols{grid-template-columns:1fr;}}
+
+/* ════ 통계 : 모델별 불량 현황 ════ */
+.model-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+.model-bar-label{width:132px;font-size:12.5px;color:var(--ink-3);text-align:right;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;}
+.model-bar-track{flex:1;height:18px;background:var(--bg-2);border-radius:5px;overflow:hidden;position:relative;}
+.model-bar-fill{height:100%;background:linear-gradient(90deg,var(--amber),#f59e0b);border-radius:5px;}
+.model-bar-share{width:44px;font-size:12px;font-weight:700;color:var(--amber);flex-shrink:0;text-align:right;}
+.model-bar-rate{width:40px;font-size:11.5px;color:var(--teal-dk);flex-shrink:0;text-align:right;}
+.model-bar-avg{width:40px;font-size:11px;color:var(--ink-5);flex-shrink:0;text-align:right;}
+.model-bar-cause{flex-shrink:0;font-size:10.5px;color:var(--ink-5);max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;}
+
+/* ════ 통계 : 차트 공통 (Pareto / 추세) ════ */
+.chart-wrap{overflow-x:auto;padding-top:2px;}
+.chart-legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px;font-size:11.5px;color:var(--ink-4);font-weight:500;}
+.chart-legend-item{display:flex;align-items:center;gap:6px;}
+.chart-legend-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.chart-legend-line{width:14px;height:2px;display:inline-block;flex-shrink:0;}
+.chart-note{font-size:11px;color:var(--ink-5);margin-top:8px;line-height:1.5;}
+
+/* ════ 통계 : SLA 세부 분포 ════ */
+.sla-split{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+.sla-pill{border-radius:var(--r-lg);padding:12px 14px;text-align:center;}
+.sla-pill.ok{background:var(--teal-lt);border:1px solid rgba(13,148,136,.15);}
+.sla-pill.bad{background:var(--rose-lt);border:1px solid rgba(225,29,72,.15);}
+.sla-pill-num{font-size:20px;font-weight:800;}
+.sla-pill.ok .sla-pill-num{color:var(--teal-dk);}
+.sla-pill.bad .sla-pill-num{color:var(--rose);}
+.sla-pill-label{font-size:11.5px;font-weight:600;margin-top:3px;}
+.sla-pill.ok .sla-pill-label{color:var(--teal-dk);}
+.sla-pill.bad .sla-pill-label{color:var(--rose);}
+
+/* ════ 통계 : 수익성 분석 (계약유형/고객사/모델Lifecycle/AS원가구조) ════ */
+.profit-minibar{width:92px;display:flex;flex-direction:column;gap:2px;}
+.profit-minibar-track{height:9px;background:var(--bg-2);border-radius:3px;overflow:hidden;}
+.profit-minibar-fill{height:100%;border-radius:3px;}
+.profit-minibar-fill.rev{background:linear-gradient(90deg,var(--blue),#3b82f6);}
+.profit-minibar-fill.cost{background:linear-gradient(90deg,var(--rose),#f43f5e);}
+.profit-margin-badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:30px;font-size:12px;font-weight:800;}
+.profit-margin-badge.pos{background:var(--free-lt);color:var(--free);}
+.profit-margin-badge.neg{background:var(--paid-lt);color:var(--paid);}
+.profit-summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;}
+.profit-summary-card{background:var(--bg);border:1px solid var(--line);border-radius:var(--r-lg);padding:12px 14px;}
+.profit-summary-label{font-size:11px;color:var(--ink-5);font-weight:600;margin-bottom:5px;}
+.profit-summary-val{font-size:17px;font-weight:800;color:var(--ink);}
+.cost-structure-wrap{display:flex;gap:22px;align-items:center;flex-wrap:wrap;}
+.cost-legend{flex:1;min-width:200px;display:flex;flex-direction:column;gap:8px;}
+.cost-legend-row{display:flex;align-items:center;gap:9px;font-size:12.5px;}
+.cost-legend-dot{width:11px;height:11px;border-radius:3px;flex-shrink:0;}
+.cost-legend-name{width:56px;font-weight:600;color:var(--ink-3);flex-shrink:0;}
+.cost-legend-bar{flex:1;height:8px;background:var(--bg-2);border-radius:4px;overflow:hidden;}
+.cost-legend-bar-fill{height:100%;border-radius:4px;}
+.cost-legend-val{width:104px;text-align:right;font-size:11.5px;color:var(--ink-4);flex-shrink:0;}
 
 /* ════ 재고 모바일 정렬 바 (기본 숨김, 모바일에서만 표시) ════ */
 .inv-mobile-sort{display:none;gap:8px;margin-bottom:14px;}
@@ -431,7 +565,14 @@ input,select,textarea{font-family:inherit;}
   .m-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:9px 4px 8px;cursor:pointer;color:rgba(255,255,255,.45);font-size:10.5px;font-weight:500;user-select:none;transition:color .15s;min-width:52px;}
   .m-tab .m-tab-ic{font-size:18px;line-height:1;}
   .m-tab.active{color:var(--teal);}
-  .content{padding:14px 14px 84px;}
+  .content{padding:14px 14px calc(84px + var(--safe-b));}
+  /* 모바일 바텀시트 드래그 핸들 (실제 드래그 동작은 없지만 시각적으로 닫힘 동작을 암시) */
+  .modal::before{content:'';position:sticky;top:0;display:block;width:36px;height:4px;border-radius:2px;background:var(--line);margin:10px auto -2px;}
+  /* iOS Safari가 16px 미만 입력 필드에 포커스 시 자동 확대하는 것을 방지 */
+  .field input,.field select,.field textarea,.search-wrap input{font-size:16px;}
+  /* 터치 타겟 최소 크기 확보 (44px 권장 기준에 근접) */
+  .btn-icon{min-width:40px;min-height:40px;padding:9px;}
+  .m-tab{min-height:52px;}
   .kpi-grid{grid-template-columns:repeat(2,1fr)!important;gap:10px;margin-bottom:16px;}
   .kpi-num{font-size:22px;}
   .kpi-card{padding:14px 14px;}
@@ -469,8 +610,8 @@ input,select,textarea{font-family:inherit;}
   .qdoc-meta-grid .qdoc-meta-col:first-child{border-bottom:2px solid #1a73c8;}
   .qdoc-meta-label{min-width:74px;padding:6px 9px;font-size:10px;}
   .qdoc-meta-val{padding:6px 9px;font-size:11px;}
-  .qdoc-items-table{font-size:10px;}
-  .qdoc-items-table th,.qdoc-items-table td{padding:5px 5px;}
+  .qdoc-items-table{font-size:10px;table-layout:fixed;}
+  .qdoc-items-table th,.qdoc-items-table td{padding:5px 5px;min-width:0!important;white-space:normal!important;word-break:break-word;overflow-wrap:anywhere;}
   .qdoc-items-table .col-spec{display:none;}
   .qdoc-total-label{min-width:80px;padding:6px 10px;font-size:11px;}
   .qdoc-total-val{min-width:100px;padding:6px 10px;font-size:11px;}
@@ -485,7 +626,21 @@ input,select,textarea{font-family:inherit;}
   .quote-preview-content{padding:8px 6px;}
   .stat-rank-label{width:88px;font-size:11px;}
   .stat-mini-table{font-size:11px;}
+  .stat-cause-grid{grid-template-columns:1fr;}
+  .stat-period-desktop{display:none;}
+  .stat-period-mobile{display:block;}
+  .site-perf-desktop{display:none;}
   .brand-grid{grid-template-columns:1fr;}
+  .qkpi-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .qkpi-num{font-size:20px;}
+  .qkpi-card{padding:13px 14px;}
+  .model-bar-label{width:84px;font-size:11px;}
+  .model-bar-avg,.model-bar-cause{display:none;}
+  .sla-split{grid-template-columns:1fr 1fr;}
+  .profit-summary-grid{grid-template-columns:1fr;}
+  .profit-minibar{width:64px;}
+  .cost-structure-wrap{flex-direction:column;align-items:stretch;}
+  .cost-legend-val{width:auto;}
   .inv-mobile-sort{display:flex;}
   .mc-inv .mc-head{flex-wrap:wrap;row-gap:8px;position:relative;padding-right:34px;}
   .mc-inv .mc-title{flex:1 1 100%;}
@@ -530,6 +685,7 @@ input,select,textarea{font-family:inherit;}
         <li class="nav-item" data-page="issue"><span class="nav-ic">⚠️</span>Issue</li>
         <li class="sidebar-section">분석</li>
         <li class="nav-item" data-page="statistics"><span class="nav-ic">📊</span>Statistics</li>
+        <li class="nav-item" data-page="profitability"><span class="nav-ic">💰</span>수익성 분석</li>
         <li class="nav-item" data-page="report"><span class="nav-ic">📝</span>Weekly Report</li>
       </ul>
     </nav>
@@ -566,6 +722,7 @@ input,select,textarea{font-family:inherit;}
     <li class="m-tab" data-page="inventory"><span class="m-tab-ic">📦</span>Stock</li>
     <li class="m-tab" data-page="errorcode"><span class="m-tab-ic">📕</span>오류</li>
     <li class="m-tab" data-page="statistics"><span class="m-tab-ic">📊</span>Stats</li>
+    <li class="m-tab" data-page="profitability"><span class="m-tab-ic">💰</span>수익성</li>
     <li class="m-tab" data-page="report"><span class="m-tab-ic">📝</span>Report</li>
     <li class="m-tab" data-page="issue"><span class="m-tab-ic">⚠️</span>Issue</li>
   </ul>
@@ -1145,7 +1302,19 @@ function _renderDetailModal(task,linkedSite,asRes,activeTab){
           </div>
         </div>
         <div class="as-section">
-          <div class="as-section-title"><span>7</span>완료 점검 체크리스트</div>
+          <div class="as-section-title"><span>7</span>AS 원가 입력 (원가 구조 분석용)</div>
+          <div class="field-row">
+            <div class="field"><label>인건비(원)</label><input id="dd_laborCost" type="number" min="0" value="${esc(task.laborCost||0)}" placeholder="0"/></div>
+            <div class="field"><label>출장비(원)</label><input id="dd_travelCost" type="number" min="0" value="${esc(task.travelCost||0)}" placeholder="0"/></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>부품비(원)</label><input id="dd_partsCost" type="number" min="0" value="${esc(task.partsCost||0)}" placeholder="0"/></div>
+            <div class="field"><label>물류비(원)</label><input id="dd_logisticsCost" type="number" min="0" value="${esc(task.logisticsCost||0)}" placeholder="0"/></div>
+          </div>
+          <div style="font-size:11px;color:var(--ink-5);line-height:1.5;">이 건 처리에 실제 발생한 원가를 항목별로 입력하면 Statistics의 "AS 원가 구조 분석"·"고객사별 손익"·"모델별 생애주기 수익성"에 자동 반영됩니다.</div>
+        </div>
+        <div class="as-section">
+          <div class="as-section-title"><span>8</span>완료 점검 체크리스트</div>
           <div class="checklist">
             ${CHECKLIST_ITEMS.map((item,i)=>{
               const done=checklist[i];
@@ -1257,6 +1426,8 @@ window._saveDetail=async function(){
     actionResult:g("dd_actionResult"),usedParts:g("dd_usedParts"),
     actualHour:g("dd_actualHour"),completeDate:g("dd_completeDate"),
     followUp:g("dd_followUp"),actionNote:g("dd_actionNote"),
+    laborCost:parseInt(g("dd_laborCost"))||0,travelCost:parseInt(g("dd_travelCost"))||0,
+    partsCost:parseInt(g("dd_partsCost"))||0,logisticsCost:parseInt(g("dd_logisticsCost"))||0,
   };
   try{
     await updateDoc(doc(db,COL.tasks,_detailTaskId),data);
@@ -1455,10 +1626,10 @@ function _buildQuoteHTML(data,task){
       <div class="qdoc-amount-val" style="font-size:20px;font-weight:900;color:#1a73c8;letter-spacing:-0.5px;">₩ ${total.toLocaleString("ko-KR")} 원정</div>
     </div>
     <div class="qdoc-section-title">■ 견적 내역</div>
-    <table class="qdoc-items-table">
+    <div class="qdoc-table-wrap"><table class="qdoc-items-table">
       <thead><tr><th style="width:34px;">No</th><th style="text-align:left;min-width:100px;">품목명</th><th class="col-spec" style="text-align:left;min-width:70px;">규격</th><th style="width:36px;">단위</th><th style="width:46px;">수량</th><th style="width:86px;">단가(원)</th><th style="width:96px;">금액(원)</th></tr></thead>
       <tbody>${itemRows}</tbody>
-    </table>
+    </table></div>
     <div class="qdoc-total-block">
       <div class="qdoc-total-row"><div class="qdoc-total-label">공급가액</div><div class="qdoc-total-val">${supply.toLocaleString("ko-KR")} 원</div></div>
       <div class="qdoc-total-row"><div class="qdoc-total-label">부가세 (10%)</div><div class="qdoc-total-val">${vat.toLocaleString("ko-KR")} 원</div></div>
@@ -1531,6 +1702,8 @@ const SITE_FIELDS=[
   {key:"quantity",label:"수량",type:"number",pair:true},
   {key:"serial",label:"시리얼",ph:"시리얼번호 직접 입력",pair:true},
   {key:"contractType",label:"계약 방식",type:"select",opts:["신규","유지보수","연장","렌탈","판매"],pair:true},
+  {key:"contractAmount",label:"계약 금액 · 매출(원)",type:"number",ph:"예: 15000000",pair:true},
+  {key:"contractCost",label:"원가 · 매입/설치비(원)",type:"number",ph:"예: 9000000",pair:true},
   {key:"contractStart",label:"계약 시작",type:"date",pair:true},
   {key:"contractEnd",label:"계약 종료",type:"date",pair:true},
   {key:"maintenancePeriod",label:"유지보수 기간",ph:"예: 12개월, 2년, 1년6개월"},
@@ -1556,7 +1729,10 @@ function renderSiteResults(){
     <td style="font-weight:600;">${esc(s.name)}</td><td>${esc(s.client)}</td>
     <td>${esc(s.equipment)||"-"}</td><td>${esc(s.quantity)||"-"}</td>
     <td style="font-family:monospace;">${esc(s.serial)||"-"}</td>
-    <td>${bContract(s.contractType)}</td><td>${esc(s.contractStart)||"-"}</td>
+    <td>${bContract(s.contractType)}</td>
+    <td style="text-align:right;">${s.contractAmount?Number(s.contractAmount).toLocaleString("ko-KR")+"원":"-"}</td>
+    <td style="text-align:right;color:var(--ink-5);">${s.contractCost?Number(s.contractCost).toLocaleString("ko-KR")+"원":"-"}</td>
+    <td>${esc(s.contractStart)||"-"}</td>
     <td>${esc(s.contractEnd)||"-"}</td>
     <td><div style="line-height:1.3;">${esc(s.maintenancePeriod)||"-"}${asExpireText(s.contractStart,s.maintenancePeriod)}</div></td>
     <td>${esc(s.pm)||"-"}</td><td>${bSite(s.status)}</td>
@@ -1578,6 +1754,8 @@ function renderSiteResults(){
       <div class="mc-fields">
         <div class="mc-field"><span class="mc-label">장비</span><span class="mc-val">${esc(s.equipment)||"-"}</span></div>
         <div class="mc-field"><span class="mc-label">시리얼</span><span class="mc-val">${esc(s.serial)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">계약금액(매출)</span><span class="mc-val">${s.contractAmount?Number(s.contractAmount).toLocaleString("ko-KR")+"원":"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">원가</span><span class="mc-val">${s.contractCost?Number(s.contractCost).toLocaleString("ko-KR")+"원":"-"}</span></div>
         <div class="mc-field"><span class="mc-label">계약기간</span><span class="mc-val">${esc(s.contractStart)||"-"} ~ ${esc(s.contractEnd)||"-"}</span></div>
         <div class="mc-field"><span class="mc-label">유지보수</span><span class="mc-val">${esc(s.maintenancePeriod)||"-"}${asExpireText(s.contractStart,s.maintenancePeriod)}</span></div>
         <div class="mc-field"><span class="mc-label">AS 구분</span><span class="mc-val">${bAS(s.contractStart,s.maintenancePeriod)}</span></div>
@@ -1591,6 +1769,7 @@ function renderSiteResults(){
   </div>`).join("");
   ra.innerHTML=`<div class="tbl-wrap"><table class="tbl"><thead><tr>
     <th>현장명</th><th>고객사</th><th>장비</th><th>수량</th><th>시리얼</th><th>계약방식</th>
+    <th style="text-align:right;">계약금액(매출)</th><th style="text-align:right;">원가</th>
     <th>계약시작</th><th>계약종료</th><th>유지보수기간</th><th>PM</th>
     <th>상태</th><th style="color:var(--teal-dk);">AS 구분</th><th>관리</th>
   </tr></thead><tbody>${tBody}</tbody></table></div>
@@ -2243,18 +2422,27 @@ function getStatPeriodData(){
 window._setStatPeriod=p=>{
   statPeriod=p;
   document.querySelectorAll(".stat-tab").forEach(el=>el.classList.toggle("stat-tab-active",el.dataset.period===p));
+  renderStatQualitySection();
   renderStatPeriodSection();
+  renderStatTrendSection();
   renderStatCauseSection();
+  renderStatModelSection();
+  renderStatPMSection();
+  renderStatBrandSection();
+  renderStatCostStructureSection();
 };
 
 /* ════════════════════════════════════
    통계 데이터 계산 (화면 렌더링 + 엑셀 내보내기가 공유하는 단일 소스)
 ════════════════════════════════════ */
 function computePeriodStats(){
-  const now=new Date();let data,groups;
+  const now=new Date();let data,groups,prevData;
   if(statPeriod==="week"){
     const weekAgo=new Date(now);weekAgo.setDate(weekAgo.getDate()-6);weekAgo.setHours(0,0,0,0);
+    const prevStart=new Date(weekAgo);prevStart.setDate(prevStart.getDate()-7);
+    const prevEnd=new Date(weekAgo);prevEnd.setDate(prevEnd.getDate()-1);prevEnd.setHours(23,59,59,999);
     data=tasks.filter(t=>{const d=toDate(t.createdAt);return d&&d>=weekAgo;});
+    prevData=tasks.filter(t=>{const d=toDate(t.createdAt);return d&&d>=prevStart&&d<=prevEnd;});
     const days=[];for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);days.push(d);}
     groups=days.map(d=>{
       const label=d.toLocaleDateString("ko-KR",{month:"2-digit",day:"2-digit",weekday:"short"});
@@ -2263,20 +2451,43 @@ function computePeriodStats(){
     });
   }else if(statPeriod==="month"){
     data=tasks.filter(t=>{const d=toDate(t.createdAt);return d&&d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
+    const prevMonthDate=new Date(now.getFullYear(),now.getMonth()-1,1);
+    prevData=tasks.filter(t=>{const d=toDate(t.createdAt);return d&&d.getMonth()===prevMonthDate.getMonth()&&d.getFullYear()===prevMonthDate.getFullYear();});
     const wkMap={};
     data.forEach(t=>{const d=toDate(t.createdAt);if(!d)return;const week=Math.ceil(d.getDate()/7);const key=`${week}주차`;if(!wkMap[key])wkMap[key]={label:key,total:0,done:0,time:0};wkMap[key].total++;if(t.status==="완료"){wkMap[key].done++;wkMap[key].time+=(t.processTime||0);}});
     groups=[1,2,3,4,5].map(w=>{const key=`${w}주차`;return wkMap[key]||{label:key,total:0,done:0,time:0};}).filter((_,i)=>i<5);
   }else{
     data=tasks.filter(t=>{const d=toDate(t.createdAt);return d&&d.getFullYear()===now.getFullYear();});
+    prevData=tasks.filter(t=>{const d=toDate(t.createdAt);return d&&d.getFullYear()===now.getFullYear()-1;});
     const mMap={};
     data.forEach(t=>{const d=toDate(t.createdAt);if(!d)return;const key=`${d.getMonth()+1}월`;if(!mMap[key])mMap[key]={label:key,total:0,done:0,time:0};mMap[key].total++;if(t.status==="완료"){mMap[key].done++;mMap[key].time+=(t.processTime||0);}});
     groups=Array.from({length:12},(_,i)=>{const key=`${i+1}월`;return mMap[key]||{label:key,total:0,done:0,time:0};});
   }
-  const totalAll=data.length,doneAll=data.filter(x=>x.status==="완료").length;
-  const rateAll=totalAll?((doneAll/totalAll)*100).toFixed(1):"0.0";
-  const avgAll=totalAll?(data.reduce((a,b)=>a+(b.processTime||0),0)/totalAll).toFixed(1):"0.0";
+  const calcAgg=arr=>{
+    const total=arr.length,done=arr.filter(x=>x.status==="완료").length;
+    return{total,done,rate:total?((done/total)*100).toFixed(1):"0.0",avg:total?(arr.reduce((a,b)=>a+(b.processTime||0),0)/total).toFixed(1):"0.0"};
+  };
+  const cur=calcAgg(data),prev=calcAgg(prevData);
   const periodLabel=statPeriod==="week"?"이번 주":statPeriod==="month"?"이번 달":"올해";
-  return{data,groups,totalAll,doneAll,rateAll,avgAll,periodLabel};
+  const prevLabel=statPeriod==="week"?"전주":statPeriod==="month"?"전월":"전년";
+  return{data,groups,prevData,totalAll:cur.total,doneAll:cur.done,rateAll:cur.rate,avgAll:cur.avg,periodLabel,
+    prevTotalAll:prev.total,prevDoneAll:prev.done,prevRateAll:prev.rate,prevAvgAll:prev.avg,prevLabel};
+}
+
+/* 이전 기간 대비 증감을 배지로 표시. inverse=true면 값이 낮을수록 긍정적(예: 처리시간) */
+function trendBadge(curVal,prevVal,{inverse=false,neutral=false}={}){
+  const cur=Number(curVal),prev=Number(prevVal);
+  if(!prev&&!cur)return"";
+  if(!prev)return`<span style="font-size:11px;color:var(--ink-5);font-weight:600;margin-left:5px;">신규</span>`;
+  const diff=cur-prev;
+  const pct=Math.abs(((diff/prev)*100)).toFixed(1);
+  const arrow=diff===0?"–":(diff>0?"▲":"▼");
+  let color="var(--ink-5)";
+  if(!neutral&&diff!==0){
+    const isGood=inverse?diff<0:diff>0;
+    color=isGood?"var(--green)":"var(--rose)";
+  }
+  return`<span style="font-size:11px;color:${color};font-weight:700;margin-left:5px;">${arrow} ${pct}%</span>`;
 }
 
 function computeCauseStats(periodData){
@@ -2322,33 +2533,812 @@ function computeSitePerf(){
   });
 }
 
+/* 담당자(PM)별 처리 현황 — 기간 내 접수/완료/완료율/평균 처리시간 집계 */
+function computePMStats(periodData){
+  const map={};
+  periodData.forEach(t=>{
+    const name=(t.pm||t.techEngineer||"").trim()||"미지정";
+    if(!map[name])map[name]={name,total:0,done:0,time:0};
+    map[name].total++;
+    if(t.status==="완료"){map[name].done++;map[name].time+=(t.processTime||0);}
+  });
+  return Object.values(map).map(p=>({
+    ...p,
+    rate:p.total?((p.done/p.total)*100).toFixed(0):0,
+    avg:p.done?(p.time/p.done).toFixed(1):"0.0",
+  })).sort((a,b)=>b.total-a.total);
+}
+
+/* 브랜드(NEO/SPARKOZ)별 기간 내 AS 현황 및 오류코드 심각도 분포 */
+function computeBrandPeriodStats(periodData){
+  return ERROR_BRANDS.map(brand=>{
+    const items=periodData.filter(t=>t.modelSeries===brand);
+    const total=items.length;
+    const done=items.filter(x=>x.status==="완료").length;
+    const rate=total?((done/total)*100).toFixed(0):0;
+    const avg=total?(items.reduce((a,b)=>a+(b.processTime||0),0)/total).toFixed(1):"0.0";
+    const sevCount={"긴급":0,"높음":0,"보통":0,"낮음":0,"미확인":0};
+    items.forEach(t=>{
+      if(!t.errorCode){sevCount["미확인"]++;return;}
+      const lc=String(t.errorCode).trim().toLowerCase();
+      const match=errorCodes.find(e=>e.brand===brand&&(e.errorCode||"").trim().toLowerCase()===lc);
+      if(match&&sevCount.hasOwnProperty(match.severity))sevCount[match.severity]++;
+      else sevCount["미확인"]++;
+    });
+    return{brand,total,done,rate,avg,sevCount};
+  });
+}
+
+/* ════════════════════════════════════
+   모델별 불량 현황 — 장비모델(equipModel, 상세) 우선, 없으면 브랜드계열(modelSeries)로 대체 집계
+   ════════════════════════════════════ */
+function computeModelStats(periodData){
+  const map={};
+  periodData.forEach(t=>{
+    const key=(t.equipModel&&String(t.equipModel).trim())||(t.modelSeries&&String(t.modelSeries).trim())||"모델 미입력";
+    if(!map[key])map[key]={name:key,total:0,done:0,time:0,causeMap:{}};
+    map[key].total++;
+    if(t.status==="완료"){map[key].done++;map[key].time+=(t.processTime||0);}
+    if(t.causeType)map[key].causeMap[t.causeType]=(map[key].causeMap[t.causeType]||0)+1;
+  });
+  const totalAll=periodData.length||1;
+  return Object.values(map).map(m=>{
+    const topCauseEntry=Object.entries(m.causeMap).sort((a,b)=>b[1]-a[1])[0];
+    return{
+      name:m.name,total:m.total,done:m.done,
+      rate:m.total?((m.done/m.total)*100).toFixed(0):"0",
+      avg:m.done?(m.time/m.done).toFixed(1):"0.0",
+      share:((m.total/totalAll)*100).toFixed(1),
+      topCause:topCauseEntry?topCauseEntry[0]:"-",
+    };
+  }).sort((a,b)=>b.total-a.total);
+}
+
+/* ════════════════════════════════════
+   영업일 기준 경과시간 계산 — 토요일(6)·일요일(0)에 걸친 시간은 전부 제외하고
+   평일 구간만 합산한다. 시작~종료 사이를 하루 단위로 순회하며, 그 날이
+   주말이면 스킵하고 평일이면 해당 날짜 내 겹치는 구간만큼만 시간을 더한다.
+   ════════════════════════════════════ */
+function businessHoursBetween(start,end){
+  if(!(start instanceof Date)||!(end instanceof Date)||isNaN(start)||isNaN(end))return 0;
+  if(end<=start)return 0;
+  let hours=0;
+  let cursor=new Date(start);
+  while(cursor<end){
+    const nextDay=new Date(cursor);
+    nextDay.setHours(24,0,0,0);
+    const segEnd=nextDay<end?nextDay:end;
+    const day=cursor.getDay();
+    if(day!==0&&day!==6)hours+=(segEnd-cursor)/3600000;
+    cursor=segEnd;
+  }
+  return hours;
+}
+
+/* ════════════════════════════════════
+   SLA 준수율 — 접수일(receiptDate) → 완료일(completeDate) 경과시간이
+   기준시간(SLA_HOURS, 72시간) 이내인 건의 비율을 산출한다.
+   경과시간은 영업일 기준으로 계산하며, 토·일요일에 해당하는 시간은
+   집계에서 제외한다(주말 제외 SLA).
+   ════════════════════════════════════ */
+const SLA_HOURS=72;
+function computeSLAStats(periodData){
+  const done=periodData.filter(t=>t.status==="완료");
+  const evaluable=done.filter(t=>t.receiptDate&&t.completeDate);
+  const withLead=evaluable.map(t=>{
+    const r=new Date(t.receiptDate),c=new Date(t.completeDate);
+    let hrs=businessHoursBetween(r,c);
+    if(isNaN(hrs)||hrs<0)hrs=0;
+    return{...t,leadHours:hrs};
+  });
+  const compliant=withLead.filter(t=>t.leadHours<=SLA_HOURS);
+  const breach=withLead.filter(t=>t.leadHours>SLA_HOURS);
+  const rate=withLead.length?((compliant.length/withLead.length)*100).toFixed(1):"0.0";
+  const avgLead=withLead.length?(withLead.reduce((a,b)=>a+b.leadHours,0)/withLead.length).toFixed(1):"0.0";
+  return{
+    evalTotal:withLead.length,compliantCount:compliant.length,breachCount:breach.length,
+    rate,avgLead,noDateCount:done.length-withLead.length,doneTotal:done.length,
+  };
+}
+
+/* ════════════════════════════════════
+   핵심 품질 지표 판정 기준(임계값)
+   - 아래 기준값은 사내 정책에 맞춰 조정 가능하도록 한 곳에 모아둔다.
+   - MTTR(수리시간)은 낮을수록, MTBF·SLA준수율은 높을수록 좋은 지표이므로
+     good/warn 경계값과 higherIsBetter 플래그로 4단계(우수/양호/주의/위험)를 판정한다.
+   ════════════════════════════════════ */
+const QUALITY_THRESHOLDS={
+  mttr:{good:24,warn:48,danger:72,higherIsBetter:false,unit:"h"},   // MTTR: ≤24h 우수 · ≤48h 양호 · ≤72h 주의 · 초과 위험
+  mtbf:{good:60,warn:30,danger:14,higherIsBetter:true, unit:"일"},  // MTBF: ≥60일 우수 · ≥30일 양호 · ≥14일 주의 · 미만 위험
+  sla: {good:95,warn:85,danger:70,higherIsBetter:true, unit:"%"},   // SLA 준수율: ≥95% 우수 · ≥85% 양호 · ≥70% 주의 · 미만 위험
+};
+const QUALITY_STATUS_META={
+  excellent:{label:"우수",cls:"qs-excellent",color:"var(--green)"},
+  good:     {label:"양호",cls:"qs-good",     color:"var(--blue)"},
+  warn:     {label:"주의",cls:"qs-warn",     color:"var(--amber)"},
+  danger:   {label:"위험",cls:"qs-danger",   color:"var(--rose)"},
+  unknown:  {label:"표본부족",cls:"qs-unknown",color:"var(--ink-5)"},
+};
+/* value가 null/undefined면 표본부족으로 처리. kind: 'mttr' | 'mtbf' | 'sla' */
+function qualityStatus(value,kind){
+  const t=QUALITY_THRESHOLDS[kind];
+  if(value===null||value===undefined||isNaN(value))return{key:"unknown",...QUALITY_STATUS_META.unknown};
+  const v=Number(value);
+  let key;
+  if(t.higherIsBetter){
+    key=v>=t.good?"excellent":v>=t.warn?"good":v>=t.danger?"warn":"danger";
+  }else{
+    key=v<=t.good?"excellent":v<=t.warn?"good":v<=t.danger?"warn":"danger";
+  }
+  return{key,...QUALITY_STATUS_META[key]};
+}
+function qualityStatusBadge(value,kind){
+  const s=qualityStatus(value,kind);
+  return`<span class="qs-badge ${s.cls}">${s.label}</span>`;
+}
+/* 임계값 대비 진행률(0~100%) — 상단 KPI 카드의 미니 게이지 바에 사용. good 기준을 100%로 캡핑 */
+function qualityGaugePct(value,kind){
+  const t=QUALITY_THRESHOLDS[kind];
+  if(value===null||value===undefined||isNaN(value))return 0;
+  const v=Number(value);
+  if(t.higherIsBetter)return Math.max(4,Math.min(100,(v/t.good)*100));
+  return Math.max(4,Math.min(100,(t.good/Math.max(v,0.01))*100));
+}
+
+/* ════════════════════════════════════
+   MTBF(평균 고장간격) — 현장(siteName)별로 접수 이력을 시간순 정렬하여
+   연속된 두 접수 사이의 간격(일)을 모두 수집한 뒤 평균을 낸다.
+   전체 누적 데이터 기준으로 산출하며(기간 탭과 무관), 접수 이력이 2건 이상인
+   현장만 표본에 포함된다.
+   ════════════════════════════════════ */
+function computeMTBF(){
+  const bySite={};
+  tasks.forEach(t=>{
+    const key=t.siteName||"미등록";
+    const d=toDate(t.receiptDate)||toDate(t.createdAt);
+    if(!d)return;
+    if(!bySite[key])bySite[key]=[];
+    bySite[key].push(d);
+  });
+  const gaps=[];
+  let sampleSiteCount=0;
+  Object.values(bySite).forEach(arr=>{
+    if(arr.length<2)return;
+    sampleSiteCount++;
+    const sorted=arr.slice().sort((a,b)=>a-b);
+    for(let i=1;i<sorted.length;i++){
+      const diffDays=(sorted[i]-sorted[i-1])/86400000;
+      if(diffDays>0)gaps.push(diffDays);
+    }
+  });
+  if(!gaps.length)return{days:null,hours:null,gapCount:0,siteCount:0};
+  const avgDays=gaps.reduce((a,b)=>a+b,0)/gaps.length;
+  return{days:avgDays.toFixed(1),hours:(avgDays*24).toFixed(0),gapCount:gaps.length,siteCount:sampleSiteCount};
+}
+
+/* ════════════════════════════════════
+   MTTR 산출 기준: AS이력카드 [④완료 처리] 탭의 "실제 소요시간"(dd_actualHour)
+   - 이 값은 기술자가 직접 기재하는 정성적 구간 선택지이므로, 통계 계산을 위해
+     아래 매핑 테이블로 대표 시간(시간 단위)으로 환산한다.
+   - "실제 소요시간"을 아직 기재하지 않은 완료 건은 MTTR 표본에서 제외한다
+     (접수→완료 자동 경과시간은 더 이상 MTTR에 사용하지 않음).
+   ════════════════════════════════════ */
+const ACTUAL_HOUR_MAP={
+  "30분 미만":0.25,"30분":0.5,"1시간":1,"2시간":2,"3시간":3,"4시간":4,
+  "반일 이상":6,"종일":8,
+};
+function actualHourToNum(label){
+  if(!label)return null;
+  const v=ACTUAL_HOUR_MAP[String(label).trim()];
+  return v===undefined?null:v;
+}
+/* MTTR = Σ 실제 소요시간(환산) ÷ 실제 소요시간이 기재된 완료 건수 */
+function computeMTTRStats(periodData){
+  const completed=periodData.filter(t=>t.status==="완료");
+  const withHour=completed.map(t=>actualHourToNum(t.actualHour)).filter(h=>h!==null);
+  const hourSum=withHour.reduce((a,b)=>a+b,0);
+  const sampleCount=withHour.length;
+  return{
+    avg:sampleCount?(hourSum/sampleCount).toFixed(1):"0.0",
+    sampleCount,doneCount:completed.length,
+    missingCount:completed.length-sampleCount,
+  };
+}
+
+/* ════════════════════════════════════
+   NEO / SPARKOZ 브랜드(modelSeries)별 · 장비모델(equipModel)별 MTTR
+   MTTR = 총 수리시간(AS이력카드 [④완료 처리]에 기재한 "실제 소요시간"의 환산 합) ÷ 수리건수(실제 소요시간 기재 건수)
+   상단 기간 탭(주/월/년)과 연동되는 periodData를 기준으로 산출한다.
+   ════════════════════════════════════ */
+function computeModelMTTR(periodData){
+  return ERROR_BRANDS.map(brand=>{
+    const items=periodData.filter(t=>t.modelSeries===brand);
+    const map={};
+    items.forEach(t=>{
+      const key=(t.equipModel&&String(t.equipModel).trim())||"모델 미입력";
+      if(!map[key])map[key]={name:key,total:0,repairCount:0,repairHours:0};
+      map[key].total++;
+      if(t.status==="완료"){
+        const h=actualHourToNum(t.actualHour);
+        if(h!==null){map[key].repairCount++;map[key].repairHours+=h;}
+      }
+    });
+    const models=Object.values(map).map(m=>{
+      const mttr=m.repairCount?(m.repairHours/m.repairCount):null;
+      return{
+        name:m.name,total:m.total,repairCount:m.repairCount,
+        repairHours:m.repairHours,
+        mttr:mttr!==null?mttr.toFixed(1):null,
+        status:qualityStatus(mttr,"mttr"),
+      };
+    // 수리시간이 긴(=위험한) 모델이 먼저 보이도록 정렬 — "한눈에" 관리 대상을 파악하기 위함.
+    // 산출 불가(mttr=null, 실제 소요시간 미기재) 모델은 맨 뒤로 보낸다.
+    }).sort((a,b)=>{
+      if(a.mttr===null&&b.mttr===null)return b.total-a.total;
+      if(a.mttr===null)return 1;
+      if(b.mttr===null)return -1;
+      return Number(b.mttr)-Number(a.mttr);
+    });
+    return{brand,models};
+  });
+}
+
+/* ════════════════════════════════════
+   NEO / SPARKOZ 브랜드(modelSeries)별 · 장비모델(equipModel)별 MTBF
+   MTBF = 총 운전시간 ÷ 고장횟수
+   - 고장횟수: 해당 모델의 전체 AS 접수 건수(전체 누적 데이터 기준, 기간 탭과 무관)
+   - 총 운전시간: 해당 모델이 설치된 각 현장의 계약 시작일(Site Master의 contractStart,
+     설비 가동 개시 시점으로 간주)부터 현재까지 경과한 시간을 현장별로 합산한 값.
+     동일 현장은 1회만 집계하며, 계약 시작일이 없는 현장은 운전시간 산출에서 제외된다.
+   ════════════════════════════════════ */
+function computeModelMTBF(){
+  const now=new Date();
+  return ERROR_BRANDS.map(brand=>{
+    const items=tasks.filter(t=>t.modelSeries===brand);
+    const map={};
+    items.forEach(t=>{
+      const key=(t.equipModel&&String(t.equipModel).trim())||"모델 미입력";
+      if(!map[key])map[key]={name:key,failureCount:0,siteSet:new Set()};
+      map[key].failureCount++;
+      if(t.siteName)map[key].siteSet.add(t.siteName);
+    });
+    const models=Object.values(map).map(m=>{
+      let operatingHours=0,siteSampleCount=0;
+      m.siteSet.forEach(siteName=>{
+        const s=site.find(x=>x.name===siteName);
+        const start=s?toDate(s.contractStart):null;
+        if(start){operatingHours+=Math.max(0,(now-start)/3600000);siteSampleCount++;}
+      });
+      const mtbfHours=(siteSampleCount>0&&m.failureCount>0)?(operatingHours/m.failureCount):null;
+      const mtbfDays=mtbfHours!==null?(mtbfHours/24):null;
+      return{
+        name:m.name,failureCount:m.failureCount,siteCount:m.siteSet.size,siteSampleCount,
+        operatingHours,
+        mtbfHours:mtbfHours!==null?mtbfHours.toFixed(0):null,
+        mtbfDays:mtbfDays!==null?mtbfDays.toFixed(1):null,
+        status:qualityStatus(mtbfDays,"mtbf"),
+      };
+    // 고장 간격이 짧은(=위험한) 모델이 먼저 보이도록 정렬 — 신뢰성이 낮은 설비를 즉시 식별하기 위함.
+    // 산출 불가(mtbfDays=null, 운전시간 표본 부족) 모델은 맨 뒤로 보낸다.
+    }).sort((a,b)=>{
+      if(a.mtbfDays===null&&b.mtbfDays===null)return b.failureCount-a.failureCount;
+      if(a.mtbfDays===null)return 1;
+      if(b.mtbfDays===null)return -1;
+      return Number(a.mtbfDays)-Number(b.mtbfDays);
+    });
+    return{brand,models};
+  });
+}
+
+/* ════════════════════════════════════
+   신뢰성 워치리스트 — 브랜드 구분 없이 전체 모델을 통틀어
+   MTTR(위험)·MTBF(위험) 등급에 해당하는 모델만 추려 상위 N개를 노출한다.
+   전문가가 표를 하나하나 훑지 않아도 "지금 봐야 할 설비"를 바로 파악하도록 돕는 요약 카드.
+   ════════════════════════════════════ */
+function computeQualityWatchlist(modelMTTR,modelMTBF,limit=5){
+  const mttrFlat=modelMTTR.flatMap(g=>g.models.map(m=>({brand:g.brand,...m})))
+    .filter(m=>m.mttr!==null&&(m.status.key==="warn"||m.status.key==="danger"))
+    .sort((a,b)=>Number(b.mttr)-Number(a.mttr)).slice(0,limit);
+  const mtbfFlat=modelMTBF.flatMap(g=>g.models.map(m=>({brand:g.brand,...m})))
+    .filter(m=>m.mtbfDays!==null&&(m.status.key==="warn"||m.status.key==="danger"))
+    .sort((a,b)=>Number(a.mtbfDays)-Number(b.mtbfDays)).slice(0,limit);
+  return{mttrFlat,mtbfFlat};
+}
+
+/* ════════════════════════════════════
+   수익성 분석 공통 헬퍼
+   - 계약(판매·렌탈·유지보수) 매출/원가는 Site Master의 계약금액(contractAmount)·원가(contractCost)를 사용
+   - AS 매출은 유상 견적(quoteItems) 청구총액, AS 원가는 AS 이력카드에 입력한 인건비·출장비·부품비·물류비 합계를 사용
+   - 전체 누적(전 기간) 데이터를 기준으로 산출한다 (계약은 1회성 이벤트라 기간 탭과 분리)
+   ════════════════════════════════════ */
+function taskASCost(t){return(Number(t.laborCost)||0)+(Number(t.travelCost)||0)+(Number(t.partsCost)||0)+(Number(t.logisticsCost)||0);}
+function taskASRevenue(t){return(t.quoteItems&&t.quoteItems.length)?t.quoteItems.reduce((s,it)=>s+((parseInt(it.qty)||0)*(parseInt(it.unitPrice)||0)),0):0;}
+
+/* 1) 계약 유형별 수익성 — 판매·렌탈·유지보수·신규·연장 */
+function computeContractTypeProfit(){
+  const map={};
+  site.forEach(s=>{
+    const type=s.contractType||"미분류";
+    if(!map[type])map[type]={type,count:0,revenue:0,cost:0};
+    map[type].count++;
+    map[type].revenue+=Number(s.contractAmount)||0;
+    map[type].cost+=Number(s.contractCost)||0;
+  });
+  return Object.values(map).map(m=>({
+    ...m,
+    profit:m.revenue-m.cost,
+    margin:m.revenue?(((m.revenue-m.cost)/m.revenue)*100).toFixed(1):"0.0",
+  })).sort((a,b)=>b.revenue-a.revenue);
+}
+
+/* 2) 고객사별 손익 분석 — 고객(계약 매출 + AS 청구 매출) 대비 AS 원가·순이익 */
+function computeCustomerProfit(){
+  const map={};
+  site.forEach(s=>{
+    const client=s.client||"미지정";
+    if(!map[client])map[client]={client,contractRevenue:0,asRevenue:0,asCost:0,siteCount:0,asCount:0};
+    map[client].contractRevenue+=Number(s.contractAmount)||0;
+    map[client].siteCount++;
+  });
+  tasks.forEach(t=>{
+    const linkedSite=site.find(s=>s.name===t.siteName);
+    const client=linkedSite?(linkedSite.client||"미지정"):null;
+    if(!client)return;
+    if(!map[client])map[client]={client,contractRevenue:0,asRevenue:0,asCost:0,siteCount:0,asCount:0};
+    map[client].asRevenue+=taskASRevenue(t);
+    map[client].asCost+=taskASCost(t);
+    map[client].asCount++;
+  });
+  return Object.values(map).map(m=>{
+    const revenue=m.contractRevenue+m.asRevenue;
+    const profit=revenue-m.asCost;
+    return{...m,revenue,profit,margin:revenue?((profit/revenue)*100).toFixed(1):"0.0"};
+  }).sort((a,b)=>b.revenue-a.revenue);
+}
+
+/* 3) 모델별 생애주기(Lifecycle) 수익성 — 판매/렌탈 매출 + 유지보수 매출 + AS 매출 대비 원가(초기원가+AS원가) */
+function computeModelLifecycleProfit(){
+  const map={};
+  const siteNamesByModel={};
+  tasks.forEach(t=>{
+    const key=(t.equipModel&&String(t.equipModel).trim())||(t.modelSeries&&String(t.modelSeries).trim())||"모델 미입력";
+    if(!map[key])map[key]={name:key,initialRevenue:0,maintRevenue:0,asRevenue:0,initialCost:0,asCost:0,asCount:0,siteSet:new Set()};
+    map[key].asRevenue+=taskASRevenue(t);
+    map[key].asCost+=taskASCost(t);
+    map[key].asCount++;
+    if(t.siteName)map[key].siteSet.add(t.siteName);
+  });
+  Object.values(map).forEach(m=>{
+    m.siteSet.forEach(sn=>{
+      const s=site.find(x=>x.name===sn);if(!s)return;
+      const amt=Number(s.contractAmount)||0,cost=Number(s.contractCost)||0;
+      if(s.contractType==="유지보수"||s.contractType==="연장")m.maintRevenue+=amt;
+      else m.initialRevenue+=amt;
+      m.initialCost+=cost;
+    });
+  });
+  return Object.values(map).map(m=>{
+    const revenue=m.initialRevenue+m.maintRevenue+m.asRevenue;
+    const cost=m.initialCost+m.asCost;
+    const profit=revenue-cost;
+    return{
+      name:m.name,initialRevenue:m.initialRevenue,maintRevenue:m.maintRevenue,asRevenue:m.asRevenue,
+      initialCost:m.initialCost,asCost:m.asCost,revenue,cost,profit,asCount:m.asCount,
+      siteCount:m.siteSet.size,
+      margin:revenue?((profit/revenue)*100).toFixed(1):"0.0",
+    };
+  }).sort((a,b)=>b.revenue-a.revenue);
+}
+
+/* 4) AS 원가 구조 분석 — 인건비·출장비·부품비·물류비 구성비 + 원가 절감 포인트(현장/원인유형별 TOP) */
+function computeASCostStructure(periodData){
+  const totals={labor:0,travel:0,parts:0,logistics:0};
+  let costedCount=0,revenueTotal=0;
+  const bySite={},byCause={};
+  periodData.forEach(t=>{
+    const c=taskASCost(t);
+    totals.labor+=Number(t.laborCost)||0;
+    totals.travel+=Number(t.travelCost)||0;
+    totals.parts+=Number(t.partsCost)||0;
+    totals.logistics+=Number(t.logisticsCost)||0;
+    revenueTotal+=taskASRevenue(t);
+    if(c>0){
+      costedCount++;
+      const sKey=t.siteName||"미등록";
+      bySite[sKey]=(bySite[sKey]||0)+c;
+      const cKey=t.causeType||"미분류";
+      byCause[cKey]=(byCause[cKey]||0)+c;
+    }
+  });
+  const grandTotal=totals.labor+totals.travel+totals.parts+totals.logistics;
+  const pct=v=>grandTotal?((v/grandTotal)*100).toFixed(1):"0.0";
+  const topSites=Object.entries(bySite).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const topCauses=Object.entries(byCause).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  return{
+    totals,grandTotal,pct,costedCount,revenueTotal,
+    costRatio:revenueTotal?((grandTotal/revenueTotal)*100).toFixed(1):"0.0",
+    avgCostPerCase:costedCount?(grandTotal/costedCount).toFixed(0):"0",
+    topSites,topCauses,
+  };
+}
+
+/* ════════════════════════════════════
+   불량 원인 Pareto 차트(SVG) — 막대(건수, 좌축) + 누적비율 꺾은선(우축, 80% 기준선)
+   ════════════════════════════════════ */
+function buildParetoSVG(entries){
+  const w=680,h=290;
+  const mL=40,mR=40,mT=20,mB=56;
+  const chartW=w-mL-mR,chartH=h-mT-mB;
+  const total=entries.reduce((a,[,v])=>a+v,0)||1;
+  const n=entries.length||1;
+  const step=chartW/n;
+  const barW=Math.min(step*0.56,64);
+  const maxCount=Math.max(...entries.map(([,v])=>v),1);
+  let cum=0;
+  const bars=entries.map(([k,v],i)=>{
+    const cx=mL+step*i+step/2;
+    const barH=(v/maxCount)*chartH;
+    const x=cx-barW/2,y=mT+chartH-barH;
+    cum+=v;
+    return{x,y,barW,barH,cx,label:k,value:v,cumPct:(cum/total*100)};
+  });
+  const linePts=bars.map(b=>({cx:b.cx,cy:mT+chartH-(b.cumPct/100*chartH),cumPct:b.cumPct}));
+  const linePath=linePts.map((p,i)=>`${i===0?"M":"L"}${p.cx.toFixed(1)},${p.cy.toFixed(1)}`).join(" ");
+  const eightyY=mT+chartH-(80/100*chartH);
+  const barsSvg=bars.map(b=>`
+    <rect x="${b.x.toFixed(1)}" y="${b.y.toFixed(1)}" width="${b.barW.toFixed(1)}" height="${Math.max(b.barH,1).toFixed(1)}" rx="3" fill="var(--violet)" opacity=".85"/>
+    <text x="${b.cx.toFixed(1)}" y="${(b.y-6).toFixed(1)}" font-size="11" text-anchor="middle" fill="var(--ink-3)" font-weight="700">${b.value}</text>
+    <text x="${b.cx.toFixed(1)}" y="${(mT+chartH+18).toFixed(1)}" font-size="10.5" text-anchor="middle" fill="var(--ink-5)">${esc(b.label)}</text>`).join("");
+  const dotsSvg=linePts.map(p=>`<circle cx="${p.cx.toFixed(1)}" cy="${p.cy.toFixed(1)}" r="3.4" fill="var(--rose)"/>
+    <text x="${p.cx.toFixed(1)}" y="${(p.cy-9).toFixed(1)}" font-size="10" text-anchor="middle" fill="var(--rose)" font-weight="700">${p.cumPct.toFixed(0)}%</text>`).join("");
+  return`<svg viewBox="0 0 ${w} ${h}" width="100%" style="min-width:${Math.max(360,n*70)}px;display:block;">
+    <line x1="${mL}" y1="${(mT+chartH).toFixed(1)}" x2="${(mL+chartW).toFixed(1)}" y2="${(mT+chartH).toFixed(1)}" stroke="var(--line)" stroke-width="1"/>
+    <line x1="${mL}" y1="${eightyY.toFixed(1)}" x2="${(mL+chartW).toFixed(1)}" y2="${eightyY.toFixed(1)}" stroke="var(--rose)" stroke-width="1" stroke-dasharray="4 3" opacity=".6"/>
+    <text x="${(mL+chartW+2).toFixed(1)}" y="${(eightyY+3).toFixed(1)}" font-size="9.5" fill="var(--rose)">80%</text>
+    ${barsSvg}
+    <path d="${linePath}" fill="none" stroke="var(--rose)" stroke-width="2"/>
+    ${dotsSvg}
+  </svg>`;
+}
+
+/* ════════════════════════════════════
+   AS 추세 차트(SVG) — 기간 탭(주/월/년)에 연동되는 접수·완료 건수 라인 차트
+   ════════════════════════════════════ */
+function buildTrendSVG(groups){
+  const w=720,h=260;
+  const mL=34,mR=16,mT=16,mB=40;
+  const chartW=w-mL-mR,chartH=h-mT-mB;
+  const n=groups.length||1;
+  const maxV=Math.max(...groups.map(g=>Math.max(g.total,g.done)),1);
+  const step=n>1?chartW/(n-1):0;
+  const px=i=>mL+(n>1?step*i:chartW/2);
+  const py=v=>mT+chartH-(v/maxV*chartH);
+  const totalPts=groups.map((g,i)=>({x:px(i),y:py(g.total)}));
+  const donePts=groups.map((g,i)=>({x:px(i),y:py(g.done)}));
+  const pathOf=pts=>pts.map((p,i)=>`${i===0?"M":"L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+  const areaOf=pts=>pts.length?`${pathOf(pts)} L${pts[pts.length-1].x.toFixed(1)},${(mT+chartH).toFixed(1)} L${pts[0].x.toFixed(1)},${(mT+chartH).toFixed(1)} Z`:"";
+  const gridSvg=[0,.25,.5,.75,1].map(f=>{
+    const y=mT+chartH-(f*chartH);
+    return`<line x1="${mL}" y1="${y.toFixed(1)}" x2="${(mL+chartW).toFixed(1)}" y2="${y.toFixed(1)}" stroke="var(--line-2)" stroke-width="1"/><text x="${(mL-6).toFixed(1)}" y="${(y+3).toFixed(1)}" font-size="9.5" text-anchor="end" fill="var(--ink-5)">${Math.round(maxV*f)}</text>`;
+  }).join("");
+  const labelsSvg=groups.map((g,i)=>`<text x="${px(i).toFixed(1)}" y="${(mT+chartH+16).toFixed(1)}" font-size="9.5" text-anchor="middle" fill="var(--ink-5)">${esc(g.label)}</text>`).join("");
+  const totalDots=totalPts.map(p=>`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3" fill="var(--blue)"/>`).join("");
+  const doneDots=donePts.map(p=>`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3" fill="var(--teal)"/>`).join("");
+  return`<svg viewBox="0 0 ${w} ${h}" width="100%" style="min-width:${Math.max(360,n*50)}px;display:block;">
+    ${gridSvg}
+    <path d="${areaOf(totalPts)}" fill="var(--blue)" opacity=".08"/>
+    <path d="${pathOf(totalPts)}" fill="none" stroke="var(--blue)" stroke-width="2.2"/>
+    <path d="${pathOf(donePts)}" fill="none" stroke="var(--teal)" stroke-width="2.2"/>
+    ${totalDots}${doneDots}
+    ${labelsSvg}
+  </svg>`;
+}
+
+/* AS 원가 구조 도넛 차트(SVG) — 인건비/출장비/부품비/물류비 구성비 */
+function buildDonutSVG(entries){
+  const size=200,cx=size/2,cy=size/2,rOuter=88,rInner=54;
+  const total=entries.reduce((a,[,v])=>a+v,0)||1;
+  let angle=-90;
+  const arcs=entries.map(([label,val,color])=>{
+    const frac=val/total;
+    const startAngle=angle;
+    const sweep=frac*360;
+    angle+=sweep;
+    const endAngle=angle;
+    const toXY=(a,r)=>{const rad=(a*Math.PI)/180;return[cx+r*Math.cos(rad),cy+r*Math.sin(rad)];};
+    const [x1,y1]=toXY(startAngle,rOuter),[x2,y2]=toXY(endAngle,rOuter);
+    const [x3,y3]=toXY(endAngle,rInner),[x4,y4]=toXY(startAngle,rInner);
+    const largeArc=sweep>180?1:0;
+    const path=`M${x1.toFixed(1)},${y1.toFixed(1)} A${rOuter},${rOuter} 0 ${largeArc} 1 ${x2.toFixed(1)},${y2.toFixed(1)} L${x3.toFixed(1)},${y3.toFixed(1)} A${rInner},${rInner} 0 ${largeArc} 0 ${x4.toFixed(1)},${y4.toFixed(1)} Z`;
+    return{path,color,label,val,pct:(frac*100).toFixed(1)};
+  });
+  const pathsSvg=arcs.map(a=>`<path d="${a.path}" fill="${a.color}" opacity=".92"><title>${esc(a.label)} ${a.pct}%</title></path>`).join("");
+  return{svg:`<svg viewBox="0 0 ${size} ${size}" width="180" height="180" style="flex-shrink:0;">${pathsSvg}<text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink-3)">총 원가</text><text x="${cx}" y="${cy+13}" text-anchor="middle" font-size="11" fill="var(--ink-5)">${total.toLocaleString("ko-KR")}원</text></svg>`,arcs};
+}
+
 function renderStatPeriodSection(){
   const el=document.getElementById("statPeriodBody");if(!el)return;
-  const{groups,totalAll,doneAll,rateAll,avgAll}=computePeriodStats();
+  const{groups,totalAll,doneAll,rateAll,avgAll,prevTotalAll,prevDoneAll,prevRateAll,prevAvgAll,prevLabel}=computePeriodStats();
   const maxTotal=Math.max(...groups.map(r=>r.total),1);
-  const kpiStrip=`<div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
-    <div class="kpi-card c-blue" style="padding:14px 16px;"><div class="kpi-eyebrow">전체 접수</div><div class="kpi-num" style="font-size:24px;">${totalAll}</div></div>
-    <div class="kpi-card c-teal" style="padding:14px 16px;"><div class="kpi-eyebrow">처리 완료</div><div class="kpi-num" style="font-size:24px;">${doneAll}</div></div>
-    <div class="kpi-card c-violet" style="padding:14px 16px;"><div class="kpi-eyebrow">완료율</div><div class="kpi-num" style="font-size:24px;">${rateAll}%</div></div>
-    <div class="kpi-card c-amber" style="padding:14px 16px;"><div class="kpi-eyebrow">평균처리시간</div><div class="kpi-num" style="font-size:24px;">${avgAll}h</div></div>
-  </div>`;
+  const kpiStrip=`<div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:8px;">
+    <div class="kpi-card c-blue" style="padding:14px 16px;"><div class="kpi-eyebrow">전체 접수</div><div class="kpi-num" style="font-size:24px;">${totalAll}${trendBadge(totalAll,prevTotalAll,{neutral:true})}</div></div>
+    <div class="kpi-card c-teal" style="padding:14px 16px;"><div class="kpi-eyebrow">처리 완료</div><div class="kpi-num" style="font-size:24px;">${doneAll}${trendBadge(doneAll,prevDoneAll,{neutral:true})}</div></div>
+    <div class="kpi-card c-violet" style="padding:14px 16px;"><div class="kpi-eyebrow">완료율</div><div class="kpi-num" style="font-size:24px;">${rateAll}%${trendBadge(rateAll,prevRateAll)}</div></div>
+    <div class="kpi-card c-amber" style="padding:14px 16px;"><div class="kpi-eyebrow">평균처리시간</div><div class="kpi-num" style="font-size:24px;">${avgAll}h${trendBadge(avgAll,prevAvgAll,{inverse:true})}</div></div>
+  </div>
+  <div style="font-size:11px;color:var(--ink-5);margin-bottom:16px;">${esc(prevLabel)} 대비 증감 표시 · 완료율은 상승, 처리시간은 하락이 긍정적 지표입니다</div>`;
+  if(!groups.length){
+    el.innerHTML=kpiStrip+`<div class="empty" style="padding:24px;"><div class="empty-icon" style="font-size:24px;">📭</div><div class="empty-body">해당 기간 데이터가 없습니다</div></div>`;
+    return;
+  }
   const bars=groups.map(r=>{
     const pct=(r.total/maxTotal*100).toFixed(1);const donePct=r.total?(r.done/r.total*100).toFixed(0):0;const avg=r.total?(r.time/r.total).toFixed(1):"0.0";
-    return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px;">
-      <div style="width:72px;font-size:12px;color:var(--ink-3);text-align:right;flex-shrink:0;font-weight:500;">${esc(r.label)}</div>
-      <div style="flex:1;height:22px;background:var(--bg-2);border-radius:6px;overflow:hidden;position:relative;">
-        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--teal),#0891b2);border-radius:6px;transition:width .4s ease;"></div>
-        ${r.total>0?`<span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:11px;color:#fff;font-weight:600;">${r.total}건</span>`:""}
+    return`<div class="stat-period-row">
+      <div class="stat-period-label">${esc(r.label)}</div>
+      <div class="stat-period-track">
+        <div class="stat-period-fill" style="width:${pct}%;"></div>
+        ${r.total>0?`<span class="stat-period-count">${r.total}건</span>`:""}
       </div>
-      <div style="width:38px;font-size:11.5px;color:var(--teal-dk);font-weight:700;flex-shrink:0;">${donePct}%</div>
-      <div style="width:34px;font-size:11.5px;color:var(--ink-5);flex-shrink:0;">${avg}h</div>
+      <div class="stat-period-rate">${donePct}%</div>
+      <div class="stat-period-avg">${avg}h</div>
     </div>`;
   }).join("");
-  el.innerHTML=kpiStrip+`<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--line);">
-    <div style="width:72px;"></div><div style="flex:1;font-size:11px;font-weight:700;color:var(--ink-5);text-transform:uppercase;letter-spacing:.4px;">접수 건수</div>
-    <div style="width:38px;font-size:11px;font-weight:700;color:var(--ink-5);">완료율</div>
-    <div style="width:34px;font-size:11px;font-weight:700;color:var(--ink-5);">평균</div>
-  </div>${bars||`<div class="empty" style="padding:24px;"><div class="empty-icon" style="font-size:24px;">📭</div><div class="empty-body">해당 기간 데이터가 없습니다</div></div>`}`;
+  const mobileCards=groups.map(r=>{
+    const pct=(r.total/maxTotal*100).toFixed(1);const donePct=r.total?(r.done/r.total*100).toFixed(0):0;const avg=r.total?(r.time/r.total).toFixed(1):"0.0";
+    return`<div class="stat-period-mcard">
+      <div class="stat-period-mcard-head">
+        <span class="stat-period-mcard-label">${esc(r.label)}</span>
+        <span class="stat-period-mcard-meta">${r.total}건 · 완료율 ${donePct}% · 평균 ${avg}h</span>
+      </div>
+      <div class="stat-period-mcard-track"><div class="stat-period-mcard-fill" style="width:${pct}%;"></div></div>
+    </div>`;
+  }).join("");
+  el.innerHTML=kpiStrip+
+    `<div class="stat-period-desktop">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--line);">
+        <div style="width:72px;"></div><div style="flex:1;font-size:11px;font-weight:700;color:var(--ink-5);text-transform:uppercase;letter-spacing:.4px;">접수 건수</div>
+        <div style="width:38px;font-size:11px;font-weight:700;color:var(--ink-5);">완료율</div>
+        <div style="width:34px;font-size:11px;font-weight:700;color:var(--ink-5);">평균</div>
+      </div>${bars}
+    </div>
+    <div class="stat-period-mobile">${mobileCards}</div>`;
+}
+
+/* 핵심 품질 지표: MTTR(평균 수리시간) · MTBF(평균 고장간격) · SLA 준수율(72시간 기준) */
+function modelMTTRTableHtml(brandGroup){
+  if(!brandGroup.models.length){
+    return`<div style="margin-bottom:14px;">
+      <div style="font-size:12.5px;font-weight:700;color:var(--ink-3);margin-bottom:6px;">${esc(brandGroup.brand)}</div>
+      <div class="empty" style="padding:18px;"><div class="empty-icon" style="font-size:20px;">🏷️</div><div class="empty-body">데이터가 없습니다</div></div>
+    </div>`;
+  }
+  const barMax=QUALITY_THRESHOLDS.mttr.danger*1.5; // 위험 기준의 1.5배를 100%로 두어 브랜드 간 막대 길이를 동일 축으로 비교
+  const desktopRows=brandGroup.models.map(m=>{
+    const pct=m.mttr!==null?Math.max(3,Math.min(100,(Number(m.mttr)/barMax)*100)):0;
+    return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line-2);">
+      <div style="width:140px;flex-shrink:0;">
+        <div style="font-size:12.5px;font-weight:600;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(m.name)}">${esc(m.name)}</div>
+        <div class="qm-bar-track"><div class="qm-bar-fill" style="width:${pct}%;background:${m.status.color};"></div></div>
+      </div>
+      <div style="flex:1;font-size:12px;color:var(--ink-5);text-align:right;">접수 ${m.total}건</div>
+      <div style="width:90px;flex-shrink:0;font-size:12px;color:var(--ink-5);text-align:right;">수리 ${m.repairCount}건</div>
+      <div style="width:100px;flex-shrink:0;font-size:12px;color:var(--ink-5);text-align:right;">${m.repairHours.toFixed(1)}h</div>
+      <div style="width:110px;flex-shrink:0;display:flex;align-items:center;justify-content:flex-end;gap:6px;">
+        <span class="qs-badge ${m.status.cls}">${m.status.label}</span>
+        <span style="font-size:13px;font-weight:700;color:var(--blue);white-space:nowrap;">${m.mttr!==null?m.mttr+"h":"-"}</span>
+      </div>
+    </div>`;}).join("");
+  const mobileCards=brandGroup.models.map(m=>{
+    const pct=m.mttr!==null?Math.max(3,Math.min(100,(Number(m.mttr)/barMax)*100)):0;
+    return`<div class="mc">
+    <div class="mc-head" style="cursor:default;">
+      <div class="mc-title"><div class="mc-name">${esc(m.name)}</div><div class="mc-sub">접수 ${m.total}건 · 수리 ${m.repairCount}건 · 총 수리시간 ${m.repairHours.toFixed(1)}h</div>
+        <div class="qm-bar-track" style="margin-top:5px;"><div class="qm-bar-fill" style="width:${pct}%;background:${m.status.color};"></div></div>
+      </div>
+      <div class="mc-badges" style="flex-direction:column;align-items:flex-end;gap:4px;">
+        <span class="qs-badge ${m.status.cls}">${m.status.label}</span>
+        <span class="badge b-progress">MTTR ${m.mttr!==null?m.mttr+"h":"-"}</span>
+      </div>
+    </div>
+  </div>`;}).join("");
+  return`<div style="margin-bottom:14px;">
+    <div style="font-size:12.5px;font-weight:700;color:var(--ink-3);margin-bottom:6px;">${esc(brandGroup.brand)}</div>
+    <div class="site-perf-desktop">
+      <div style="display:flex;align-items:center;gap:10px;padding-bottom:6px;border-bottom:1px solid var(--line);">
+        <div style="width:140px;flex-shrink:0;"></div>
+        <div style="flex:1;font-size:10.5px;font-weight:700;color:var(--ink-5);text-transform:uppercase;letter-spacing:.4px;text-align:right;">접수</div>
+        <div style="width:90px;flex-shrink:0;font-size:10.5px;font-weight:700;color:var(--ink-5);text-align:right;">수리건수</div>
+        <div style="width:100px;flex-shrink:0;font-size:10.5px;font-weight:700;color:var(--ink-5);text-align:right;">총 수리시간</div>
+        <div style="width:110px;flex-shrink:0;font-size:10.5px;font-weight:700;color:var(--ink-5);text-align:right;">판정 · MTTR</div>
+      </div>${desktopRows}
+    </div>
+    <div class="mc-list">${mobileCards}</div>
+  </div>`;
+}
+function modelMTBFTableHtml(brandGroup){
+  if(!brandGroup.models.length){
+    return`<div style="margin-bottom:14px;">
+      <div style="font-size:12.5px;font-weight:700;color:var(--ink-3);margin-bottom:6px;">${esc(brandGroup.brand)}</div>
+      <div class="empty" style="padding:18px;"><div class="empty-icon" style="font-size:20px;">🏷️</div><div class="empty-body">데이터가 없습니다</div></div>
+    </div>`;
+  }
+  const barMax=QUALITY_THRESHOLDS.mtbf.good*1.5; // 우수 기준의 1.5배를 100%로 두어 브랜드 간 막대 길이를 동일 축으로 비교(길수록 안정적)
+  const desktopRows=brandGroup.models.map(m=>{
+    const pct=m.mtbfDays!==null?Math.max(3,Math.min(100,(Number(m.mtbfDays)/barMax)*100)):0;
+    return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line-2);">
+      <div style="width:140px;flex-shrink:0;">
+        <div style="font-size:12.5px;font-weight:600;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(m.name)}">${esc(m.name)}</div>
+        <div class="qm-bar-track"><div class="qm-bar-fill" style="width:${pct}%;background:${m.status.color};"></div></div>
+      </div>
+      <div style="flex:1;font-size:12px;color:var(--ink-5);text-align:right;">고장 ${m.failureCount}건</div>
+      <div style="width:120px;flex-shrink:0;font-size:12px;color:var(--ink-5);text-align:right;">설치 ${m.siteCount}곳${m.siteSampleCount<m.siteCount?` (산출 ${m.siteSampleCount}곳)`:""}</div>
+      <div style="width:100px;flex-shrink:0;font-size:12px;color:var(--ink-5);text-align:right;">${m.mtbfHours!==null?m.operatingHours.toFixed(0)+"h":"-"}</div>
+      <div style="width:110px;flex-shrink:0;display:flex;align-items:center;justify-content:flex-end;gap:6px;">
+        <span class="qs-badge ${m.status.cls}">${m.status.label}</span>
+        <span style="font-size:13px;font-weight:700;color:var(--violet);white-space:nowrap;">${m.mtbfDays!==null?m.mtbfDays+"일":"산출불가"}</span>
+      </div>
+    </div>`;}).join("");
+  const mobileCards=brandGroup.models.map(m=>{
+    const pct=m.mtbfDays!==null?Math.max(3,Math.min(100,(Number(m.mtbfDays)/barMax)*100)):0;
+    return`<div class="mc">
+    <div class="mc-head" style="cursor:default;">
+      <div class="mc-title"><div class="mc-name">${esc(m.name)}</div><div class="mc-sub">고장 ${m.failureCount}건 · 설치 현장 ${m.siteCount}곳 · 총 운전시간 ${m.mtbfHours!==null?m.operatingHours.toFixed(0)+"h":"-"}</div>
+        <div class="qm-bar-track" style="margin-top:5px;"><div class="qm-bar-fill" style="width:${pct}%;background:${m.status.color};"></div></div>
+      </div>
+      <div class="mc-badges" style="flex-direction:column;align-items:flex-end;gap:4px;">
+        <span class="qs-badge ${m.status.cls}">${m.status.label}</span>
+        <span class="badge b-progress">MTBF ${m.mtbfDays!==null?m.mtbfDays+"일":"산출불가"}</span>
+      </div>
+    </div>
+  </div>`;}).join("");
+  return`<div style="margin-bottom:14px;">
+    <div style="font-size:12.5px;font-weight:700;color:var(--ink-3);margin-bottom:6px;">${esc(brandGroup.brand)}</div>
+    <div class="site-perf-desktop">
+      <div style="display:flex;align-items:center;gap:10px;padding-bottom:6px;border-bottom:1px solid var(--line);">
+        <div style="width:140px;flex-shrink:0;"></div>
+        <div style="flex:1;font-size:10.5px;font-weight:700;color:var(--ink-5);text-transform:uppercase;letter-spacing:.4px;text-align:right;">고장횟수</div>
+        <div style="width:120px;flex-shrink:0;font-size:10.5px;font-weight:700;color:var(--ink-5);text-align:right;">설치 현장</div>
+        <div style="width:100px;flex-shrink:0;font-size:10.5px;font-weight:700;color:var(--ink-5);text-align:right;">총 운전시간</div>
+        <div style="width:110px;flex-shrink:0;font-size:10.5px;font-weight:700;color:var(--ink-5);text-align:right;">판정 · MTBF</div>
+      </div>${desktopRows}
+    </div>
+    <div class="mc-list">${mobileCards}</div>
+  </div>`;
+}
+/* KPI 카드 상단에 붙는 상태 배지 + 임계값 대비 미니 게이지 바를 공통으로 생성 */
+function qkpiStatusRow(value,kind){
+  const s=qualityStatus(value,kind);
+  const pct=qualityGaugePct(value,kind);
+  return`<span class="qs-badge ${s.cls}">${s.label}</span>
+    <div class="qkpi-gauge-track"><div class="qkpi-gauge-fill" style="width:${pct}%;background:${s.color};"></div></div>`;
+}
+function renderStatQualitySection(){
+  const el=document.getElementById("statQualityBody");if(!el)return;
+  const{data,prevData,periodLabel,prevLabel,doneAll}=computePeriodStats();
+  const mttrStats=computeMTTRStats(data);
+  const prevMttrStats=computeMTTRStats(prevData);
+  const mtbf=computeMTBF();
+  const sla=computeSLAStats(data);
+  const prevSla=computeSLAStats(prevData);
+  const modelMTTR=computeModelMTTR(data);
+  const modelMTBF=computeModelMTBF();
+  const watch=computeQualityWatchlist(modelMTTR,modelMTBF);
+  const watchRow=(m,kind)=>`<div class="qm-watch-item">
+      <div class="qm-watch-name" title="${esc(m.name)}"><span class="qm-watch-brand">${esc(m.brand)}</span> ${esc(m.name)}</div>
+      <span class="qs-badge ${m.status.cls}">${m.status.label}</span>
+      <span class="qm-watch-val" style="color:${kind==='mttr'?'var(--blue)':'var(--violet)'};">${kind==='mttr'?m.mttr+'h':m.mtbfDays+'일'}</span>
+    </div>`;
+  el.innerHTML=`
+    <div class="qkpi-grid">
+      <div class="qkpi-card q-mttr">
+        <div class="qkpi-label">⏱️ MTTR (평균 수리시간)</div>
+        <div class="qkpi-num">${mttrStats.avg}<span class="qkpi-unit">시간</span>${trendBadge(mttrStats.avg,prevMttrStats.avg,{inverse:true})}</div>
+        <div class="qkpi-sub">${periodLabel} 완료 ${doneAll}건 중 실제 소요시간 기재 ${mttrStats.sampleCount}건 기준${mttrStats.missingCount>0?` (미기재 ${mttrStats.missingCount}건 제외)`:""} · ${prevLabel} ${prevMttrStats.avg}시간</div>
+        ${qkpiStatusRow(mttrStats.avg,"mttr")}
+      </div>
+      <div class="qkpi-card q-mtbf">
+        <div class="qkpi-label">🔁 MTBF (평균 고장간격)</div>
+        <div class="qkpi-num">${mtbf.days!==null?mtbf.days:"-"}<span class="qkpi-unit">${mtbf.days!==null?"일":""}</span></div>
+        <div class="qkpi-sub">${mtbf.days!==null?`전체 데이터 · 현장 ${mtbf.siteCount}곳 · 간격표본 ${mtbf.gapCount}건 (≈${mtbf.hours}시간)`:"동일 현장 재접수 이력이 2건 이상 쌓이면 산출됩니다"}</div>
+        ${mtbf.days!==null?qkpiStatusRow(mtbf.days,"mtbf"):""}
+      </div>
+      <div class="qkpi-card q-sla">
+        <div class="qkpi-label">✅ SLA 준수율 (72h 기준)</div>
+        <div class="qkpi-num">${sla.rate}<span class="qkpi-unit">%</span>${trendBadge(sla.rate,prevSla.rate)}</div>
+        <div class="qkpi-sub">${periodLabel} 완료 건 중 접수→완료 리드타임 평가 ${sla.evalTotal}건 · 평균 리드타임 ${sla.avgLead}h</div>
+        ${qkpiStatusRow(sla.rate,"sla")}
+      </div>
+      <div class="qkpi-card q-breach">
+        <div class="qkpi-label">⚠️ SLA 위반 건수</div>
+        <div class="qkpi-num">${sla.breachCount}<span class="qkpi-unit">건</span></div>
+        <div class="qkpi-sub">${sla.noDateCount>0?`접수·완료일 미입력으로 평가 제외 ${sla.noDateCount}건`:"완료 건 전체가 평가 대상에 포함됨"}</div>
+      </div>
+    </div>
+    <div class="sla-split">
+      <div class="sla-pill ok"><div class="sla-pill-num">${sla.compliantCount}건</div><div class="sla-pill-label">✅ SLA 준수 (72시간 이내)</div></div>
+      <div class="sla-pill bad"><div class="sla-pill-num">${sla.breachCount}건</div><div class="sla-pill-label">⚠️ SLA 위반 (72시간 초과)</div></div>
+    </div>
+    <div class="qkpi-def">
+      · <strong>MTTR</strong>: AS이력카드 [④완료 처리] 탭에 기술자가 직접 기재한 "실제 소요시간"을 시간 단위로 환산한 평균값 (30분 미만=0.25h · 30분=0.5h · 1~4시간=그대로 · 반일 이상=6h · 종일=8h) — 낮을수록 우수. 실제 소요시간을 기재하지 않은 완료 건은 표본에서 제외됩니다<br/>
+      · <strong>MTBF</strong>: 동일 현장에서 이전 AS 접수 이후 다음 접수가 발생하기까지 걸린 평균 일수 (설비 신뢰성 지표) — 높을수록 우수<br/>
+      · <strong>SLA 준수율</strong>: 접수일 대비 완료일 경과시간이 사내 기준(72시간) 이내인 완료 건의 비율 (토·일요일은 경과시간 계산에서 제외한 영업일 기준)<br/>
+      · <strong>판정 기준</strong>: MTTR 우수 ≤${QUALITY_THRESHOLDS.mttr.good}h · 양호 ≤${QUALITY_THRESHOLDS.mttr.warn}h · 주의 ≤${QUALITY_THRESHOLDS.mttr.danger}h · 위험 초과 &nbsp;|&nbsp; MTBF 우수 ≥${QUALITY_THRESHOLDS.mtbf.good}일 · 양호 ≥${QUALITY_THRESHOLDS.mtbf.warn}일 · 주의 ≥${QUALITY_THRESHOLDS.mtbf.danger}일 · 위험 미만 &nbsp;|&nbsp; SLA 우수 ≥${QUALITY_THRESHOLDS.sla.good}% · 양호 ≥${QUALITY_THRESHOLDS.sla.warn}% · 주의 ≥${QUALITY_THRESHOLDS.sla.danger}% · 위험 미만 (사내 정책값, 조정 가능)
+    </div>
+    ${(watch.mttrFlat.length||watch.mtbfFlat.length)?`
+    <div class="qm-watch-card">
+      <div class="qm-watch-title">🔎 신뢰성 관리 필요 TOP 모델 <span class="qm-watch-title-sub">(주의·위험 등급만 표시 · 브랜드 통합)</span></div>
+      <div class="qm-watch-cols">
+        <div class="qm-watch-col">
+          <div class="qm-watch-col-h">MTTR 상위 (수리시간 김)</div>
+          ${watch.mttrFlat.length?watch.mttrFlat.map(m=>watchRow(m,"mttr")).join(""):`<div class="qm-watch-empty">주의·위험 등급 모델 없음</div>`}
+        </div>
+        <div class="qm-watch-col">
+          <div class="qm-watch-col-h">MTBF 하위 (고장 잦음)</div>
+          ${watch.mtbfFlat.length?watch.mtbfFlat.map(m=>watchRow(m,"mtbf")).join(""):`<div class="qm-watch-empty">주의·위험 등급 모델 없음</div>`}
+        </div>
+      </div>
+    </div>`:""}
+    <div style="margin-top:22px;padding-top:16px;border-top:1px solid var(--line);">
+      <div class="card-title" style="font-size:13px;margin-bottom:4px;">🏷️ NEO / SPARKOZ 모델별 MTTR <span style="font-weight:400;color:var(--ink-5);">(수리시간 긴 순)</span></div>
+      <div style="font-size:11px;color:var(--ink-5);margin-bottom:10px;">${esc(periodLabel)} 기준 · MTTR = 총 수리시간(AS이력카드 [④완료 처리]에 기재한 "실제 소요시간"의 환산 합) ÷ 수리건수(실제 소요시간 기재 건수)</div>
+      ${modelMTTR.map(modelMTTRTableHtml).join("")}
+    </div>
+    <div style="margin-top:6px;padding-top:16px;border-top:1px solid var(--line);">
+      <div class="card-title" style="font-size:13px;margin-bottom:4px;">🏷️ NEO / SPARKOZ 모델별 MTBF <span style="font-weight:400;color:var(--ink-5);">(고장 간격 짧은 순)</span></div>
+      <div style="font-size:11px;color:var(--ink-5);margin-bottom:10px;">전체 데이터 기준(기간 탭과 무관) · MTBF = 총 운전시간(설치 현장의 계약 시작일부터 현재까지 경과시간의 합) ÷ 고장횟수(전체 AS 접수 건수)</div>
+      ${modelMTBF.map(modelMTBFTableHtml).join("")}
+    </div>`;
+}
+
+/* AS 추세 그래프 — 기간 탭(주/월/년)에 연동되는 접수·완료 추이 라인 차트 */
+function renderStatTrendSection(){
+  const el=document.getElementById("statTrendBody");if(!el)return;
+  const{groups,periodLabel,totalAll,doneAll,rateAll}=computePeriodStats();
+  const hasData=groups.some(g=>g.total>0);
+  el.innerHTML=`
+    <div class="chart-legend">
+      <span class="chart-legend-item"><span class="chart-legend-line" style="background:var(--blue);"></span>접수 건수</span>
+      <span class="chart-legend-item"><span class="chart-legend-line" style="background:var(--teal);"></span>완료 건수</span>
+      <span style="margin-left:auto;font-weight:600;color:var(--ink-4);">${periodLabel} 누계 접수 ${totalAll}건 · 완료 ${doneAll}건 · 완료율 ${rateAll}%</span>
+    </div>
+    ${hasData?`<div class="chart-wrap">${buildTrendSVG(groups)}</div>`:`<div class="empty" style="padding:24px;"><div class="empty-icon" style="font-size:22px;">📈</div><div class="empty-body" style="font-size:12px;">${periodLabel} 접수 추이 데이터가 없습니다</div></div>`}
+    <div class="chart-note">접수 대비 완료 곡선의 간격이 벌어질수록 처리 지연(백로그)이 누적되고 있음을 의미합니다.</div>`;
+}
+
+/* 모델별 불량 현황 — 장비모델(equipModel) 기준 비중·완료율·평균처리시간·주요 원인 */
+function renderStatModelSection(){
+  const el=document.getElementById("statModelBody");if(!el)return;
+  const{data,periodLabel}=computePeriodStats();
+  const modelStats=computeModelStats(data);
+  if(!modelStats.length){el.innerHTML=empty("📱","모델 데이터가 없습니다",`${periodLabel} 접수 건에 장비모델 정보가 없습니다`);return;}
+  const maxTotal=Math.max(...modelStats.map(m=>m.total),1);
+  const rows=modelStats.map(m=>`
+    <div class="model-bar-row">
+      <div class="model-bar-label" title="${esc(m.name)}">${esc(m.name)}</div>
+      <div class="model-bar-track"><div class="model-bar-fill" style="width:${(m.total/maxTotal*100).toFixed(1)}%;"></div></div>
+      <div class="model-bar-share">${m.share}%</div>
+      <div class="model-bar-rate">${m.rate}%</div>
+      <div class="model-bar-avg">${m.avg}h</div>
+      <div class="model-bar-cause" title="${esc(m.topCause)}">${esc(m.topCause)}</div>
+    </div>`).join("");
+  const cards=modelStats.map(m=>`<div class="mc">
+    <div class="mc-head" style="cursor:default;">
+      <div class="mc-title"><div class="mc-name">${esc(m.name)}</div><div class="mc-sub">접수 ${m.total}건 · 비중 ${m.share}% · 주원인 ${esc(m.topCause)}</div></div>
+      <div class="mc-badges"><span class="badge b-progress">완료율 ${m.rate}%</span></div>
+    </div>
+  </div>`).join("");
+  el.innerHTML=`
+    <div class="site-perf-desktop">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--line);">
+        <div style="width:132px;"></div><div style="flex:1;font-size:11px;font-weight:700;color:var(--ink-5);text-transform:uppercase;letter-spacing:.4px;">접수 비중(불량 발생 비중)</div>
+        <div style="width:44px;font-size:11px;font-weight:700;color:var(--ink-5);"></div>
+        <div style="width:40px;font-size:11px;font-weight:700;color:var(--ink-5);">완료율</div>
+        <div style="width:40px;font-size:11px;font-weight:700;color:var(--ink-5);">평균</div>
+        <div style="width:96px;font-size:11px;font-weight:700;color:var(--ink-5);text-align:right;">주요 원인</div>
+      </div>${rows}
+    </div>
+    <div class="mc-list">${cards}</div>
+    <div class="chart-note">모델정보 미입력 건은 브랜드계열로 대체 집계됩니다. 설치 대수(모집단) 정보가 없어 "불량률"은 전체 접수 건 대비 모델별 비중으로 산출했습니다 — Inventory에 모델별 설치 대수를 등록하면 정확한 고장률(건수/설치대수)로 고도화할 수 있습니다.</div>`;
 }
 
 function renderStatCauseSection(){
@@ -2367,9 +3357,14 @@ function renderStatCauseSection(){
   const partRows=partEntriesTop.map(([k,v],i)=>`<tr><td>${i+1}</td><td title="${esc(k)}" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(k)}</td><td style="text-align:right;font-weight:700;color:var(--amber);">${v}건</td></tr>`).join("");
   const errRows=errEntriesTop.map(([k,v],i)=>`<tr><td>${i+1}</td><td title="${esc(k)}" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;">${esc(k)}</td><td style="text-align:right;font-weight:700;color:var(--rose);">${v}건</td></tr>`).join("");
 
+  const paretoEntries=causeEntries.slice(0,10);
   el.innerHTML=`
     <div style="font-size:12px;color:var(--ink-5);margin-bottom:14px;">📊 <strong>${periodLabel}</strong> 접수 건 ${data.length}건 중 원인 분석 완료 <strong style="color:var(--violet);">${causeTotal}건</strong>${noCause>0?` · 원인 미입력 <strong style="color:var(--ink-4);">${noCause}건</strong>`:""}</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div style="margin-bottom:20px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-5);margin-bottom:8px;">📐 불량 원인 Pareto 분석 (막대: 건수 · 꺾은선: 누적 비율)</div>
+      ${paretoEntries.length?`<div class="chart-wrap">${buildParetoSVG(paretoEntries)}</div><div class="chart-note">빨간 점선(80%) 도달 지점까지의 원인이 핵심 관리 대상(Vital Few)입니다. 이 원인부터 우선 개선하면 전체 불량의 대부분을 통제할 수 있습니다.</div>`:`<div class="empty" style="padding:20px;"><div class="empty-icon" style="font-size:22px;">📐</div><div class="empty-body" style="font-size:12px;">${periodLabel} 원인 분석 데이터가 없어 Pareto 차트를 생성할 수 없습니다</div></div>`}
+    </div>
+    <div class="stat-cause-grid">
       <div>
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-5);margin-bottom:10px;">🔍 원인 구분별 분포</div>
         ${causeEntries.length?causeBars:`<div class="empty" style="padding:20px;"><div class="empty-icon" style="font-size:22px;">🔍</div><div class="empty-body" style="font-size:12px;">${periodLabel} 원인 분석 데이터가 없습니다</div></div>`}
@@ -2389,6 +3384,210 @@ function renderStatCauseSection(){
     </div>`;
 }
 
+/* 담당자(PM)별 처리 현황 렌더링 */
+function renderStatPMSection(){
+  const el=document.getElementById("statPMBody");if(!el)return;
+  const{data,periodLabel}=computePeriodStats();
+  const pmStats=computePMStats(data);
+  if(!pmStats.length){el.innerHTML=empty("👤","담당자 데이터가 없습니다",`${periodLabel} 접수 건에 담당 PM 정보가 없습니다`);return;}
+  const maxTotal=Math.max(...pmStats.map(p=>p.total),1);
+  const rows=pmStats.map(p=>`<tr>
+    <td style="font-weight:700;">${esc(p.name)}</td>
+    <td>${p.total}건</td>
+    <td>${p.done}건</td>
+    <td><span style="font-weight:700;color:var(--teal-dk);">${p.rate}%</span></td>
+    <td>${p.avg}h</td>
+    <td style="min-width:110px;"><div style="height:8px;background:var(--bg-2);border-radius:4px;overflow:hidden;"><div style="height:100%;width:${(p.total/maxTotal*100).toFixed(1)}%;background:linear-gradient(90deg,var(--violet),#a855f7);"></div></div></td>
+  </tr>`).join("");
+  const cards=pmStats.map(p=>`<div class="mc">
+    <div class="mc-head" style="cursor:default;">
+      <div class="mc-title"><div class="mc-name">${esc(p.name)}</div><div class="mc-sub">접수 ${p.total}건 · 완료 ${p.done}건 · 평균 ${p.avg}h</div></div>
+      <div class="mc-badges"><span class="badge b-progress">완료율 ${p.rate}%</span></div>
+    </div>
+  </div>`).join("");
+  el.innerHTML=`<div style="font-size:12px;color:var(--ink-5);margin-bottom:12px;">👤 <strong>${periodLabel}</strong> 접수 건을 담당 PM(현장 담당 또는 방문 기사) 기준으로 집계합니다</div>
+  <div class="tbl-wrap"><table class="tbl"><thead><tr>
+    <th>담당자</th><th>접수</th><th>완료</th><th>완료율</th><th>평균 처리시간</th><th>업무량</th>
+  </tr></thead><tbody>${rows}</tbody></table></div>
+  <div class="mc-list">${cards}</div>`;
+}
+
+/* 브랜드(NEO/SPARKOZ)별 AS 현황 및 오류 심각도 분포 렌더링 */
+function renderStatBrandSection(){
+  const el=document.getElementById("statBrandBody");if(!el)return;
+  const{data,periodLabel}=computePeriodStats();
+  const brandStats=computeBrandPeriodStats(data);
+  const sevColor={"긴급":"var(--rose)","높음":"var(--warn)","보통":"var(--teal-dk)","낮음":"var(--ink-4)","미확인":"var(--ink-5)"};
+  const themes={NEO:{color:"#2563eb",bg:"linear-gradient(135deg,#eff6ff,#dbeafe)"},SPARKOZ:{color:"#7c3aed",bg:"linear-gradient(135deg,#faf5ff,#ede9fe)"}};
+  const totalBrandTasks=brandStats.reduce((a,b)=>a+b.total,0);
+  const cards=brandStats.map(b=>{
+    const theme=themes[b.brand]||{color:"var(--ink-3)",bg:"var(--bg-2)"};
+    const sevEntries=Object.entries(b.sevCount).filter(([,v])=>v>0);
+    const sevTotal=sevEntries.reduce((a,[,v])=>a+v,0)||1;
+    const sevBars=sevEntries.map(([k,v])=>`
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
+        <div style="width:44px;font-size:11px;color:var(--ink-4);flex-shrink:0;">${esc(k)}</div>
+        <div style="flex:1;height:8px;background:var(--bg-2);border-radius:4px;overflow:hidden;"><div style="height:100%;width:${(v/sevTotal*100).toFixed(1)}%;background:${sevColor[k]};"></div></div>
+        <div style="width:24px;font-size:11px;font-weight:700;color:${sevColor[k]};text-align:right;flex-shrink:0;">${v}</div>
+      </div>`).join("");
+    return`<div style="border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;background:var(--surface);">
+      <div style="padding:12px 16px;background:${theme.bg};display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-weight:800;color:${theme.color};letter-spacing:-.2px;">${esc(b.brand)}</div>
+        <div style="font-size:20px;font-weight:800;color:${theme.color};">${b.total}<span style="font-size:11px;color:var(--ink-5);font-weight:600;margin-left:2px;">건</span></div>
+      </div>
+      <div style="padding:12px 16px;">
+        <div style="display:flex;gap:16px;margin-bottom:10px;font-size:12px;color:var(--ink-3);">
+          <div>완료율 <strong style="color:var(--teal-dk);">${b.rate}%</strong></div>
+          <div>평균처리 <strong>${b.avg}h</strong></div>
+        </div>
+        <div style="font-size:10.5px;font-weight:700;color:var(--ink-5);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;">오류 심각도 분포</div>
+        ${sevEntries.length?sevBars:`<div style="font-size:11.5px;color:var(--ink-5);">${periodLabel} 접수 데이터가 없습니다</div>`}
+      </div>
+    </div>`;
+  }).join("");
+  el.innerHTML=totalBrandTasks?`<div class="brand-grid">${cards}</div>`:empty("🤖","브랜드 데이터가 없습니다",`${periodLabel} 접수 건에 브랜드(NEO/SPARKOZ) 정보가 입력된 항목이 없습니다`);
+}
+
+function fmtWon(n){return Math.round(n||0).toLocaleString("ko-KR")+"원";}
+function marginBadge(margin){
+  const v=Number(margin);
+  return`<span class="profit-margin-badge ${v>=0?"pos":"neg"}">${v>=0?"+":""}${margin}%</span>`;
+}
+function miniBar(revenue,cost,maxVal){
+  const rw=maxVal?Math.min((revenue/maxVal)*100,100):0;
+  const cw=maxVal?Math.min((cost/maxVal)*100,100):0;
+  return`<div class="profit-minibar">
+    <div class="profit-minibar-track"><div class="profit-minibar-fill rev" style="width:${rw.toFixed(1)}%;"></div></div>
+    <div class="profit-minibar-track"><div class="profit-minibar-fill cost" style="width:${cw.toFixed(1)}%;"></div></div>
+  </div>`;
+}
+
+/* ① 계약 유형별 수익성 — 판매·렌탈·유지보수 매출/원가/이익률 비교 */
+function renderStatContractTypeSection(){
+  const el=document.getElementById("statContractTypeBody");if(!el)return;
+  const rows=computeContractTypeProfit();
+  if(!rows.length||rows.every(r=>r.revenue===0&&r.cost===0)){
+    el.innerHTML=empty("📄","계약 데이터가 없습니다","Site Master에서 계약금액(매출)·원가를 입력하면 유형별 수익성이 자동 산출됩니다");return;
+  }
+  const totalRevenue=rows.reduce((a,r)=>a+r.revenue,0);
+  const totalCost=rows.reduce((a,r)=>a+r.cost,0);
+  const totalProfit=totalRevenue-totalCost;
+  const totalMargin=totalRevenue?((totalProfit/totalRevenue)*100).toFixed(1):"0.0";
+  const maxVal=Math.max(...rows.map(r=>Math.max(r.revenue,r.cost)),1);
+  const tbody=rows.map(r=>`<tr>
+    <td style="font-weight:700;">${bContract(r.type)}</td>
+    <td style="text-align:right;">${r.count}건</td>
+    <td style="text-align:right;font-weight:600;color:var(--blue);">${fmtWon(r.revenue)}</td>
+    <td style="text-align:right;color:var(--ink-5);">${fmtWon(r.cost)}</td>
+    <td style="text-align:right;font-weight:700;color:${r.profit>=0?"var(--teal-dk)":"var(--rose)"};">${fmtWon(r.profit)}</td>
+    <td style="text-align:right;">${marginBadge(r.margin)}</td>
+    <td>${miniBar(r.revenue,r.cost,maxVal)}</td>
+  </tr>`).join("");
+  el.innerHTML=`
+    <div class="profit-summary-grid">
+      <div class="profit-summary-card"><div class="profit-summary-label">전체 계약 매출</div><div class="profit-summary-val" style="color:var(--blue);">${fmtWon(totalRevenue)}</div></div>
+      <div class="profit-summary-card"><div class="profit-summary-label">전체 원가</div><div class="profit-summary-val" style="color:var(--ink-4);">${fmtWon(totalCost)}</div></div>
+      <div class="profit-summary-card"><div class="profit-summary-label">전체 이익 · 이익률</div><div class="profit-summary-val" style="color:${totalProfit>=0?"var(--teal-dk)":"var(--rose)"};">${fmtWon(totalProfit)} <span style="font-size:13px;">(${totalMargin}%)</span></div></div>
+    </div>
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th>계약 유형</th><th style="text-align:right;">건수</th><th style="text-align:right;">매출</th><th style="text-align:right;">원가</th><th style="text-align:right;">이익</th><th style="text-align:right;">이익률</th><th>매출·원가 비교</th></tr></thead>
+      <tbody>${tbody}</tbody>
+    </table></div>
+    <div class="chart-note">전체 누적(Site Master) 계약 데이터 기준입니다. 파란 막대는 매출, 빨간 막대는 원가를 나타내며, 두 막대 간 간격이 클수록 해당 계약 유형의 수익성이 좋습니다.</div>`;
+}
+
+/* ② 고객사별 손익 분석 — 매출 대비 AS 비용·순이익 */
+function renderStatCustomerProfitSection(){
+  const el=document.getElementById("statCustomerProfitBody");if(!el)return;
+  const rows=computeCustomerProfit().filter(r=>r.revenue>0||r.asCost>0);
+  if(!rows.length){el.innerHTML=empty("🏢","고객사 손익 데이터가 없습니다","Site Master에 계약금액을, AS 이력카드에 원가를 입력하면 자동 산출됩니다");return;}
+  const maxVal=Math.max(...rows.map(r=>Math.max(r.revenue,r.asCost)),1);
+  const best=rows.slice().sort((a,b)=>b.profit-a.profit)[0];
+  const worst=rows.slice().sort((a,b)=>a.profit-b.profit)[0];
+  const tbody=rows.map(r=>`<tr>
+    <td style="font-weight:700;">${esc(r.client)}</td>
+    <td style="text-align:right;color:var(--ink-5);">${r.siteCount}현장 · AS ${r.asCount}건</td>
+    <td style="text-align:right;font-weight:600;color:var(--blue);">${fmtWon(r.revenue)}</td>
+    <td style="text-align:right;color:var(--rose);">${fmtWon(r.asCost)}</td>
+    <td style="text-align:right;font-weight:700;color:${r.profit>=0?"var(--teal-dk)":"var(--rose)"};">${fmtWon(r.profit)}</td>
+    <td style="text-align:right;">${marginBadge(r.margin)}</td>
+    <td>${miniBar(r.revenue,r.asCost,maxVal)}</td>
+  </tr>`).join("");
+  el.innerHTML=`
+    <div class="profit-summary-grid">
+      <div class="profit-summary-card"><div class="profit-summary-label">🏆 최우수 고객사 (순이익)</div><div class="profit-summary-val" style="color:var(--teal-dk);font-size:14px;">${esc(best.client)} · ${fmtWon(best.profit)}</div></div>
+      <div class="profit-summary-card"><div class="profit-summary-label">⚠️ 저수익/적자 고객사</div><div class="profit-summary-val" style="color:${worst.profit<0?"var(--rose)":"var(--ink-3)"};font-size:14px;">${esc(worst.client)} · ${fmtWon(worst.profit)}</div></div>
+      <div class="profit-summary-card"><div class="profit-summary-label">전체 고객사 순이익 합계</div><div class="profit-summary-val" style="color:var(--ink);">${fmtWon(rows.reduce((a,r)=>a+r.profit,0))}</div></div>
+    </div>
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th>고객사</th><th style="text-align:right;">현장·AS건수</th><th style="text-align:right;">매출(계약+AS청구)</th><th style="text-align:right;">AS 비용</th><th style="text-align:right;">순이익</th><th style="text-align:right;">이익률</th><th>매출·비용 비교</th></tr></thead>
+      <tbody>${tbody}</tbody>
+    </table></div>
+    <div class="chart-note">매출 = 계약금액(Site Master) + AS 유상 청구액(견적서 합계), AS 비용 = AS 이력카드에 입력한 인건비·출장비·부품비·물류비 합계. 순이익 = 매출 - AS 비용. 전체 누적 데이터 기준입니다.</div>`;
+}
+
+/* ③ 모델별 생애주기(Lifecycle) 수익성 — 판매 후 유지보수·AS까지 포함한 총수익성 */
+function renderStatLifecycleSection(){
+  const el=document.getElementById("statLifecycleBody");if(!el)return;
+  const rows=computeModelLifecycleProfit();
+  if(!rows.length){el.innerHTML=empty("🔄","생애주기 데이터가 없습니다","AS 접수와 Site Master 계약 정보가 함께 있어야 산출됩니다");return;}
+  const maxVal=Math.max(...rows.map(r=>Math.max(r.revenue,r.cost)),1);
+  const tbody=rows.map(r=>`<tr>
+    <td style="font-weight:700;">${esc(r.name)}</td>
+    <td style="text-align:right;color:var(--ink-5);">${r.siteCount}현장 · AS ${r.asCount}건</td>
+    <td style="text-align:right;">${fmtWon(r.initialRevenue)}</td>
+    <td style="text-align:right;">${fmtWon(r.maintRevenue)}</td>
+    <td style="text-align:right;">${fmtWon(r.asRevenue)}</td>
+    <td style="text-align:right;color:var(--ink-5);">${fmtWon(r.cost)}</td>
+    <td style="text-align:right;font-weight:700;color:${r.profit>=0?"var(--teal-dk)":"var(--rose)"};">${fmtWon(r.profit)}</td>
+    <td style="text-align:right;">${marginBadge(r.margin)}</td>
+    <td>${miniBar(r.revenue,r.cost,maxVal)}</td>
+  </tr>`).join("");
+  el.innerHTML=`
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th>모델</th><th style="text-align:right;">현장·AS건수</th><th style="text-align:right;">판매·렌탈매출</th><th style="text-align:right;">유지보수매출</th><th style="text-align:right;">AS매출</th><th style="text-align:right;">총원가</th><th style="text-align:right;">총이익</th><th style="text-align:right;">이익률</th><th>매출·원가 비교</th></tr></thead>
+      <tbody>${tbody}</tbody>
+    </table></div>
+    <div class="chart-note">판매/렌탈부터 유지보수 계약, AS 발생까지 모델(equipModel) 단위로 전 생애주기 수익을 합산합니다. 총원가 = 초기 계약원가(Site Master) + AS 원가(인건비·출장비·부품비·물류비). 연동된 현장(siteName)의 계약금액·원가를 모델에 합산하므로, 한 현장에 여러 모델이 혼재된 경우 근사치가 될 수 있습니다.</div>`;
+}
+
+/* ④ AS 원가 구조 분석 — 인건비/출장비/부품비/물류비 구성비 + 원가 절감 포인트 */
+function renderStatCostStructureSection(){
+  const el=document.getElementById("statCostStructureBody");if(!el)return;
+  const{data,periodLabel}=computePeriodStats();
+  const cs=computeASCostStructure(data);
+  if(!cs.grandTotal){el.innerHTML=empty("💰","원가 데이터가 없습니다",`${periodLabel} AS 이력카드의 "완료 처리" 탭에서 인건비·출장비·부품비·물류비를 입력하면 표시됩니다`);return;}
+  const categories=[["인건비",cs.totals.labor,"var(--blue)"],["출장비",cs.totals.travel,"var(--amber)"],["부품비",cs.totals.parts,"var(--violet)"],["물류비",cs.totals.logistics,"var(--teal)"]];
+  const donut=buildDonutSVG(categories);
+  const legendRows=categories.map(([label,val,color])=>`
+    <div class="cost-legend-row">
+      <span class="cost-legend-dot" style="background:${color};"></span>
+      <span class="cost-legend-name">${esc(label)}</span>
+      <span class="cost-legend-bar"><span class="cost-legend-bar-fill" style="width:${cs.pct(val)}%;background:${color};"></span></span>
+      <span class="cost-legend-val">${fmtWon(val)} (${cs.pct(val)}%)</span>
+    </div>`).join("");
+  const topSitesRows=cs.topSites.map(([name,val],i)=>`<tr><td>${i+1}</td><td style="font-weight:600;">${esc(name)}</td><td style="text-align:right;color:var(--rose);font-weight:700;">${fmtWon(val)}</td></tr>`).join("");
+  const topCausesRows=cs.topCauses.map(([name,val],i)=>`<tr><td>${i+1}</td><td style="font-weight:600;">${esc(name)}</td><td style="text-align:right;color:var(--rose);font-weight:700;">${fmtWon(val)}</td></tr>`).join("");
+  el.innerHTML=`
+    <div class="profit-summary-grid">
+      <div class="profit-summary-card"><div class="profit-summary-label">${periodLabel} AS 총원가</div><div class="profit-summary-val" style="color:var(--rose);">${fmtWon(cs.grandTotal)}</div></div>
+      <div class="profit-summary-card"><div class="profit-summary-label">건당 평균 원가</div><div class="profit-summary-val">${fmtWon(cs.avgCostPerCase)}</div></div>
+      <div class="profit-summary-card"><div class="profit-summary-label">AS 매출 대비 원가율</div><div class="profit-summary-val" style="color:${Number(cs.costRatio)>70?"var(--rose)":"var(--teal-dk)"};">${cs.costRatio}%</div></div>
+    </div>
+    <div class="cost-structure-wrap" style="margin-bottom:18px;">${donut.svg}<div class="cost-legend">${legendRows}</div></div>
+    <div class="stat-cause-grid">
+      <div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-5);margin-bottom:8px;">🎯 원가 절감 포인트 · 현장별 TOP5</div>
+        ${cs.topSites.length?`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>현장</th><th style="text-align:right;">누적 원가</th></tr></thead><tbody>${topSitesRows}</tbody></table></div>`:`<div style="font-size:11.5px;color:var(--ink-5);">데이터가 없습니다</div>`}
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-5);margin-bottom:8px;">🎯 원가 절감 포인트 · 원인유형별 TOP5</div>
+        ${cs.topCauses.length?`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>원인 구분</th><th style="text-align:right;">누적 원가</th></tr></thead><tbody>${topCausesRows}</tbody></table></div>`:`<div style="font-size:11.5px;color:var(--ink-5);">데이터가 없습니다</div>`}
+      </div>
+    </div>
+    <div class="chart-note">현장·원인유형 TOP5는 반복적으로 높은 원가가 발생하는 지점으로, 예방점검 강화·부품 표준화·출장 동선 최적화 등 원가 절감 시책 수립의 우선순위로 활용할 수 있습니다.</div>`;
+}
+
 /* ════════════════════════════════════
    통계 엑셀(.xlsx) 다운로드
 ════════════════════════════════════ */
@@ -2400,6 +3599,16 @@ window._exportStatisticsExcel=function(){
     const periodStats=computePeriodStats();
     const causeStats=computeCauseStats(periodStats.data);
     const sitePerf=computeSitePerf();
+    const modelStats=computeModelStats(periodStats.data);
+    const slaStats=computeSLAStats(periodStats.data);
+    const mttrStats=computeMTTRStats(periodStats.data);
+    const mtbfStats=computeMTBF();
+    const modelMTTRStats=computeModelMTTR(periodStats.data);
+    const modelMTBFStats=computeModelMTBF();
+    const contractTypeProfit=computeContractTypeProfit();
+    const customerProfit=computeCustomerProfit();
+    const lifecycleProfit=computeModelLifecycleProfit();
+    const costStructure=computeASCostStructure(periodStats.data);
     const periodLabel=periodStats.periodLabel;
     const todayStr=new Date().toLocaleDateString("ko-KR",{year:"numeric",month:"2-digit",day:"2-digit"});
 
@@ -2457,17 +3666,140 @@ window._exportStatisticsExcel=function(){
     ws3["!cols"]=[{wch:26},{wch:12},{wch:12},{wch:12},{wch:16},{wch:12}];
     XLSX.utils.book_append_sheet(wb,ws3,"현장별현황");
 
-    /* ── Sheet 4: 오류코드 가이드 ── */
+    /* ── Sheet 4: 담당자(PM)별 처리 현황 ── */
+    const pmStats=computePMStats(periodStats.data);
     const s4=[
+      ["담당자(PM)별 처리 현황"],
+      [`기준 기간: ${periodLabel}`,`생성일: ${todayStr}`],
+      [],
+      ["담당자","접수","완료","완료율(%)","평균 처리시간(h)"],
+      ...(pmStats.length?pmStats.map(p=>[p.name,p.total,p.done,Number(p.rate),Number(p.avg)]):[["데이터 없음","","","",""]])
+    ];
+    const ws4=XLSX.utils.aoa_to_sheet(s4);
+    ws4["!cols"]=[{wch:16},{wch:10},{wch:10},{wch:12},{wch:16}];
+    XLSX.utils.book_append_sheet(wb,ws4,"담당자성과");
+
+    /* ── Sheet 5: 브랜드별 AS 현황 ── */
+    const brandStats=computeBrandPeriodStats(periodStats.data);
+    const s5=[
+      ["브랜드별 AS 현황 (NEO / SPARKOZ)"],
+      [`기준 기간: ${periodLabel}`,`생성일: ${todayStr}`],
+      [],
+      ["브랜드","전체 접수","처리 완료","완료율(%)","평균 처리시간(h)","긴급","높음","보통","낮음","미확인"],
+      ...brandStats.map(b=>[b.brand,b.total,b.done,Number(b.rate),Number(b.avg),b.sevCount["긴급"],b.sevCount["높음"],b.sevCount["보통"],b.sevCount["낮음"],b.sevCount["미확인"]])
+    ];
+    const ws5=XLSX.utils.aoa_to_sheet(s5);
+    ws5["!cols"]=[{wch:10},{wch:12},{wch:12},{wch:12},{wch:16},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8}];
+    XLSX.utils.book_append_sheet(wb,ws5,"브랜드분석");
+
+    /* ── Sheet 6: 오류코드 가이드 ── */
+    const s6=[
       ["오류코드 가이드 (NEO / SPARKOZ)"],
       [`생성일: ${todayStr}`],
       [],
       ["브랜드","오류코드","오류명","증상","원인","조치방법","심각도","비고"],
       ...(errorCodes.length?errorCodes.slice().sort((a,b)=>(a.brand||"").localeCompare(b.brand||"")).map(e=>[e.brand||"",e.errorCode||"",e.errorName||"",e.symptom||"",e.cause||"",e.solution||"",e.severity||"",e.note||""]):[["데이터 없음","","","","","","",""]])
     ];
-    const ws4=XLSX.utils.aoa_to_sheet(s4);
-    ws4["!cols"]=[{wch:10},{wch:14},{wch:20},{wch:26},{wch:26},{wch:34},{wch:10},{wch:20}];
-    XLSX.utils.book_append_sheet(wb,ws4,"오류코드가이드");
+    const ws6=XLSX.utils.aoa_to_sheet(s6);
+    ws6["!cols"]=[{wch:10},{wch:14},{wch:20},{wch:26},{wch:26},{wch:34},{wch:10},{wch:20}];
+    XLSX.utils.book_append_sheet(wb,ws6,"오류코드가이드");
+
+    /* ── Sheet 7: 핵심 품질 지표 (MTTR·MTBF·SLA) ── */
+    const s7=[
+      ["핵심 품질 지표 (MTTR · MTBF · SLA 준수율)"],
+      [`기준 기간: ${periodLabel}`,`생성일: ${todayStr}`],
+      [],
+      ["지표","값","단위","비고"],
+      ["MTTR (평균 수리시간)",Number(mttrStats.avg),"시간",`완료 ${mttrStats.doneCount}건 중 실제 소요시간 기재 ${mttrStats.sampleCount}건 기준 · 판정 ${qualityStatus(mttrStats.avg,"mttr").label}`],
+      ["MTBF (평균 고장간격)",mtbfStats.days!==null?Number(mtbfStats.days):"","일",mtbfStats.days!==null?`현장 ${mtbfStats.siteCount}곳 · 간격표본 ${mtbfStats.gapCount}건(전체 데이터 기준) · 판정 ${qualityStatus(mtbfStats.days,"mtbf").label}`:"산출 불가(표본 부족)"],
+      ["SLA 준수율(72시간 기준, 주말 제외)",Number(slaStats.rate),"%",`평가대상 ${slaStats.evalTotal}건 중 준수 ${slaStats.compliantCount}건 (토·일요일 경과시간 제외)`],
+      ["SLA 위반 건수",slaStats.breachCount,"건",slaStats.noDateCount>0?`평가 제외(날짜 미입력) ${slaStats.noDateCount}건`:""],
+      ["평균 리드타임(접수→완료, 주말 제외)",Number(slaStats.avgLead),"시간",""],
+      [],
+      ["■ NEO / SPARKOZ 모델별 MTTR (기준 기간 · 수리시간 긴 순)"],
+      ["브랜드","장비모델","접수 건수","수리건수(완료)","총 수리시간(h)","MTTR(h)","판정"],
+      ...(modelMTTRStats.some(b=>b.models.length)?modelMTTRStats.flatMap(b=>b.models.map(m=>[b.brand,m.name,m.total,m.repairCount,Number(m.repairHours.toFixed(1)),m.mttr!==null?Number(m.mttr):"",m.status.label])):[["데이터 없음","","","","","",""]]),
+      [],
+      ["■ NEO / SPARKOZ 모델별 MTBF (전체 데이터 기준 · 고장 간격 짧은 순)"],
+      ["브랜드","장비모델","고장횟수","설치 현장 수","총 운전시간(h)","MTBF(일)","판정"],
+      ...(modelMTBFStats.some(b=>b.models.length)?modelMTBFStats.flatMap(b=>b.models.map(m=>[b.brand,m.name,m.failureCount,m.siteCount,Number(m.operatingHours.toFixed(0)),m.mtbfDays!==null?Number(m.mtbfDays):"산출불가",m.status.label])):[["데이터 없음","","","","","",""]]),
+    ];
+    const ws7=XLSX.utils.aoa_to_sheet(s7);
+    ws7["!cols"]=[{wch:26},{wch:16},{wch:14},{wch:16},{wch:16},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,ws7,"품질지표");
+
+    /* ── Sheet 8: 모델별 불량 현황 ── */
+    const s8=[
+      ["모델별 불량 현황"],
+      [`기준 기간: ${periodLabel}`,`생성일: ${todayStr}`],
+      [],
+      ["장비모델","접수 건수","비중(%)","완료","완료율(%)","평균 처리시간(h)","주요 원인"],
+      ...(modelStats.length?modelStats.map(m=>[m.name,m.total,Number(m.share),m.done,Number(m.rate),Number(m.avg),m.topCause]):[["데이터 없음","","","","","",""]])
+    ];
+    const ws8=XLSX.utils.aoa_to_sheet(s8);
+    ws8["!cols"]=[{wch:22},{wch:12},{wch:10},{wch:10},{wch:12},{wch:16},{wch:20}];
+    XLSX.utils.book_append_sheet(wb,ws8,"모델별불량현황");
+
+    /* ── Sheet 9: 계약 유형별 수익성 ── */
+    const s9=[
+      ["계약 유형별 수익성 (전체 누적 · Site Master 기준)"],
+      [`생성일: ${todayStr}`],
+      [],
+      ["계약 유형","건수","매출(원)","원가(원)","이익(원)","이익률(%)"],
+      ...(contractTypeProfit.length?contractTypeProfit.map(r=>[r.type,r.count,r.revenue,r.cost,r.profit,Number(r.margin)]):[["데이터 없음","","","","",""]])
+    ];
+    const ws9=XLSX.utils.aoa_to_sheet(s9);
+    ws9["!cols"]=[{wch:14},{wch:8},{wch:16},{wch:16},{wch:16},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,ws9,"계약유형별수익성");
+
+    /* ── Sheet 10: 고객사별 손익 분석 ── */
+    const s10=[
+      ["고객사별 손익 분석 (전체 누적)"],
+      [`생성일: ${todayStr}`],
+      [],
+      ["고객사","현장수","AS건수","계약매출(원)","AS청구매출(원)","매출합계(원)","AS비용(원)","순이익(원)","이익률(%)"],
+      ...(customerProfit.length?customerProfit.map(r=>[r.client,r.siteCount,r.asCount,r.contractRevenue,r.asRevenue,r.revenue,r.asCost,r.profit,Number(r.margin)]):[["데이터 없음","","","","","","","",""]])
+    ];
+    const ws10=XLSX.utils.aoa_to_sheet(s10);
+    ws10["!cols"]=[{wch:18},{wch:8},{wch:8},{wch:16},{wch:16},{wch:16},{wch:14},{wch:16},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,ws10,"고객사별손익");
+
+    /* ── Sheet 11: 모델별 생애주기 수익성 ── */
+    const s11=[
+      ["모델별 생애주기(Lifecycle) 수익성 (전체 누적)"],
+      [`생성일: ${todayStr}`],
+      [],
+      ["모델","현장수","AS건수","판매·렌탈매출(원)","유지보수매출(원)","AS매출(원)","총원가(원)","총이익(원)","이익률(%)"],
+      ...(lifecycleProfit.length?lifecycleProfit.map(r=>[r.name,r.siteCount,r.asCount,r.initialRevenue,r.maintRevenue,r.asRevenue,r.cost,r.profit,Number(r.margin)]):[["데이터 없음","","","","","","","",""]])
+    ];
+    const ws11=XLSX.utils.aoa_to_sheet(s11);
+    ws11["!cols"]=[{wch:18},{wch:8},{wch:8},{wch:16},{wch:16},{wch:14},{wch:14},{wch:16},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,ws11,"모델별생애주기수익성");
+
+    /* ── Sheet 12: AS 원가 구조 분석 ── */
+    const s12=[
+      ["AS 원가 구조 분석"],
+      [`기준 기간: ${periodLabel}`,`생성일: ${todayStr}`],
+      [],
+      ["원가 항목","금액(원)","비중(%)"],
+      ["인건비",costStructure.totals.labor,Number(costStructure.pct(costStructure.totals.labor))],
+      ["출장비",costStructure.totals.travel,Number(costStructure.pct(costStructure.totals.travel))],
+      ["부품비",costStructure.totals.parts,Number(costStructure.pct(costStructure.totals.parts))],
+      ["물류비",costStructure.totals.logistics,Number(costStructure.pct(costStructure.totals.logistics))],
+      ["총계",costStructure.grandTotal,100],
+      [],
+      ["건당 평균 원가(원)",Number(costStructure.avgCostPerCase)],
+      ["AS 매출 대비 원가율(%)",Number(costStructure.costRatio)],
+      [],
+      ["현장별 원가 TOP5","누적원가(원)"],
+      ...(costStructure.topSites.length?costStructure.topSites.map(([n,v])=>[n,v]):[["데이터 없음",""]]),
+      [],
+      ["원인유형별 원가 TOP5","누적원가(원)"],
+      ...(costStructure.topCauses.length?costStructure.topCauses.map(([n,v])=>[n,v]):[["데이터 없음",""]]),
+    ];
+    const ws12=XLSX.utils.aoa_to_sheet(s12);
+    ws12["!cols"]=[{wch:22},{wch:16},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,ws12,"AS원가구조분석");
 
     const fileDate=new Date().toISOString().slice(0,10).replace(/-/g,"");
     XLSX.writeFile(wb,`PMO_통계_${fileDate}.xlsx`);
@@ -2481,7 +3813,7 @@ window._exportStatisticsExcel=function(){
 };
 
 function renderStatistics(){
-  const sPerf=computeSitePerf();
+  const sPerf=computeSitePerf().slice().sort((a,b)=>b.total-a.total);
   const maxSiteTotal=Math.max(...sPerf.map(s=>s.total),1);
   const sPerfHtml=sPerf.map(s=>{
     const asBadge=s.linkedSite?bAS(s.linkedSite.contractStart,s.linkedSite.maintenancePeriod):`<span class="badge b-ready">-</span>`;
@@ -2490,15 +3822,32 @@ function renderStatistics(){
       <div class="site-bar-track"><div class="site-bar-fill" style="width:${(s.total/maxSiteTotal*100).toFixed(1)}%"></div></div>
       <div class="site-bar-count">${s.total}</div>
       <div style="width:36px;font-size:12px;color:var(--teal-dk);font-weight:600;">${s.rate}%</div>
+      <div style="width:38px;font-size:11.5px;color:var(--ink-5);">${s.avg}h</div>
       <div style="width:80px;display:flex;justify-content:flex-end;">${asBadge}</div>
+    </div>`;
+  }).join("");
+  const sPerfCards=sPerf.map(s=>{
+    const asBadge=s.linkedSite?bAS(s.linkedSite.contractStart,s.linkedSite.maintenancePeriod):`<span class="badge b-ready">-</span>`;
+    return`<div class="mc">
+      <div class="mc-head" style="cursor:default;">
+        <div class="mc-title"><div class="mc-name">${esc(s.name)}</div><div class="mc-sub">접수 ${s.total}건 · 평균 ${s.avg}h</div></div>
+        <div class="mc-badges"><span class="badge b-progress">${s.rate}%</span>${asBadge}</div>
+      </div>
     </div>`;
   }).join("");
   const tabs=[["week","이번 주"],["month","이번 달"],["year","올해"]].map(([p,l])=>
     `<button class="stat-tab${statPeriod===p?" stat-tab-active":""}" data-period="${p}" onclick="_setStatPeriod('${p}')">${l}</button>`).join("");
   $content.innerHTML=`
     <div class="page-head">
-      <div><div class="page-title">Statistics</div><div class="page-subtitle">기간별·현장별·원인별 현황을 분석합니다</div></div>
+      <div><div class="page-title">Statistics</div><div class="page-subtitle">MTTR·MTBF·SLA 준수율(72h)·모델별 불량·원인 Pareto·AS 접수/처리 추세를 종합 분석합니다. 아래 분석은 상단 기간 탭(이번 주 / 이번 달 / 올해)과 함께 갱신됩니다(MTBF·현장별 전체 현황은 전체 누적 기준). 매출·원가 등 수익성 지표는 「수익성 분석」 페이지에서 확인하세요</div></div>
       <div class="page-actions"><button class="btn btn-secondary" id="statExportBtn" onclick="window._exportStatisticsExcel()">📥 엑셀 다운로드</button></div>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header">
+        <div class="card-title">📌 핵심 품질 지표 (MTTR · MTBF · SLA 준수율)</div>
+        <div style="font-size:11.5px;color:var(--ink-5);">MTBF는 전체 누적 데이터 기준</div>
+      </div>
+      <div class="card-body" id="statQualityBody"></div>
     </div>
     <div class="card" style="margin-bottom:16px;">
       <div class="card-header"><div class="card-title">기간별 분석</div><div class="stat-tab-group">${tabs}</div></div>
@@ -2506,19 +3855,90 @@ function renderStatistics(){
     </div>
     <div class="card" style="margin-bottom:16px;">
       <div class="card-header">
-        <div class="card-title">🛠️ AS 이력카드 분석 (원인구분 · 불량부품 · 에러코드)</div>
-        <div style="font-size:11.5px;color:var(--ink-5);">상단 기간 탭과 연동됩니다</div>
+        <div class="card-title">📈 AS 접수·처리 추세</div>
+      </div>
+      <div class="card-body" id="statTrendBody"></div>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header">
+        <div class="card-title">🛠️ AS 이력카드 분석 (원인구분 Pareto · 불량부품 · 에러코드)</div>
       </div>
       <div class="card-body" id="statCauseBody"></div>
     </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header">
+        <div class="card-title">📱 모델별 불량 현황</div>
+      </div>
+      <div class="card-body" id="statModelBody"></div>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header">
+        <div class="card-title">👤 담당자(PM)별 처리 현황</div>
+      </div>
+      <div class="card-body" id="statPMBody"></div>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header">
+        <div class="card-title">🤖 브랜드별 AS 현황 (NEO / SPARKOZ)</div>
+      </div>
+      <div class="card-body" id="statBrandBody"></div>
+    </div>
     <div class="card">
-      <div class="card-header"><div class="card-title">현장별 전체 현황</div></div>
+      <div class="card-header"><div class="card-title">현장별 전체 현황</div><div style="font-size:11.5px;color:var(--ink-5);">접수 건수 많은 순</div></div>
       <div class="card-body">
-        ${sPerf.length?sPerfHtml:`<div class="empty" style="padding:24px;"><div class="empty-icon" style="font-size:24px;">📊</div><div class="empty-body">접수 데이터가 없습니다</div></div>`}
+        ${sPerf.length?`<div class="site-perf-desktop">${sPerfHtml}</div><div class="mc-list">${sPerfCards}</div>`:`<div class="empty" style="padding:24px;"><div class="empty-icon" style="font-size:24px;">📊</div><div class="empty-body">접수 데이터가 없습니다</div></div>`}
       </div>
     </div>`;
+  renderStatQualitySection();
   renderStatPeriodSection();
+  renderStatTrendSection();
   renderStatCauseSection();
+  renderStatModelSection();
+  renderStatPMSection();
+  renderStatBrandSection();
+}
+
+/* ════════════════════════════════════
+   PROFITABILITY (수익성 분석) — 별도 페이지
+   계약 유형별 수익성 · 고객사별 손익 · 모델별 생애주기 수익성 · AS 원가 구조 분석
+════════════════════════════════════ */
+function renderProfitability(){
+  const profitTabs=[["week","이번 주"],["month","이번 달"],["year","올해"]].map(([p,l])=>
+    `<button class="stat-tab${statPeriod===p?" stat-tab-active":""}" data-period="${p}" onclick="_setStatPeriod('${p}')">${l}</button>`).join("");
+  $content.innerHTML=`
+    <div class="page-head">
+      <div><div class="page-title">수익성 분석</div><div class="page-subtitle">Site Master 계약금액·원가 및 AS 이력카드 원가 입력을 기반으로 계약유형별·고객사별·모델 생애주기 수익성과 AS 원가 구조를 종합 분석합니다 (특별한 언급이 없는 한 전체 누적 데이터 기준)</div></div>
+      <div class="page-actions"><button class="btn btn-secondary" id="statExportBtn" onclick="window._exportStatisticsExcel()">📥 엑셀 다운로드</button></div>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header">
+        <div class="card-title">📄 계약 유형별 수익성 (판매·렌탈·유지보수)</div>
+        <div style="font-size:11.5px;color:var(--ink-5);">전체 누적 · Site Master 기준</div>
+      </div>
+      <div class="card-body" id="statContractTypeBody"></div>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header">
+        <div class="card-title">🏢 고객사별 손익 분석</div>
+        <div style="font-size:11.5px;color:var(--ink-5);">전체 누적 · 매출 대비 AS 비용</div>
+      </div>
+      <div class="card-body" id="statCustomerProfitBody"></div>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header">
+        <div class="card-title">🔄 모델별 생애주기(Lifecycle) 수익성</div>
+        <div style="font-size:11.5px;color:var(--ink-5);">전체 누적 · 판매+유지보수+AS 총수익성</div>
+      </div>
+      <div class="card-body" id="statLifecycleBody"></div>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header"><div class="card-title">🧾 AS 원가 구조 분석</div><div class="stat-tab-group">${profitTabs}</div></div>
+      <div class="card-body" id="statCostStructureBody"></div>
+    </div>`;
+  renderStatContractTypeSection();
+  renderStatCustomerProfitSection();
+  renderStatLifecycleSection();
+  renderStatCostStructureSection();
 }
 
 /* ════════════════════════════════════
@@ -2526,6 +3946,25 @@ function renderStatistics(){
 ════════════════════════════════════ */
 
 /* 선택된 PM·주차 기준으로 시스템 데이터에서 실적을 자동 집계 */
+/* ── AS이력카드 원인분석·조치사항 자동 반영 헬퍼 ──
+   AS 이력카드(작업 상세)의 "원인 분석" 탭(causeType/causeDetail)과
+   "완료 처리" 탭(actionType/actionResult) 입력값을 주간업무보고에서
+   재입력 없이 그대로 끌어와 보여주기 위한 요약 함수. */
+function causeSummary(t){
+  const parts=[];
+  if(t.causeType)parts.push(`[${t.causeType}]`);
+  if(t.causeDetail)parts.push(t.causeDetail);
+  if(!parts.length)return`<span style="color:var(--ink-5);">미입력</span>`;
+  return esc(parts.join(" "));
+}
+function actionSummary(t){
+  const parts=[];
+  if(t.actionType)parts.push(`[${t.actionType}]`);
+  if(t.actionResult)parts.push(t.actionResult);
+  if(!parts.length)return`<span style="color:var(--ink-5);">미입력</span>`;
+  return esc(parts.join(" "));
+}
+
 function computeReportStats(pmName,wi){
   const{start,end}=wi;
   const pmTasks=pmName?tasks.filter(t=>(t.pm||"").trim()===pmName||(t.techEngineer||"").trim()===pmName):tasks.slice();
@@ -2618,7 +4057,9 @@ function _buildReportHTML(reportDoc,pmName,wi,stats){
     <td style="text-align:left;">${esc(t.symptom)||"-"}</td>
     <td class="ctr">${esc(t.status)||"-"}</td>
     <td class="ctr">${esc(t.visitDate)||"-"}</td>
-  </tr>`).join("")||`<tr><td colspan="5" style="text-align:center;color:#888;">해당 주간 활동 내역이 없습니다</td></tr>`;
+    <td style="text-align:left;">${causeSummary(t)}</td>
+    <td style="text-align:left;">${actionSummary(t)}</td>
+  </tr>`).join("")||`<tr><td colspan="7" style="text-align:center;color:#888;">해당 주간 활동 내역이 없습니다</td></tr>`;
   const days=weekdayList(wi);
   const dailyRows=days.map(d=>{
     const val=(reportDoc.dailySummary&&reportDoc.dailySummary[d.key])||"";
@@ -2648,7 +4089,7 @@ function _buildReportHTML(reportDoc,pmName,wi,stats){
       </div>
     </div>
     <div class="qdoc-section-title">■ 실적 요약 (시스템 자동 집계)</div>
-    <table class="qdoc-items-table" style="margin-bottom:14px;">
+    <div class="qdoc-table-wrap"><table class="qdoc-items-table" style="margin-bottom:14px;">
       <thead><tr><th>신규접수</th><th>처리완료</th><th>현장방문</th><th>견적발행</th><th>총 처리시간</th><th>등록 이슈</th></tr></thead>
       <tbody><tr>
         <td class="ctr" style="font-weight:800;color:#1a73c8;">${stats.received.length}건</td>
@@ -2658,17 +4099,17 @@ function _buildReportHTML(reportDoc,pmName,wi,stats){
         <td class="ctr" style="font-weight:800;">${stats.totalHours}h (평균 ${stats.avgHours}h)</td>
         <td class="ctr" style="font-weight:800;color:#e11d48;">${stats.issuesThisWeek.length}건</td>
       </tr></tbody>
-    </table>
+    </table></div>
     <div class="qdoc-section-title">■ 금주 처리 현장 내역</div>
-    <table class="qdoc-items-table" style="margin-bottom:14px;">
-      <thead><tr><th style="width:34px;">No</th><th style="min-width:90px;">현장명</th><th style="text-align:left;min-width:140px;">증상/내용</th><th style="width:60px;">상태</th><th style="width:80px;">방문일</th></tr></thead>
+    <div class="qdoc-table-wrap"><table class="qdoc-items-table" style="margin-bottom:14px;">
+      <thead><tr><th style="width:30px;">No</th><th style="min-width:80px;">현장명</th><th style="text-align:left;min-width:110px;">증상/내용</th><th style="width:50px;">상태</th><th style="width:70px;">방문일</th><th style="text-align:left;min-width:120px;">원인분석</th><th style="text-align:left;min-width:120px;">조치사항</th></tr></thead>
       <tbody>${actRows}</tbody>
-    </table>
+    </table></div>
     <div class="qdoc-section-title">■ 금주 주요 업무 요약 (일자별)</div>
-    <table class="qdoc-items-table" style="margin-bottom:14px;">
+    <div class="qdoc-table-wrap"><table class="qdoc-items-table" style="margin-bottom:14px;">
       <thead><tr><th style="width:44px;">요일</th><th style="width:66px;">일자</th><th style="text-align:left;">업무 내용</th></tr></thead>
       <tbody>${dailyRows}</tbody>
-    </table>
+    </table></div>
     <div class="qdoc-section-title">■ 특이사항 · 애로사항</div>
     <div style="margin-top:10px;">
       ${textBlock("특이사항 · 애로사항",reportDoc.issuesNote)}
@@ -2770,6 +4211,24 @@ window._exportReportExcel=function(){
     ws2["!cols"]=[{wch:12},{wch:26},{wch:26},{wch:26},{wch:26},{wch:26},{wch:28}];
     XLSX.utils.book_append_sheet(wb,ws2,"보고서상세");
 
+    // AS이력카드의 원인분석·조치사항을 담당자별로 자동 반영한 시트
+    const asRows=[];
+    team.forEach(r=>{
+      r.activities.forEach(t=>{
+        asRows.push([r.name,t.siteName||"-",t.symptom||"-",t.causeType||"-",t.causeDetail||"",t.actionType||"-",t.actionResult||""]);
+      });
+    });
+    const s3=[
+      ["AS 이력카드 연동 - 원인분석 · 조치사항 (자동 반영)"],
+      [`보고 기간: ${wi.label}`],
+      [],
+      ["담당자","현장명","증상/내용","원인구분","원인분석 상세","조치유형","조치사항"],
+      ...(asRows.length?asRows:[["데이터 없음","","","","","",""]])
+    ];
+    const ws3=XLSX.utils.aoa_to_sheet(s3);
+    ws3["!cols"]=[{wch:12},{wch:16},{wch:26},{wch:14},{wch:34},{wch:14},{wch:34}];
+    XLSX.utils.book_append_sheet(wb,ws3,"AS원인·조치내역");
+
     const fileDate=wi.key.replace(/-/g,"");
     XLSX.writeFile(wb,`PMO_주간업무보고_${fileDate}.xlsx`);
     toast("엑셀 파일이 다운로드되었습니다","success");
@@ -2836,7 +4295,7 @@ function renderReport(){
       </div>
       <div class="card-body card-body-flush">
         ${stats.activities.length?`<div class="tbl-wrap"><table class="tbl"><thead><tr>
-          <th style="width:34px;">No</th><th>현장명</th><th>증상/내용</th><th>상태</th><th>AS구분</th><th>방문일</th><th>처리시간</th>
+          <th style="width:34px;">No</th><th>현장명</th><th>증상/내용</th><th>상태</th><th>AS구분</th><th>방문일</th><th>처리시간</th><th style="min-width:160px;">원인분석</th><th style="min-width:160px;">조치사항</th>
         </tr></thead><tbody>
         ${stats.activities.map((t,i)=>`<tr>
           <td style="text-align:center;color:var(--ink-5);font-weight:700;">${i+1}</td>
@@ -2846,6 +4305,8 @@ function renderReport(){
           <td>${getSiteAS(t.siteName)}</td>
           <td>${t.visitDate?`${esc(t.visitDate)} ${ddayBadge(t.visitDate)}`:"-"}</td>
           <td>${t.processTime||0}h</td>
+          <td style="max-width:220px;white-space:normal;word-break:keep-all;line-height:1.4;">${causeSummary(t)}</td>
+          <td style="max-width:220px;white-space:normal;word-break:keep-all;line-height:1.4;">${actionSummary(t)}</td>
         </tr>`).join("")}</tbody></table></div>
         <div class="mc-list">${stats.activities.map((t,i)=>`<div class="mc">
           <div class="mc-head" onclick="_toggleMC('rp${t.id}')">
@@ -2859,6 +4320,8 @@ function renderReport(){
               <div class="mc-field"><span class="mc-label">AS구분</span><span class="mc-val">${getSiteAS(t.siteName)||"-"}</span></div>
               <div class="mc-field"><span class="mc-label">방문일</span><span class="mc-val">${t.visitDate?`${esc(t.visitDate)} ${ddayBadge(t.visitDate)}`:"-"}</span></div>
               <div class="mc-field"><span class="mc-label">처리시간</span><span class="mc-val">${t.processTime||0}h</span></div>
+              <div class="mc-field"><span class="mc-label">원인분석</span><span class="mc-val">${causeSummary(t)}</span></div>
+              <div class="mc-field"><span class="mc-label">조치사항</span><span class="mc-val">${actionSummary(t)}</span></div>
             </div>
           </div>
         </div>`).join("")}</div>`
@@ -3025,6 +4488,7 @@ const PAGES={
   inventory:{fn:renderInventory,label:"Inventory"},
   errorcode:{fn:renderErrorCode,label:"오류코드 가이드"},
   statistics:{fn:renderStatistics,label:"Statistics"},
+  profitability:{fn:renderProfitability,label:"수익성 분석"},
   report:{fn:renderReport,label:"주간업무보고"},
   issue:{fn:renderIssue,label:"Issue"},
 };
