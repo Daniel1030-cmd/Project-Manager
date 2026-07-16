@@ -505,7 +505,7 @@ input,select,textarea{font-family:inherit;}
 .sla-pill.ok .sla-pill-label{color:var(--teal-dk);}
 .sla-pill.bad .sla-pill-label{color:var(--rose);}
 
-/* ════ 통계 : 수익성 분석 (계약유형/고객사/모델Lifecycle/AS원가구조) ════ */
+/* ════ 통계 : 수익성 분석 (기간별/계약유형/고객사/AS원가구조) ════ */
 .profit-minibar{width:92px;display:flex;flex-direction:column;gap:2px;}
 .profit-minibar-track{height:9px;background:var(--bg-2);border-radius:3px;overflow:hidden;}
 .profit-minibar-fill{height:100%;border-radius:3px;}
@@ -1304,7 +1304,7 @@ function _renderDetailModal(task,linkedSite,asRes,activeTab){
             <div class="field"><label>부품비(원)</label><input id="dd_partsCost" type="number" min="0" value="${esc(task.partsCost||0)}" placeholder="0"/></div>
             <div class="field"><label>물류비(원)</label><input id="dd_logisticsCost" type="number" min="0" value="${esc(task.logisticsCost||0)}" placeholder="0"/></div>
           </div>
-          <div style="font-size:11px;color:var(--ink-5);line-height:1.5;">이 건 처리에 실제 발생한 원가를 항목별로 입력하면 Statistics의 "AS 원가 구조 분석"·"고객사별 손익"·"모델별 생애주기 수익성"에 자동 반영됩니다.</div>
+          <div style="font-size:11px;color:var(--ink-5);line-height:1.5;">이 건 처리에 실제 발생한 원가를 항목별로 입력하면 Statistics의 "AS 원가 구조 분석"·"고객사별 손익"·"기간별 수익성 추이(인건비)"에 자동 반영됩니다.</div>
         </div>
         <div class="as-section">
           <div class="as-section-title"><span>8</span>완료 점검 체크리스트</div>
@@ -1888,8 +1888,6 @@ function renderSite(){
     <div class="page-head">
       <div><div class="page-title">Site Master</div><div class="page-subtitle">등록된 현장을 관리합니다</div></div>
       <div class="page-actions">
-        <button class="btn btn-secondary" onclick="_showMonthlyFeeReference()">📋 금액 미기재 현장</button>
-        <button class="btn btn-secondary" onclick="_applyContractAmountImport()">📥 계약금액 엑셀 반영</button>
         <button class="btn btn-primary" onclick="_openAddSite()">+ 현장 등록</button>
       </div>
     </div>
@@ -3023,41 +3021,6 @@ function computeCustomerProfit(){
   }).sort((a,b)=>b.revenue-a.revenue);
 }
 
-/* 3) 모델별 생애주기(Lifecycle) 수익성 — 판매/렌탈 매출 + 유지보수 매출 + AS 매출 대비 원가(초기원가+AS원가) */
-function computeModelLifecycleProfit(){
-  const map={};
-  const siteNamesByModel={};
-  tasks.forEach(t=>{
-    const key=(t.equipModel&&String(t.equipModel).trim())||(t.modelSeries&&String(t.modelSeries).trim())||"모델 미입력";
-    if(!map[key])map[key]={name:key,initialRevenue:0,maintRevenue:0,asRevenue:0,initialCost:0,asCost:0,asCount:0,siteSet:new Set()};
-    map[key].asRevenue+=taskASRevenue(t);
-    map[key].asCost+=taskASCost(t);
-    map[key].asCount++;
-    if(t.siteName)map[key].siteSet.add(t.siteName);
-  });
-  Object.values(map).forEach(m=>{
-    m.siteSet.forEach(sn=>{
-      const s=site.find(x=>x.name===sn);if(!s)return;
-      const amt=siteAccruedRevenue(s),cost=Number(s.contractCost)||0;
-      // 렌탈은 유지보수와 마찬가지로 매월 반복 청구되는 매출 구조이므로 유지보수 매출로 분류
-      if(s.contractType==="유지보수"||s.contractType==="연장"||s.contractType==="렌탈")m.maintRevenue+=amt;
-      else m.initialRevenue+=amt;
-      m.initialCost+=cost;
-    });
-  });
-  return Object.values(map).map(m=>{
-    const revenue=m.initialRevenue+m.maintRevenue+m.asRevenue;
-    const cost=m.initialCost+m.asCost;
-    const profit=revenue-cost;
-    return{
-      name:m.name,initialRevenue:m.initialRevenue,maintRevenue:m.maintRevenue,asRevenue:m.asRevenue,
-      initialCost:m.initialCost,asCost:m.asCost,revenue,cost,profit,asCount:m.asCount,
-      siteCount:m.siteSet.size,
-      margin:revenue?((profit/revenue)*100).toFixed(1):"0.0",
-    };
-  }).sort((a,b)=>b.revenue-a.revenue);
-}
-
 /* 4) 렌탈 현장별 누적 매출 상세 — 월 이용료 × 청구 개월 수 산정 근거를 그대로 노출 */
 function computeRentalAccrualDetail(){
   return site.filter(s=>s.contractType==="렌탈").map(s=>{
@@ -3085,7 +3048,7 @@ function yearKey(d){return`${d.getFullYear()}`;}
 function computePeriodProfitability(mode){
   const keyFn=mode==="month"?monthKey:yearKey;
   const map={};
-  const ensure=k=>{if(!map[k])map[k]={key:k,contractRevenue:0,rentalRevenue:0,asRevenue:0,contractCost:0,asCost:0};return map[k];};
+  const ensure=k=>{if(!map[k])map[k]={key:k,contractRevenue:0,rentalRevenue:0,asRevenue:0,contractCost:0,asCost:0,laborCost:0};return map[k];};
 
   site.forEach(s=>{
     const start=toDate(s.contractStart);
@@ -3122,15 +3085,22 @@ function computePeriodProfitability(mode){
     const cost=taskASCost(t);
     if(cost>0){
       const d=toDate(t.completeDate)||toDate(t.receiptDate)||toDate(t.createdAt);
-      if(d)ensure(keyFn(d)).asCost+=cost;
+      if(d){
+        const row=ensure(keyFn(d));
+        row.asCost+=cost;
+        row.laborCost+=Number(t.laborCost)||0;
+      }
     }
   });
 
   return Object.values(map).map(m=>{
     const revenue=m.contractRevenue+m.rentalRevenue+m.asRevenue;
     const cost=m.contractCost+m.asCost;
+    // 인건비는 AS 원가(asCost)에 이미 포함된 항목이며, 수익성 분석 편의를 위해 별도 항목으로 함께 노출한다.
+    const costExLabor=cost-m.laborCost;
     const profit=revenue-cost;
-    return{...m,revenue,cost,profit,margin:revenue?((profit/revenue)*100).toFixed(1):"0.0"};
+    const marginExLabor=revenue?(((revenue-costExLabor)/revenue)*100).toFixed(1):"0.0";
+    return{...m,revenue,cost,costExLabor,profit,margin:revenue?((profit/revenue)*100).toFixed(1):"0.0",marginExLabor};
   }).sort((a,b)=>a.key<b.key?-1:(a.key>b.key?1:0));
 }
 function profitPeriodLabel(mode,key){
@@ -3747,6 +3717,7 @@ function renderStatPeriodProfitSection(){
   const maxVal=Math.max(...rows.map(r=>Math.max(r.revenue,r.cost)),1);
   const totalRevenue=rows.reduce((a,r)=>a+r.revenue,0);
   const totalCost=rows.reduce((a,r)=>a+r.cost,0);
+  const totalLabor=rows.reduce((a,r)=>a+r.laborCost,0);
   const totalProfit=totalRevenue-totalCost;
   const tbody=rows.map(r=>`<tr>
     <td style="font-weight:700;">${profitPeriodLabel(profitPeriodMode,r.key)}</td>
@@ -3754,6 +3725,7 @@ function renderStatPeriodProfitSection(){
     <td style="text-align:right;color:var(--blue);">${fmtWon(r.contractRevenue)}</td>
     <td style="text-align:right;color:#059669;">${fmtWon(r.asRevenue)}</td>
     <td style="text-align:right;font-weight:700;color:var(--ink);">${fmtWon(r.revenue)}</td>
+    <td style="text-align:right;color:var(--amber-dk,#b45309);">${fmtWon(r.laborCost)}</td>
     <td style="text-align:right;color:var(--ink-5);">${fmtWon(r.cost)}</td>
     <td style="text-align:right;font-weight:700;color:${r.profit>=0?"var(--teal-dk)":"var(--rose)"};">${fmtWon(r.profit)}</td>
     <td style="text-align:right;">${marginBadge(r.margin)}</td>
@@ -3762,14 +3734,15 @@ function renderStatPeriodProfitSection(){
   el.innerHTML=`
     <div class="profit-summary-grid">
       <div class="profit-summary-card"><div class="profit-summary-label">${profitPeriodMode==="month"?"전체 월":"전체 연도"} 매출 합계</div><div class="profit-summary-val" style="color:var(--blue);">${fmtWon(totalRevenue)}</div></div>
+      <div class="profit-summary-card"><div class="profit-summary-label">${profitPeriodMode==="month"?"전체 월":"전체 연도"} 인건비 합계</div><div class="profit-summary-val" style="color:var(--amber-dk,#b45309);">${fmtWon(totalLabor)}</div></div>
       <div class="profit-summary-card"><div class="profit-summary-label">${profitPeriodMode==="month"?"전체 월":"전체 연도"} 원가 합계</div><div class="profit-summary-val" style="color:var(--ink-4);">${fmtWon(totalCost)}</div></div>
       <div class="profit-summary-card"><div class="profit-summary-label">누적 이익</div><div class="profit-summary-val" style="color:${totalProfit>=0?"var(--teal-dk)":"var(--rose)"};">${fmtWon(totalProfit)}</div></div>
     </div>
     <div class="tbl-wrap"><table class="tbl">
-      <thead><tr><th>${profitPeriodMode==="month"?"월":"연도"}</th><th style="text-align:right;">렌탈 누적매출</th><th style="text-align:right;">판매·기타 매출</th><th style="text-align:right;">AS 매출</th><th style="text-align:right;">총 매출</th><th style="text-align:right;">총 원가</th><th style="text-align:right;">이익</th><th style="text-align:right;">이익률</th><th>매출·원가 비교</th></tr></thead>
+      <thead><tr><th>${profitPeriodMode==="month"?"월":"연도"}</th><th style="text-align:right;">렌탈 누적매출</th><th style="text-align:right;">판매·기타 매출</th><th style="text-align:right;">AS 매출</th><th style="text-align:right;">총 매출</th><th style="text-align:right;">인건비</th><th style="text-align:right;">총 원가</th><th style="text-align:right;">이익</th><th style="text-align:right;">이익률</th><th>매출·원가 비교</th></tr></thead>
       <tbody>${tbody}</tbody>
     </table></div>
-    <div class="chart-note">렌탈 매출은 계약 시작월부터 매월 월 이용료가 해당 기간에 누적 반영됩니다. 판매·신규 등 1회성 계약 매출·원가는 계약 시작일이 속한 기간에 전액 반영됩니다. AS 매출은 견적일(청구 시점), AS 원가는 완료일(비용 발생 시점) 기준으로 집계됩니다.</div>`;
+    <div class="chart-note">렌탈 매출은 계약 시작월부터 매월 월 이용료가 해당 기간에 누적 반영됩니다. 판매·신규 등 1회성 계약 매출·원가는 계약 시작일이 속한 기간에 전액 반영됩니다. AS 매출은 견적일(청구 시점), AS 원가는 완료일(비용 발생 시점) 기준으로 집계됩니다. 인건비는 AS 이력카드에 입력한 인건비 합계로, 총 원가에 이미 포함된 항목을 별도로 표시하여 인건비 비중을 함께 분석할 수 있도록 한 것입니다.</div>`;
 }
 
 /* ② 고객사별 손익 분석 — 매출 대비 AS 비용·순이익 */
@@ -3802,32 +3775,7 @@ function renderStatCustomerProfitSection(){
     <div class="chart-note">매출 = 계약금액(Site Master) + AS 유상 청구액(견적서 합계), AS 비용 = AS 이력카드에 입력한 인건비·출장비·부품비·물류비 합계. 순이익 = 매출 - AS 비용. 전체 누적 데이터 기준입니다.</div>`;
 }
 
-/* ③ 모델별 생애주기(Lifecycle) 수익성 — 판매 후 유지보수·AS까지 포함한 총수익성 */
-function renderStatLifecycleSection(){
-  const el=document.getElementById("statLifecycleBody");if(!el)return;
-  const rows=computeModelLifecycleProfit();
-  if(!rows.length){el.innerHTML=empty("🔄","생애주기 데이터가 없습니다","AS 접수와 Site Master 계약 정보가 함께 있어야 산출됩니다");return;}
-  const maxVal=Math.max(...rows.map(r=>Math.max(r.revenue,r.cost)),1);
-  const tbody=rows.map(r=>`<tr>
-    <td style="font-weight:700;">${esc(r.name)}</td>
-    <td style="text-align:right;color:var(--ink-5);">${r.siteCount}현장 · AS ${r.asCount}건</td>
-    <td style="text-align:right;">${fmtWon(r.initialRevenue)}</td>
-    <td style="text-align:right;">${fmtWon(r.maintRevenue)}</td>
-    <td style="text-align:right;">${fmtWon(r.asRevenue)}</td>
-    <td style="text-align:right;color:var(--ink-5);">${fmtWon(r.cost)}</td>
-    <td style="text-align:right;font-weight:700;color:${r.profit>=0?"var(--teal-dk)":"var(--rose)"};">${fmtWon(r.profit)}</td>
-    <td style="text-align:right;">${marginBadge(r.margin)}</td>
-    <td>${miniBar(r.revenue,r.cost,maxVal)}</td>
-  </tr>`).join("");
-  el.innerHTML=`
-    <div class="tbl-wrap"><table class="tbl">
-      <thead><tr><th>모델</th><th style="text-align:right;">현장·AS건수</th><th style="text-align:right;">판매·렌탈매출</th><th style="text-align:right;">유지보수매출</th><th style="text-align:right;">AS매출</th><th style="text-align:right;">총원가</th><th style="text-align:right;">총이익</th><th style="text-align:right;">이익률</th><th>매출·원가 비교</th></tr></thead>
-      <tbody>${tbody}</tbody>
-    </table></div>
-    <div class="chart-note">판매/렌탈부터 유지보수 계약, AS 발생까지 모델(equipModel) 단위로 전 생애주기 수익을 합산합니다. 총원가 = 초기 계약원가(Site Master) + AS 원가(인건비·출장비·부품비·물류비). 연동된 현장(siteName)의 계약금액·원가를 모델에 합산하므로, 한 현장에 여러 모델이 혼재된 경우 근사치가 될 수 있습니다.</div>`;
-}
-
-/* ④ AS 원가 구조 분석 — 인건비/출장비/부품비/물류비 구성비 + 원가 절감 포인트 */
+/* ③ AS 원가 구조 분석 — 인건비/출장비/부품비/물류비 구성비 + 원가 절감 포인트 */
 function renderStatCostStructureSection(){
   const el=document.getElementById("statCostStructureBody");if(!el)return;
   const{data,periodLabel}=computePeriodStats();
@@ -3883,7 +3831,6 @@ window._exportStatisticsExcel=function(){
     const modelMTBFStats=computeModelMTBF();
     const contractTypeProfit=computeContractTypeProfit();
     const customerProfit=computeCustomerProfit();
-    const lifecycleProfit=computeModelLifecycleProfit();
     const costStructure=computeASCostStructure(periodStats.data);
     const periodLabel=periodStats.periodLabel;
     const todayStr=new Date().toLocaleDateString("ko-KR",{year:"numeric",month:"2-digit",day:"2-digit"});
@@ -4047,11 +3994,11 @@ window._exportStatisticsExcel=function(){
       ["연도별 수익성 추이"],
       [`생성일: ${todayStr}`],
       [],
-      ["연도","렌탈 누적매출(원)","판매·기타 매출(원)","AS 매출(원)","총 매출(원)","총 원가(원)","이익(원)","이익률(%)"],
-      ...(yearlyProfit.length?yearlyProfit.map(r=>[r.key,r.rentalRevenue,r.contractRevenue,r.asRevenue,r.revenue,r.cost,r.profit,Number(r.margin)]):[["데이터 없음","","","","","","",""]])
+      ["연도","렌탈 누적매출(원)","판매·기타 매출(원)","AS 매출(원)","총 매출(원)","인건비(원)","총 원가(원)","이익(원)","이익률(%)"],
+      ...(yearlyProfit.length?yearlyProfit.map(r=>[r.key,r.rentalRevenue,r.contractRevenue,r.asRevenue,r.revenue,r.laborCost,r.cost,r.profit,Number(r.margin)]):[["데이터 없음","","","","","","","",""]])
     ];
     const ws9c=XLSX.utils.aoa_to_sheet(s9c);
-    ws9c["!cols"]=[{wch:10},{wch:16},{wch:16},{wch:14},{wch:16},{wch:16},{wch:16},{wch:12}];
+    ws9c["!cols"]=[{wch:10},{wch:16},{wch:16},{wch:14},{wch:16},{wch:14},{wch:16},{wch:16},{wch:12}];
     XLSX.utils.book_append_sheet(wb,ws9c,"연도별수익성");
 
     const monthlyProfit=computePeriodProfitability("month");
@@ -4059,11 +4006,11 @@ window._exportStatisticsExcel=function(){
       ["월별 수익성 추이"],
       [`생성일: ${todayStr}`],
       [],
-      ["연-월","렌탈 누적매출(원)","판매·기타 매출(원)","AS 매출(원)","총 매출(원)","총 원가(원)","이익(원)","이익률(%)"],
-      ...(monthlyProfit.length?monthlyProfit.map(r=>[r.key,r.rentalRevenue,r.contractRevenue,r.asRevenue,r.revenue,r.cost,r.profit,Number(r.margin)]):[["데이터 없음","","","","","","",""]])
+      ["연-월","렌탈 누적매출(원)","판매·기타 매출(원)","AS 매출(원)","총 매출(원)","인건비(원)","총 원가(원)","이익(원)","이익률(%)"],
+      ...(monthlyProfit.length?monthlyProfit.map(r=>[r.key,r.rentalRevenue,r.contractRevenue,r.asRevenue,r.revenue,r.laborCost,r.cost,r.profit,Number(r.margin)]):[["데이터 없음","","","","","","","",""]])
     ];
     const ws9d=XLSX.utils.aoa_to_sheet(s9d);
-    ws9d["!cols"]=[{wch:10},{wch:16},{wch:16},{wch:14},{wch:16},{wch:16},{wch:16},{wch:12}];
+    ws9d["!cols"]=[{wch:10},{wch:16},{wch:16},{wch:14},{wch:16},{wch:14},{wch:16},{wch:16},{wch:12}];
     XLSX.utils.book_append_sheet(wb,ws9d,"월별수익성");
 
     /* ── Sheet 10: 고객사별 손익 분석 ── */
@@ -4077,18 +4024,6 @@ window._exportStatisticsExcel=function(){
     const ws10=XLSX.utils.aoa_to_sheet(s10);
     ws10["!cols"]=[{wch:18},{wch:8},{wch:8},{wch:16},{wch:16},{wch:16},{wch:14},{wch:16},{wch:12}];
     XLSX.utils.book_append_sheet(wb,ws10,"고객사별손익");
-
-    /* ── Sheet 11: 모델별 생애주기 수익성 ── */
-    const s11=[
-      ["모델별 생애주기(Lifecycle) 수익성 (전체 누적)"],
-      [`생성일: ${todayStr}`],
-      [],
-      ["모델","현장수","AS건수","판매·렌탈매출(원)","유지보수매출(원)","AS매출(원)","총원가(원)","총이익(원)","이익률(%)"],
-      ...(lifecycleProfit.length?lifecycleProfit.map(r=>[r.name,r.siteCount,r.asCount,r.initialRevenue,r.maintRevenue,r.asRevenue,r.cost,r.profit,Number(r.margin)]):[["데이터 없음","","","","","","","",""]])
-    ];
-    const ws11=XLSX.utils.aoa_to_sheet(s11);
-    ws11["!cols"]=[{wch:18},{wch:8},{wch:8},{wch:16},{wch:16},{wch:14},{wch:14},{wch:16},{wch:12}];
-    XLSX.utils.book_append_sheet(wb,ws11,"모델별생애주기수익성");
 
     /* ── Sheet 12: AS 원가 구조 분석 ── */
     const s12=[
@@ -4214,14 +4149,14 @@ function renderStatistics(){
 
 /* ════════════════════════════════════
    PROFITABILITY (수익성 분석) — 별도 페이지
-   계약 유형별 수익성 · 고객사별 손익 · 모델별 생애주기 수익성 · AS 원가 구조 분석
+   기간별(연도별/월별) 수익성 추이(인건비 포함) · 계약 유형별 수익성 · 고객사별 손익 · AS 원가 구조 분석
 ════════════════════════════════════ */
 function renderProfitability(){
   const profitTabs=[["week","이번 주"],["month","이번 달"],["year","올해"]].map(([p,l])=>
     `<button class="stat-tab${statPeriod===p?" stat-tab-active":""}" data-period="${p}" onclick="_setStatPeriod('${p}')">${l}</button>`).join("");
   $content.innerHTML=`
     <div class="page-head">
-      <div><div class="page-title">수익성 분석</div><div class="page-subtitle">Site Master 계약금액·원가 및 AS 이력카드 원가 입력을 기반으로 계약유형별·고객사별·모델 생애주기 수익성과 AS 원가 구조를 종합 분석합니다 (특별한 언급이 없는 한 전체 누적 데이터 기준)</div></div>
+      <div><div class="page-title">수익성 분석</div><div class="page-subtitle">Site Master 계약금액·원가 및 AS 이력카드 원가(인건비 포함) 입력을 기반으로 기간별·계약유형별·고객사별 수익성과 AS 원가 구조를 종합 분석합니다 (특별한 언급이 없는 한 전체 누적 데이터 기준)</div></div>
       <div class="page-actions"><button class="btn btn-secondary" id="statExportBtn" onclick="window._exportStatisticsExcel()">📥 엑셀 다운로드</button></div>
     </div>
     <div class="card" style="margin-bottom:16px;">
@@ -4256,13 +4191,6 @@ function renderProfitability(){
       <div class="card-body" id="statCustomerProfitBody"></div>
     </div>
     <div class="card" style="margin-bottom:16px;">
-      <div class="card-header">
-        <div class="card-title">🔄 모델별 생애주기(Lifecycle) 수익성</div>
-        <div style="font-size:11.5px;color:var(--ink-5);">전체 누적 · 판매+유지보수+AS 총수익성</div>
-      </div>
-      <div class="card-body" id="statLifecycleBody"></div>
-    </div>
-    <div class="card" style="margin-bottom:16px;">
       <div class="card-header"><div class="card-title">🧾 AS 원가 구조 분석</div><div class="stat-tab-group">${profitTabs}</div></div>
       <div class="card-body" id="statCostStructureBody"></div>
     </div>`;
@@ -4270,7 +4198,6 @@ function renderProfitability(){
   renderStatContractTypeSection();
   renderStatRentalAccrualSection();
   renderStatCustomerProfitSection();
-  renderStatLifecycleSection();
   renderStatCostStructureSection();
 }
 
