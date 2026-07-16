@@ -3661,6 +3661,19 @@ function renderStatContractTypeSection(){
     <td style="text-align:right;">${marginBadge(r.margin)}</td>
     <td>${miniBar(r.revenue,r.cost,maxVal)}</td>
   </tr>`).join("");
+  const cards=rows.map(r=>`<div class="mc">
+    <div class="mc-head" style="cursor:default;">
+      <div class="mc-title"><div class="mc-name">${bContract(r.type)}</div><div class="mc-sub">${r.count}건</div></div>
+      <div class="mc-badges">${marginBadge(r.margin)}</div>
+    </div>
+    <hr class="mc-divider"/>
+    <div class="mc-fields">
+      <div class="mc-field"><span class="mc-label">매출</span><span class="mc-val" style="font-weight:600;color:var(--blue);">${fmtWon(r.revenue)}</span></div>
+      <div class="mc-field"><span class="mc-label">원가</span><span class="mc-val" style="color:var(--ink-5);">${fmtWon(r.cost)}</span></div>
+      <div class="mc-field"><span class="mc-label">이익</span><span class="mc-val" style="font-weight:700;color:${r.profit>=0?"var(--teal-dk)":"var(--rose)"};">${fmtWon(r.profit)}</span></div>
+      <div class="mc-field"><span class="mc-label">매출·원가</span><span class="mc-val">${miniBar(r.revenue,r.cost,maxVal)}</span></div>
+    </div>
+  </div>`).join("");
   el.innerHTML=`
     <div class="profit-summary-grid">
       <div class="profit-summary-card"><div class="profit-summary-label">전체 계약 매출</div><div class="profit-summary-val" style="color:var(--blue);">${fmtWon(totalRevenue)}</div></div>
@@ -3671,6 +3684,7 @@ function renderStatContractTypeSection(){
       <thead><tr><th>계약 유형</th><th style="text-align:right;">건수</th><th style="text-align:right;">매출</th><th style="text-align:right;">원가</th><th style="text-align:right;">이익</th><th style="text-align:right;">이익률</th><th>매출·원가 비교</th></tr></thead>
       <tbody>${tbody}</tbody>
     </table></div>
+    <div class="mc-list">${cards}</div>
     <div class="chart-note">전체 누적(Site Master) 계약 데이터 기준입니다. 렌탈 계약은 계약금액(매출) 필드에 입력된 월 이용료에, 계약 시작일 이후 청구된 개월 수를 곱한 누적 청구액으로 매출을 산정합니다. 파란 막대는 매출, 빨간 막대는 원가를 나타내며, 두 막대 간 간격이 클수록 해당 계약 유형의 수익성이 좋습니다.</div>`;
 }
 
@@ -3691,6 +3705,19 @@ function renderStatRentalAccrualSection(){
     <td style="text-align:right;font-weight:700;color:var(--blue);">${fmtWon(r.accrued)}</td>
     <td style="text-align:right;color:var(--ink-5);">${r.deposit?fmtWon(r.deposit):"-"}</td>
   </tr>`).join("");
+  const cards=rows.map(r=>`<div class="mc">
+    <div class="mc-head" style="cursor:default;">
+      <div class="mc-title"><div class="mc-name">${esc(r.name)}</div><div class="mc-sub">${esc(r.client)}</div></div>
+      <div class="mc-badges"><span class="badge b-progress">${r.months}개월</span></div>
+    </div>
+    <hr class="mc-divider"/>
+    <div class="mc-fields">
+      <div class="mc-field"><span class="mc-label">월 이용료</span><span class="mc-val">${fmtWon(r.monthly)}</span></div>
+      <div class="mc-field"><span class="mc-label">계약기간</span><span class="mc-val">${esc(r.contractStart)}${r.contractEnd?` ~ ${esc(r.contractEnd)}`:" ~ 현재"}</span></div>
+      <div class="mc-field"><span class="mc-label">누적 매출</span><span class="mc-val" style="font-weight:700;color:var(--blue);">${fmtWon(r.accrued)}</span></div>
+      <div class="mc-field"><span class="mc-label">보증금</span><span class="mc-val">${r.deposit?fmtWon(r.deposit):"-"}</span></div>
+    </div>
+  </div>`).join("");
   el.innerHTML=`
     <div class="profit-summary-grid">
       <div class="profit-summary-card"><div class="profit-summary-label">렌탈 현장 수 · 월 이용료 합계</div><div class="profit-summary-val" style="color:var(--violet);">${rows.length}곳 · ${fmtWon(totalMonthly)}/월</div></div>
@@ -3701,6 +3728,7 @@ function renderStatRentalAccrualSection(){
       <thead><tr><th>현장명</th><th>고객사</th><th style="text-align:right;">월 이용료</th><th>계약 기간</th><th style="text-align:center;">청구 개월</th><th style="text-align:right;">누적 매출</th><th style="text-align:right;">보증금</th></tr></thead>
       <tbody>${tbody}</tbody>
     </table></div>
+    <div class="mc-list">${cards}</div>
     <div class="chart-note">누적 매출 = 월 이용료 × 청구 개월 수. 청구 개월 수는 계약 시작일부터 계약 종료일(없으면 오늘)까지 도래한 결제 주기 수로 산정하며, 계약 체결 즉시 청구되는 첫 달을 포함해 최소 1개월부터 계산합니다. 보증금은 매출에 포함되지 않습니다.</div>`;
 }
 
@@ -3731,6 +3759,22 @@ function renderStatPeriodProfitSection(){
     <td style="text-align:right;">${marginBadge(r.margin)}</td>
     <td>${miniBar(r.revenue,r.cost,maxVal)}</td>
   </tr>`).join("");
+  const cards=rows.map(r=>`<div class="mc">
+    <div class="mc-head" style="cursor:default;">
+      <div class="mc-title"><div class="mc-name">${profitPeriodLabel(profitPeriodMode,r.key)}</div><div class="mc-sub">총 매출 ${fmtWon(r.revenue)}</div></div>
+      <div class="mc-badges">${marginBadge(r.margin)}</div>
+    </div>
+    <hr class="mc-divider"/>
+    <div class="mc-fields">
+      <div class="mc-field"><span class="mc-label">렌탈매출</span><span class="mc-val" style="color:var(--violet);">${fmtWon(r.rentalRevenue)}</span></div>
+      <div class="mc-field"><span class="mc-label">판매·기타</span><span class="mc-val" style="color:var(--blue);">${fmtWon(r.contractRevenue)}</span></div>
+      <div class="mc-field"><span class="mc-label">AS매출</span><span class="mc-val" style="color:#059669;">${fmtWon(r.asRevenue)}</span></div>
+      <div class="mc-field"><span class="mc-label">인건비</span><span class="mc-val" style="color:var(--amber-dk,#b45309);">${fmtWon(r.laborCost)}</span></div>
+      <div class="mc-field"><span class="mc-label">총 원가</span><span class="mc-val" style="color:var(--ink-5);">${fmtWon(r.cost)}</span></div>
+      <div class="mc-field"><span class="mc-label">이익</span><span class="mc-val" style="font-weight:700;color:${r.profit>=0?"var(--teal-dk)":"var(--rose)"};">${fmtWon(r.profit)}</span></div>
+      <div class="mc-field"><span class="mc-label">매출·원가</span><span class="mc-val">${miniBar(r.revenue,r.cost,maxVal)}</span></div>
+    </div>
+  </div>`).join("");
   el.innerHTML=`
     <div class="profit-summary-grid">
       <div class="profit-summary-card"><div class="profit-summary-label">${profitPeriodMode==="month"?"전체 월":"전체 연도"} 매출 합계</div><div class="profit-summary-val" style="color:var(--blue);">${fmtWon(totalRevenue)}</div></div>
@@ -3742,6 +3786,7 @@ function renderStatPeriodProfitSection(){
       <thead><tr><th>${profitPeriodMode==="month"?"월":"연도"}</th><th style="text-align:right;">렌탈 누적매출</th><th style="text-align:right;">판매·기타 매출</th><th style="text-align:right;">AS 매출</th><th style="text-align:right;">총 매출</th><th style="text-align:right;">인건비</th><th style="text-align:right;">총 원가</th><th style="text-align:right;">이익</th><th style="text-align:right;">이익률</th><th>매출·원가 비교</th></tr></thead>
       <tbody>${tbody}</tbody>
     </table></div>
+    <div class="mc-list">${cards}</div>
     <div class="chart-note">렌탈 매출은 계약 시작월부터 매월 월 이용료가 해당 기간에 누적 반영됩니다. 판매·신규 등 1회성 계약 매출·원가는 계약 시작일이 속한 기간에 전액 반영됩니다. AS 매출은 견적일(청구 시점), AS 원가는 완료일(비용 발생 시점) 기준으로 집계됩니다. 인건비는 AS 이력카드에 입력한 인건비 합계로, 총 원가에 이미 포함된 항목을 별도로 표시하여 인건비 비중을 함께 분석할 수 있도록 한 것입니다.</div>`;
 }
 
@@ -3762,6 +3807,19 @@ function renderStatCustomerProfitSection(){
     <td style="text-align:right;">${marginBadge(r.margin)}</td>
     <td>${miniBar(r.revenue,r.asCost,maxVal)}</td>
   </tr>`).join("");
+  const cards=rows.map(r=>`<div class="mc">
+    <div class="mc-head" style="cursor:default;">
+      <div class="mc-title"><div class="mc-name">${esc(r.client)}</div><div class="mc-sub">${r.siteCount}현장 · AS ${r.asCount}건</div></div>
+      <div class="mc-badges">${marginBadge(r.margin)}</div>
+    </div>
+    <hr class="mc-divider"/>
+    <div class="mc-fields">
+      <div class="mc-field"><span class="mc-label">매출</span><span class="mc-val" style="font-weight:600;color:var(--blue);">${fmtWon(r.revenue)}</span></div>
+      <div class="mc-field"><span class="mc-label">AS 비용</span><span class="mc-val" style="color:var(--rose);">${fmtWon(r.asCost)}</span></div>
+      <div class="mc-field"><span class="mc-label">순이익</span><span class="mc-val" style="font-weight:700;color:${r.profit>=0?"var(--teal-dk)":"var(--rose)"};">${fmtWon(r.profit)}</span></div>
+      <div class="mc-field"><span class="mc-label">매출·비용</span><span class="mc-val">${miniBar(r.revenue,r.asCost,maxVal)}</span></div>
+    </div>
+  </div>`).join("");
   el.innerHTML=`
     <div class="profit-summary-grid">
       <div class="profit-summary-card"><div class="profit-summary-label">🏆 최우수 고객사 (순이익)</div><div class="profit-summary-val" style="color:var(--teal-dk);font-size:14px;">${esc(best.client)} · ${fmtWon(best.profit)}</div></div>
@@ -3772,6 +3830,7 @@ function renderStatCustomerProfitSection(){
       <thead><tr><th>고객사</th><th style="text-align:right;">현장·AS건수</th><th style="text-align:right;">매출(계약+AS청구)</th><th style="text-align:right;">AS 비용</th><th style="text-align:right;">순이익</th><th style="text-align:right;">이익률</th><th>매출·비용 비교</th></tr></thead>
       <tbody>${tbody}</tbody>
     </table></div>
+    <div class="mc-list">${cards}</div>
     <div class="chart-note">매출 = 계약금액(Site Master) + AS 유상 청구액(견적서 합계), AS 비용 = AS 이력카드에 입력한 인건비·출장비·부품비·물류비 합계. 순이익 = 매출 - AS 비용. 전체 누적 데이터 기준입니다.</div>`;
 }
 
@@ -3792,6 +3851,18 @@ function renderStatCostStructureSection(){
     </div>`).join("");
   const topSitesRows=cs.topSites.map(([name,val],i)=>`<tr><td>${i+1}</td><td style="font-weight:600;">${esc(name)}</td><td style="text-align:right;color:var(--rose);font-weight:700;">${fmtWon(val)}</td></tr>`).join("");
   const topCausesRows=cs.topCauses.map(([name,val],i)=>`<tr><td>${i+1}</td><td style="font-weight:600;">${esc(name)}</td><td style="text-align:right;color:var(--rose);font-weight:700;">${fmtWon(val)}</td></tr>`).join("");
+  const topSitesCards=cs.topSites.map(([name,val],i)=>`<div class="mc">
+    <div class="mc-head" style="cursor:default;">
+      <div class="mc-title"><div class="mc-name">${i+1}. ${esc(name)}</div></div>
+      <div class="mc-badges"><span style="font-weight:700;color:var(--rose);">${fmtWon(val)}</span></div>
+    </div>
+  </div>`).join("");
+  const topCausesCards=cs.topCauses.map(([name,val],i)=>`<div class="mc">
+    <div class="mc-head" style="cursor:default;">
+      <div class="mc-title"><div class="mc-name">${i+1}. ${esc(name)}</div></div>
+      <div class="mc-badges"><span style="font-weight:700;color:var(--rose);">${fmtWon(val)}</span></div>
+    </div>
+  </div>`).join("");
   el.innerHTML=`
     <div class="profit-summary-grid">
       <div class="profit-summary-card"><div class="profit-summary-label">${periodLabel} AS 총원가</div><div class="profit-summary-val" style="color:var(--rose);">${fmtWon(cs.grandTotal)}</div></div>
@@ -3802,11 +3873,11 @@ function renderStatCostStructureSection(){
     <div class="stat-cause-grid">
       <div>
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-5);margin-bottom:8px;">🎯 원가 절감 포인트 · 현장별 TOP5</div>
-        ${cs.topSites.length?`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>현장</th><th style="text-align:right;">누적 원가</th></tr></thead><tbody>${topSitesRows}</tbody></table></div>`:`<div style="font-size:11.5px;color:var(--ink-5);">데이터가 없습니다</div>`}
+        ${cs.topSites.length?`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>현장</th><th style="text-align:right;">누적 원가</th></tr></thead><tbody>${topSitesRows}</tbody></table></div><div class="mc-list">${topSitesCards}</div>`:`<div style="font-size:11.5px;color:var(--ink-5);">데이터가 없습니다</div>`}
       </div>
       <div>
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-5);margin-bottom:8px;">🎯 원가 절감 포인트 · 원인유형별 TOP5</div>
-        ${cs.topCauses.length?`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>원인 구분</th><th style="text-align:right;">누적 원가</th></tr></thead><tbody>${topCausesRows}</tbody></table></div>`:`<div style="font-size:11.5px;color:var(--ink-5);">데이터가 없습니다</div>`}
+        ${cs.topCauses.length?`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>원인 구분</th><th style="text-align:right;">누적 원가</th></tr></thead><tbody>${topCausesRows}</tbody></table></div><div class="mc-list">${topCausesCards}</div>`:`<div style="font-size:11.5px;color:var(--ink-5);">데이터가 없습니다</div>`}
       </div>
     </div>
     <div class="chart-note">현장·원인유형 TOP5는 반복적으로 높은 원가가 발생하는 지점으로, 예방점검 강화·부품 표준화·출장 동선 최적화 등 원가 절감 시책 수립의 우선순위로 활용할 수 있습니다.</div>`;
