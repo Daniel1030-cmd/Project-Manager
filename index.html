@@ -566,11 +566,8 @@ input,select,textarea{font-family:inherit;}
   .m-tab .m-tab-ic{font-size:18px;line-height:1;}
   .m-tab.active{color:var(--teal);}
   .content{padding:14px 14px calc(84px + var(--safe-b));}
-  /* 모바일 바텀시트 드래그 핸들 (실제 드래그 동작은 없지만 시각적으로 닫힘 동작을 암시) */
   .modal::before{content:'';position:sticky;top:0;display:block;width:36px;height:4px;border-radius:2px;background:var(--line);margin:10px auto -2px;}
-  /* iOS Safari가 16px 미만 입력 필드에 포커스 시 자동 확대하는 것을 방지 */
   .field input,.field select,.field textarea,.search-wrap input{font-size:16px;}
-  /* 터치 타겟 최소 크기 확보 (44px 권장 기준에 근접) */
   .btn-icon{min-width:40px;min-height:40px;padding:9px;}
   .m-tab{min-height:52px;}
   .kpi-grid{grid-template-columns:repeat(2,1fr)!important;gap:10px;margin-bottom:16px;}
@@ -774,6 +771,7 @@ let sq={site:"",project:"",issue:"",inventory:"",errorcode:""};
 let projSort={col:"receiptDate",dir:"desc"};
 let invSort={col:"model",dir:"asc"};
 let statPeriod="week";
+let profitPeriodMode="year"; // 수익성 분석: 기간별 추이 보기 단위 ("year" | "month")
 let reportPM=""; // 선택된 담당자(작성자)
 let reportAnchor=new Date(); // 선택된 주(週)의 기준일
 let reportHistOpenId=null;
@@ -917,8 +915,6 @@ function isoWeekNumber(d){
   return Math.ceil((((dt-yearStart)/86400000)+1)/7);
 }
 function ymd(d){
-  // toISOString()은 UTC 기준으로 변환되어 KST(UTC+9)에서는 날짜가 하루 당겨지는 문제가 있어
-  // 로컬 날짜 요소를 직접 사용한다. (예: 월요일 00:00 KST가 "일요일"로 표시되던 버그 수정)
   const y=d.getFullYear();
   const m=String(d.getMonth()+1).padStart(2,"0");
   const day=String(d.getDate()).padStart(2,"0");
@@ -936,7 +932,6 @@ function weekInfo(anchorDate){
     shortLabel:`${start.toLocaleDateString("ko-KR",{month:"2-digit",day:"2-digit"})}~${end.toLocaleDateString("ko-KR",{month:"2-digit",day:"2-digit"})}`,
   };
 }
-/* 선택된 주(週)의 월~금 5일 목록을 반환 — 주간업무보고 일자별 입력에 사용 */
 function weekdayList(wi){
   const names=["월","화","수","목","금"];
   const cls=["rpt-mon","rpt-tue","rpt-wed","rpt-thu","rpt-fri"];
@@ -950,7 +945,6 @@ function weekdayList(wi){
     };
   });
 }
-/* 일자별 업무요약 객체를 미리보기/이력용 한 줄 텍스트로 변환 */
 function dailySummaryText(dailySummary){
   if(!dailySummary)return"";
   return Object.values(dailySummary).map(v=>(v||"").trim()).filter(Boolean).join(" / ");
@@ -963,7 +957,6 @@ function reportDocId(pmName,weekKey){
   const safe=String(pmName).trim().replace(/[\/\s.#$\[\]]+/g,"_");
   return`${safe}__${weekKey}`;
 }
-/* 시스템 내 등장한 모든 담당자(PM) 이름 후보 목록 */
 function allPMNames(){
   const set=new Set();
   site.forEach(s=>s.pm&&set.add(s.pm.trim()));
@@ -1706,9 +1699,114 @@ const SITE_FIELDS=[
   {key:"contractCost",label:"원가 · 매입/설치비(원)",type:"number",ph:"예: 9000000",pair:true},
   {key:"contractStart",label:"계약 시작",type:"date",pair:true},
   {key:"contractEnd",label:"계약 종료",type:"date",pair:true},
-  {key:"maintenancePeriod",label:"유지보수 기간",ph:"예: 12개월, 2년, 1년6개월"},
+  {key:"maintenancePeriod",label:"유지보수 기간",ph:"예: 12개월, 2년, 1년6개월",pair:true},
+  {key:"deposit",label:"보증금(원)",type:"number",ph:"예: 10000000"},
   {key:"pm",label:"담당 PM",req:true},
 ];
+
+/* ════════════════════════════════════
+   계약금액(매출) 엑셀 일괄 반영 — "계약금액.xlsx" 기준 (VAT 별도)
+   렌탈 계약은 원래 월정 요금으로 청구되는 구조이며, 매달 청구되는 유지보수료와
+   같은 성격의 반복 과금이므로, "1회성 총액이 아니라서 제외"하지 않고
+   렌탈/유지보수 계약의 월 이용료(및 총 월 이용료)도 계약금액(매출)에 반영합니다.
+   보증금이 있는 경우 별도 보증금(deposit) 필드에 함께 반영합니다.
+   금액 자체가 엑셀에 기재되지 않은 현장은 CONTRACT_AMOUNT_UNPRICED 참고 목록으로 남깁니다.
+════════════════════════════════════ */
+const CONTRACT_AMOUNT_IMPORT=[
+  {name:"센트럴시티",              client:"(주)리에이즈",     amount:156000000, note:"총액"},
+  {name:"삼성엔지니어링 글로벌 HQ", client:"㈜에스원",         amount:89000000,  note:"총액"},
+  {name:"현대자동차 양재점",        client:"㈜다올토탈서비스",   amount:1957000,   deposit:10000000, note:"렌탈 월 이용료"},
+  {name:"에코프로머티리얼즈",       client:"에코프로머티리얼즈", amount:6600000,   note:"렌탈 총 월 이용료(대당 3,300,000원, 골드플랜 570,000원 포함)"},
+  {name:"롯데광교점",              client:"㈜아이피엘에스",     amount:190000,    note:"렌탈 베이직플랜 월 이용료"},
+  {name:"롯데중동점",              client:"㈜삼구아이앤씨",    amount:130500000, note:"총액(유지보수 월 190,000원 포함)"},
+  {name:"롯데백화점 인천점",        client:"두잉씨앤에스",       amount:190000,    note:"렌탈 베이직플랜 월 이용료"},
+  {name:"롯데백화점 본점",          client:"(주)우지기업",       amount:190000,    note:"렌탈 베이직플랜 월 이용료"},
+  {name:"롯데 노원점",             client:"한국랜탈",           amount:190000,    note:"렌탈 베이직플랜 월 이용료"},
+  {name:"롯데김포점",              client:"㈜더맨",             amount:190000,    note:"렌탈 베이직플랜 월 이용료"},
+  {name:"로열케닌",                client:"로열케닌",         amount:126500000, note:"총액"},
+  {name:"롯데 프리미엄 아울렛 기흥", client:"㈜아람코 코리아",    amount:190000,    note:"렌탈 베이직플랜 월 이용료"},
+  {name:"롯데 평촌점",             client:"㈜거성지엠에스",      amount:190000,    note:"렌탈 베이직플랜 월 이용료"},
+  {name:"삼성 화성창고(HDC)",       client:"해우지엘에스",       amount:4560000,   note:"렌탈 총 월 이용료(대당 760,000원)"},
+  {name:"삼성영종(칼트로닉스)",     client:"에스텍시스템",       amount:875000,    note:"렌탈 월 이용료"},
+  {name:"코티티",                  client:"아스타아이비에스", amount:20600000,  note:"총액"},
+  {name:"스페이스",                client:"스페이스",         amount:48600000,  note:"총액"},
+];
+
+/* ════════════════════════════════════
+   엑셀에 금액 자체가 기재되지 않아 반영할 수 없는 현장 목록 (참고용, 읽기 전용)
+════════════════════════════════════ */
+const CONTRACT_AMOUNT_UNPRICED=[
+  {name:"인천공항",              client:"제이씨현"},
+  {name:"광전자",                client:"광전자"},
+  {name:"기아자동차 화성오토랜드", client:"신일FAS"},
+  {name:"LK로보틱스",            client:"LK로보틱스"},
+  {name:"해군사관학교",           client:"LK로보틱스"},
+];
+
+window._showMonthlyFeeReference=function(){
+  const rows=CONTRACT_AMOUNT_UNPRICED.map(r=>{
+    const matched=site.find(s=>s.name===r.name);
+    const statusBadge=matched
+      ?(matched.contractAmount&&Number(matched.contractAmount)>0
+        ?`<span class="badge b-done">✅ 계약금액 입력됨</span>`
+        :`<span class="badge b-warn-soon">⚠️ 계약금액 미입력</span>`)
+      :`<span class="badge b-ready">현장 미등록</span>`;
+    return`<div class="mc-field">
+      <span class="mc-label" style="min-width:150px;">${esc(r.name)}</span>
+      <span class="mc-val" style="text-align:left;flex:1;">
+        <div style="font-size:12px;color:var(--ink-4);">${esc(r.client)}</div>
+        <div style="margin-top:4px;">${statusBadge}</div>
+      </span>
+    </div>`;
+  }).join("");
+  $modal.className="modal modal-xl";
+  $overlay.classList.remove("hidden");
+  $modal.innerHTML=`
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">금액 미기재 현장 (참고용)</div>
+        <div style="font-size:12px;color:var(--ink-5);margin-top:2px;">엑셀에 금액 정보가 없어 자동 반영이 불가능한 ${CONTRACT_AMOUNT_UNPRICED.length}개 현장입니다</div>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.add('hidden')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="as-hint"><span class="as-hint-icon">💡</span><span>금액 확인 후 Site Master에서 해당 현장의 계약금액(매출)을 직접 입력해주세요.</span></div>
+      <div class="mc-fields">${rows}</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="document.getElementById('modalOverlay').classList.add('hidden')">닫기</button>
+    </div>`;
+};
+
+window._applyContractAmountImport=async function(){
+  if(!site.length){toast("반영할 현장 데이터가 없습니다","error");return;}
+  const matched=[],unmatched=[],skipped=[];
+  CONTRACT_AMOUNT_IMPORT.forEach(row=>{
+    const s=site.find(x=>x.name===row.name);
+    if(!s){unmatched.push(row.name);return;}
+    if(s.contractAmount&&Number(s.contractAmount)>0){skipped.push(row.name);return;}
+    matched.push({id:s.id,...row});
+  });
+  if(!matched.length){
+    const reason=unmatched.length?`일치하는 현장을 찾지 못했습니다: ${unmatched.join(", ")}`:"이미 계약금액이 입력되어 있어 반영할 항목이 없습니다";
+    toast(reason,"error");
+    return;
+  }
+  const detail=matched.map(m=>`${m.name}: ${m.amount.toLocaleString("ko-KR")}원${m.deposit?` (보증금 ${m.deposit.toLocaleString("ko-KR")}원)`:""} — ${m.note}`).join("\n");
+  if(!confirm(`아래 ${matched.length}개 현장의 계약금액(매출)을 엑셀 기준으로 반영합니다. 렌탈/유지보수 현장은 월 이용료가 계약금액으로 반영되며, 보증금이 있는 경우 보증금 필드에도 함께 반영됩니다.\n\n${detail}\n\n계속하시겠습니까?`))return;
+  try{
+    for(const m of matched){
+      const patch={contractAmount:m.amount};
+      if(m.deposit)patch.deposit=m.deposit;
+      await updateDoc(doc(db,COL.site,m.id),patch);
+    }
+    let msg=`${matched.length}건 반영 완료`;
+    if(skipped.length)msg+=` · 이미 입력됨 ${skipped.length}건 제외`;
+    if(unmatched.length)msg+=` · 현장 미발견 ${unmatched.length}건`;
+    toast(msg,"success");
+  }catch(e){console.error(e);toast("반영 중 오류가 발생했습니다","error");}
+};
+
 window._openAddSite=()=>openModal({title:"신규 현장 등록",fields:SITE_FIELDS,hint:"계약 시작일과 유지보수 기간 입력 시 AS 구분이 자동 산출됩니다.",
   onSave:async d=>{await addDoc(collection(db,COL.site),{...d,status:"준비",createdAt:serverTimestamp()});toast("현장이 등록되었습니다","success");}});
 window._openEditSite=id=>{
@@ -1732,6 +1830,7 @@ function renderSiteResults(){
     <td>${bContract(s.contractType)}</td>
     <td style="text-align:right;">${s.contractAmount?Number(s.contractAmount).toLocaleString("ko-KR")+"원":"-"}</td>
     <td style="text-align:right;color:var(--ink-5);">${s.contractCost?Number(s.contractCost).toLocaleString("ko-KR")+"원":"-"}</td>
+    <td style="text-align:right;color:var(--violet);">${s.deposit?Number(s.deposit).toLocaleString("ko-KR")+"원":"-"}</td>
     <td>${esc(s.contractStart)||"-"}</td>
     <td>${esc(s.contractEnd)||"-"}</td>
     <td><div style="line-height:1.3;">${esc(s.maintenancePeriod)||"-"}${asExpireText(s.contractStart,s.maintenancePeriod)}</div></td>
@@ -1756,6 +1855,7 @@ function renderSiteResults(){
         <div class="mc-field"><span class="mc-label">시리얼</span><span class="mc-val">${esc(s.serial)||"-"}</span></div>
         <div class="mc-field"><span class="mc-label">계약금액(매출)</span><span class="mc-val">${s.contractAmount?Number(s.contractAmount).toLocaleString("ko-KR")+"원":"-"}</span></div>
         <div class="mc-field"><span class="mc-label">원가</span><span class="mc-val">${s.contractCost?Number(s.contractCost).toLocaleString("ko-KR")+"원":"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">보증금</span><span class="mc-val">${s.deposit?Number(s.deposit).toLocaleString("ko-KR")+"원":"-"}</span></div>
         <div class="mc-field"><span class="mc-label">계약기간</span><span class="mc-val">${esc(s.contractStart)||"-"} ~ ${esc(s.contractEnd)||"-"}</span></div>
         <div class="mc-field"><span class="mc-label">유지보수</span><span class="mc-val">${esc(s.maintenancePeriod)||"-"}${asExpireText(s.contractStart,s.maintenancePeriod)}</span></div>
         <div class="mc-field"><span class="mc-label">AS 구분</span><span class="mc-val">${bAS(s.contractStart,s.maintenancePeriod)}</span></div>
@@ -1769,7 +1869,7 @@ function renderSiteResults(){
   </div>`).join("");
   ra.innerHTML=`<div class="tbl-wrap"><table class="tbl"><thead><tr>
     <th>현장명</th><th>고객사</th><th>장비</th><th>수량</th><th>시리얼</th><th>계약방식</th>
-    <th style="text-align:right;">계약금액(매출)</th><th style="text-align:right;">원가</th>
+    <th style="text-align:right;">계약금액(매출)</th><th style="text-align:right;">원가</th><th style="text-align:right;">보증금</th>
     <th>계약시작</th><th>계약종료</th><th>유지보수기간</th><th>PM</th>
     <th>상태</th><th style="color:var(--teal-dk);">AS 구분</th><th>관리</th>
   </tr></thead><tbody>${tBody}</tbody></table></div>
@@ -1787,7 +1887,11 @@ function renderSite(){
   $content.innerHTML=`
     <div class="page-head">
       <div><div class="page-title">Site Master</div><div class="page-subtitle">등록된 현장을 관리합니다</div></div>
-      <div class="page-actions"><button class="btn btn-primary" onclick="_openAddSite()">+ 현장 등록</button></div>
+      <div class="page-actions">
+        <button class="btn btn-secondary" onclick="_showMonthlyFeeReference()">📋 금액 미기재 현장</button>
+        <button class="btn btn-secondary" onclick="_applyContractAmountImport()">📥 계약금액 엑셀 반영</button>
+        <button class="btn btn-primary" onclick="_openAddSite()">+ 현장 등록</button>
+      </div>
     </div>
     <div class="kpi-grid" style="grid-template-columns:repeat(5,1fr);">
       ${kpiHtml(total,"전체 현장","c-teal")}${kpiHtml(progress,"진행 중","c-blue")}
@@ -2771,8 +2875,6 @@ function computeModelMTTR(periodData){
         mttr:mttr!==null?mttr.toFixed(1):null,
         status:qualityStatus(mttr,"mttr"),
       };
-    // 수리시간이 긴(=위험한) 모델이 먼저 보이도록 정렬 — "한눈에" 관리 대상을 파악하기 위함.
-    // 산출 불가(mttr=null, 실제 소요시간 미기재) 모델은 맨 뒤로 보낸다.
     }).sort((a,b)=>{
       if(a.mttr===null&&b.mttr===null)return b.total-a.total;
       if(a.mttr===null)return 1;
@@ -2818,8 +2920,6 @@ function computeModelMTBF(){
         mtbfDays:mtbfDays!==null?mtbfDays.toFixed(1):null,
         status:qualityStatus(mtbfDays,"mtbf"),
       };
-    // 고장 간격이 짧은(=위험한) 모델이 먼저 보이도록 정렬 — 신뢰성이 낮은 설비를 즉시 식별하기 위함.
-    // 산출 불가(mtbfDays=null, 운전시간 표본 부족) 모델은 맨 뒤로 보낸다.
     }).sort((a,b)=>{
       if(a.mtbfDays===null&&b.mtbfDays===null)return b.failureCount-a.failureCount;
       if(a.mtbfDays===null)return 1;
@@ -2854,6 +2954,33 @@ function computeQualityWatchlist(modelMTTR,modelMTBF,limit=5){
 function taskASCost(t){return(Number(t.laborCost)||0)+(Number(t.travelCost)||0)+(Number(t.partsCost)||0)+(Number(t.logisticsCost)||0);}
 function taskASRevenue(t){return(t.quoteItems&&t.quoteItems.length)?t.quoteItems.reduce((s,it)=>s+((parseInt(it.qty)||0)*(parseInt(it.unitPrice)||0)),0):0;}
 
+/* ════════════════════════════════════
+   렌탈 계약 누적 매출 산정
+   - 렌탈은 계약금액(매출) 필드에 "월 이용료"가 들어있고, 계약일을 기준으로
+     매월 입금되는 구조이므로, 수익성 분석에서는 (월 이용료 × 계약일 이후 청구된 개월 수)를
+     누적 매출로 산정한다.
+   - 청구 개월 수는 계약 시작일(contractStart)부터 계약 종료일(contractEnd, 있는 경우
+     그 날짜까지 / 없으면 오늘까지) 사이에 도래한 결제 주기 수로 계산하며, 최초 1개월은
+     계약 체결 시 즉시 청구되는 것으로 보아 최소 1개월부터 시작한다.
+   ════════════════════════════════════ */
+function rentalMonthsAccrued(s){
+  const start=toDate(s.contractStart);
+  if(!start)return 0;
+  const end=s.contractEnd?toDate(s.contractEnd):null;
+  const now=new Date();
+  const cutoff=(end&&end<now)?end:now;
+  if(cutoff<start)return 0;
+  let months=(cutoff.getFullYear()-start.getFullYear())*12+(cutoff.getMonth()-start.getMonth());
+  if(cutoff.getDate()>=start.getDate())months+=1; // 이번 결제 주기(청구일)가 이미 도래한 경우 1개월 추가 산입
+  return Math.max(1,months);
+}
+/* 현장의 계약 누적 매출 — 렌탈은 (월 이용료 × 누적 청구 개월 수), 그 외 계약은 계약금액을 그대로 1회성 매출로 산정 */
+function siteAccruedRevenue(s){
+  const amt=Number(s.contractAmount)||0;
+  if(s.contractType==="렌탈")return amt*rentalMonthsAccrued(s);
+  return amt;
+}
+
 /* 1) 계약 유형별 수익성 — 판매·렌탈·유지보수·신규·연장 */
 function computeContractTypeProfit(){
   const map={};
@@ -2861,7 +2988,7 @@ function computeContractTypeProfit(){
     const type=s.contractType||"미분류";
     if(!map[type])map[type]={type,count:0,revenue:0,cost:0};
     map[type].count++;
-    map[type].revenue+=Number(s.contractAmount)||0;
+    map[type].revenue+=siteAccruedRevenue(s);
     map[type].cost+=Number(s.contractCost)||0;
   });
   return Object.values(map).map(m=>({
@@ -2877,7 +3004,7 @@ function computeCustomerProfit(){
   site.forEach(s=>{
     const client=s.client||"미지정";
     if(!map[client])map[client]={client,contractRevenue:0,asRevenue:0,asCost:0,siteCount:0,asCount:0};
-    map[client].contractRevenue+=Number(s.contractAmount)||0;
+    map[client].contractRevenue+=siteAccruedRevenue(s);
     map[client].siteCount++;
   });
   tasks.forEach(t=>{
@@ -2911,8 +3038,9 @@ function computeModelLifecycleProfit(){
   Object.values(map).forEach(m=>{
     m.siteSet.forEach(sn=>{
       const s=site.find(x=>x.name===sn);if(!s)return;
-      const amt=Number(s.contractAmount)||0,cost=Number(s.contractCost)||0;
-      if(s.contractType==="유지보수"||s.contractType==="연장")m.maintRevenue+=amt;
+      const amt=siteAccruedRevenue(s),cost=Number(s.contractCost)||0;
+      // 렌탈은 유지보수와 마찬가지로 매월 반복 청구되는 매출 구조이므로 유지보수 매출로 분류
+      if(s.contractType==="유지보수"||s.contractType==="연장"||s.contractType==="렌탈")m.maintRevenue+=amt;
       else m.initialRevenue+=amt;
       m.initialCost+=cost;
     });
@@ -2930,7 +3058,87 @@ function computeModelLifecycleProfit(){
   }).sort((a,b)=>b.revenue-a.revenue);
 }
 
-/* 4) AS 원가 구조 분석 — 인건비·출장비·부품비·물류비 구성비 + 원가 절감 포인트(현장/원인유형별 TOP) */
+/* 4) 렌탈 현장별 누적 매출 상세 — 월 이용료 × 청구 개월 수 산정 근거를 그대로 노출 */
+function computeRentalAccrualDetail(){
+  return site.filter(s=>s.contractType==="렌탈").map(s=>{
+    const monthly=Number(s.contractAmount)||0;
+    const months=rentalMonthsAccrued(s);
+    return{
+      name:s.name,client:s.client||"-",monthly,months,
+      accrued:monthly*months,
+      contractStart:s.contractStart||"-",contractEnd:s.contractEnd||"",
+      deposit:Number(s.deposit)||0,
+    };
+  }).sort((a,b)=>b.accrued-a.accrued);
+}
+
+
+/* ════════════════════════════════════
+   5) 기간별(연도별/월별) 수익성 추이
+   - 렌탈 매출: 계약 시작월부터 계약 종료월(없으면 이번 달)까지, 매월 월 이용료를 해당
+     연/월 구간에 누적 반영한다 (실제 입금이 발생하는 시점 기준).
+   - 판매·신규 등 1회성 계약 매출/원가: 계약 시작일이 속한 연/월 구간에 전액 반영한다.
+   - AS 매출: 견적일(quoteDate, 청구 시점) 기준, AS 원가: 완료일(completeDate, 비용 발생 시점) 기준.
+   ════════════════════════════════════ */
+function monthKey(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;}
+function yearKey(d){return`${d.getFullYear()}`;}
+function computePeriodProfitability(mode){
+  const keyFn=mode==="month"?monthKey:yearKey;
+  const map={};
+  const ensure=k=>{if(!map[k])map[k]={key:k,contractRevenue:0,rentalRevenue:0,asRevenue:0,contractCost:0,asCost:0};return map[k];};
+
+  site.forEach(s=>{
+    const start=toDate(s.contractStart);
+    if(!start)return;
+    if(s.contractType==="렌탈"){
+      const monthly=Number(s.contractAmount)||0;
+      const end=toDate(s.contractEnd);
+      const now=new Date();
+      const cutoff=(end&&end<now)?end:now;
+      if(cutoff>=start){
+        let cursor=new Date(start.getFullYear(),start.getMonth(),1);
+        const cutoffMonth=new Date(cutoff.getFullYear(),cutoff.getMonth(),1);
+        let guard=0;
+        while(cursor<=cutoffMonth&&guard<1200){
+          ensure(keyFn(cursor)).rentalRevenue+=monthly;
+          cursor=new Date(cursor.getFullYear(),cursor.getMonth()+1,1);
+          guard++;
+        }
+      }
+      ensure(keyFn(start)).contractCost+=Number(s.contractCost)||0;
+    }else{
+      const k=keyFn(start);
+      ensure(k).contractRevenue+=Number(s.contractAmount)||0;
+      ensure(k).contractCost+=Number(s.contractCost)||0;
+    }
+  });
+
+  tasks.forEach(t=>{
+    const rev=taskASRevenue(t);
+    if(rev>0){
+      const d=toDate(t.quoteDate)||toDate(t.receiptDate)||toDate(t.createdAt);
+      if(d)ensure(keyFn(d)).asRevenue+=rev;
+    }
+    const cost=taskASCost(t);
+    if(cost>0){
+      const d=toDate(t.completeDate)||toDate(t.receiptDate)||toDate(t.createdAt);
+      if(d)ensure(keyFn(d)).asCost+=cost;
+    }
+  });
+
+  return Object.values(map).map(m=>{
+    const revenue=m.contractRevenue+m.rentalRevenue+m.asRevenue;
+    const cost=m.contractCost+m.asCost;
+    const profit=revenue-cost;
+    return{...m,revenue,cost,profit,margin:revenue?((profit/revenue)*100).toFixed(1):"0.0"};
+  }).sort((a,b)=>a.key<b.key?-1:(a.key>b.key?1:0));
+}
+function profitPeriodLabel(mode,key){
+  if(mode==="month"){const[y,m]=key.split("-");return`${y}년 ${Number(m)}월`;}
+  return`${key}년`;
+}
+
+
 function computeASCostStructure(periodData){
   const totals={labor:0,travel:0,parts:0,logistics:0};
   let costedCount=0,revenueTotal=0;
@@ -3493,7 +3701,75 @@ function renderStatContractTypeSection(){
       <thead><tr><th>계약 유형</th><th style="text-align:right;">건수</th><th style="text-align:right;">매출</th><th style="text-align:right;">원가</th><th style="text-align:right;">이익</th><th style="text-align:right;">이익률</th><th>매출·원가 비교</th></tr></thead>
       <tbody>${tbody}</tbody>
     </table></div>
-    <div class="chart-note">전체 누적(Site Master) 계약 데이터 기준입니다. 파란 막대는 매출, 빨간 막대는 원가를 나타내며, 두 막대 간 간격이 클수록 해당 계약 유형의 수익성이 좋습니다.</div>`;
+    <div class="chart-note">전체 누적(Site Master) 계약 데이터 기준입니다. 렌탈 계약은 계약금액(매출) 필드에 입력된 월 이용료에, 계약 시작일 이후 청구된 개월 수를 곱한 누적 청구액으로 매출을 산정합니다. 파란 막대는 매출, 빨간 막대는 원가를 나타내며, 두 막대 간 간격이 클수록 해당 계약 유형의 수익성이 좋습니다.</div>`;
+}
+
+/* ①-1 렌탈 현장별 누적 매출 상세 — 월 이용료 × 청구 개월 수 산정 근거 노출 */
+function renderStatRentalAccrualSection(){
+  const el=document.getElementById("statRentalAccrualBody");if(!el)return;
+  const rows=computeRentalAccrualDetail();
+  if(!rows.length){el.innerHTML=empty("🏠","등록된 렌탈 현장이 없습니다","Site Master에서 계약 방식을 렌탈로 등록하면 월 이용료 기준 누적 매출이 자동 산정됩니다");return;}
+  const totalAccrued=rows.reduce((a,r)=>a+r.accrued,0);
+  const totalMonthly=rows.reduce((a,r)=>a+r.monthly,0);
+  const totalDeposit=rows.reduce((a,r)=>a+r.deposit,0);
+  const tbody=rows.map(r=>`<tr>
+    <td style="font-weight:700;">${esc(r.name)}</td>
+    <td style="color:var(--ink-5);">${esc(r.client)}</td>
+    <td style="text-align:right;">${fmtWon(r.monthly)}</td>
+    <td>${esc(r.contractStart)}${r.contractEnd?` ~ ${esc(r.contractEnd)}`:" ~ 현재"}</td>
+    <td style="text-align:center;font-weight:700;color:var(--violet);">${r.months}개월</td>
+    <td style="text-align:right;font-weight:700;color:var(--blue);">${fmtWon(r.accrued)}</td>
+    <td style="text-align:right;color:var(--ink-5);">${r.deposit?fmtWon(r.deposit):"-"}</td>
+  </tr>`).join("");
+  el.innerHTML=`
+    <div class="profit-summary-grid">
+      <div class="profit-summary-card"><div class="profit-summary-label">렌탈 현장 수 · 월 이용료 합계</div><div class="profit-summary-val" style="color:var(--violet);">${rows.length}곳 · ${fmtWon(totalMonthly)}/월</div></div>
+      <div class="profit-summary-card"><div class="profit-summary-label">누적 청구 매출 합계</div><div class="profit-summary-val" style="color:var(--blue);">${fmtWon(totalAccrued)}</div></div>
+      <div class="profit-summary-card"><div class="profit-summary-label">보증금 합계</div><div class="profit-summary-val" style="color:var(--ink-4);">${fmtWon(totalDeposit)}</div></div>
+    </div>
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th>현장명</th><th>고객사</th><th style="text-align:right;">월 이용료</th><th>계약 기간</th><th style="text-align:center;">청구 개월</th><th style="text-align:right;">누적 매출</th><th style="text-align:right;">보증금</th></tr></thead>
+      <tbody>${tbody}</tbody>
+    </table></div>
+    <div class="chart-note">누적 매출 = 월 이용료 × 청구 개월 수. 청구 개월 수는 계약 시작일부터 계약 종료일(없으면 오늘)까지 도래한 결제 주기 수로 산정하며, 계약 체결 즉시 청구되는 첫 달을 포함해 최소 1개월부터 계산합니다. 보증금은 매출에 포함되지 않습니다.</div>`;
+}
+
+/* ①-2 기간별(연도별/월별) 수익성 추이 */
+window._setProfitPeriodMode=function(mode){
+  profitPeriodMode=mode;
+  document.querySelectorAll(".profit-period-tab").forEach(el=>el.classList.toggle("stat-tab-active",el.dataset.mode===mode));
+  renderStatPeriodProfitSection();
+};
+function renderStatPeriodProfitSection(){
+  const el=document.getElementById("statPeriodProfitBody");if(!el)return;
+  const rows=computePeriodProfitability(profitPeriodMode);
+  if(!rows.length){el.innerHTML=empty("📅","기간별 데이터가 없습니다","계약 시작일이 입력된 현장이 있으면 연도별/월별 수익성 추이가 자동 산출됩니다");return;}
+  const maxVal=Math.max(...rows.map(r=>Math.max(r.revenue,r.cost)),1);
+  const totalRevenue=rows.reduce((a,r)=>a+r.revenue,0);
+  const totalCost=rows.reduce((a,r)=>a+r.cost,0);
+  const totalProfit=totalRevenue-totalCost;
+  const tbody=rows.map(r=>`<tr>
+    <td style="font-weight:700;">${profitPeriodLabel(profitPeriodMode,r.key)}</td>
+    <td style="text-align:right;color:var(--violet);">${fmtWon(r.rentalRevenue)}</td>
+    <td style="text-align:right;color:var(--blue);">${fmtWon(r.contractRevenue)}</td>
+    <td style="text-align:right;color:#059669;">${fmtWon(r.asRevenue)}</td>
+    <td style="text-align:right;font-weight:700;color:var(--ink);">${fmtWon(r.revenue)}</td>
+    <td style="text-align:right;color:var(--ink-5);">${fmtWon(r.cost)}</td>
+    <td style="text-align:right;font-weight:700;color:${r.profit>=0?"var(--teal-dk)":"var(--rose)"};">${fmtWon(r.profit)}</td>
+    <td style="text-align:right;">${marginBadge(r.margin)}</td>
+    <td>${miniBar(r.revenue,r.cost,maxVal)}</td>
+  </tr>`).join("");
+  el.innerHTML=`
+    <div class="profit-summary-grid">
+      <div class="profit-summary-card"><div class="profit-summary-label">${profitPeriodMode==="month"?"전체 월":"전체 연도"} 매출 합계</div><div class="profit-summary-val" style="color:var(--blue);">${fmtWon(totalRevenue)}</div></div>
+      <div class="profit-summary-card"><div class="profit-summary-label">${profitPeriodMode==="month"?"전체 월":"전체 연도"} 원가 합계</div><div class="profit-summary-val" style="color:var(--ink-4);">${fmtWon(totalCost)}</div></div>
+      <div class="profit-summary-card"><div class="profit-summary-label">누적 이익</div><div class="profit-summary-val" style="color:${totalProfit>=0?"var(--teal-dk)":"var(--rose)"};">${fmtWon(totalProfit)}</div></div>
+    </div>
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th>${profitPeriodMode==="month"?"월":"연도"}</th><th style="text-align:right;">렌탈 누적매출</th><th style="text-align:right;">판매·기타 매출</th><th style="text-align:right;">AS 매출</th><th style="text-align:right;">총 매출</th><th style="text-align:right;">총 원가</th><th style="text-align:right;">이익</th><th style="text-align:right;">이익률</th><th>매출·원가 비교</th></tr></thead>
+      <tbody>${tbody}</tbody>
+    </table></div>
+    <div class="chart-note">렌탈 매출은 계약 시작월부터 매월 월 이용료가 해당 기간에 누적 반영됩니다. 판매·신규 등 1회성 계약 매출·원가는 계약 시작일이 속한 기간에 전액 반영됩니다. AS 매출은 견적일(청구 시점), AS 원가는 완료일(비용 발생 시점) 기준으로 집계됩니다.</div>`;
 }
 
 /* ② 고객사별 손익 분석 — 매출 대비 AS 비용·순이익 */
@@ -3752,6 +4028,44 @@ window._exportStatisticsExcel=function(){
     ws9["!cols"]=[{wch:14},{wch:8},{wch:16},{wch:16},{wch:16},{wch:12}];
     XLSX.utils.book_append_sheet(wb,ws9,"계약유형별수익성");
 
+    /* ── Sheet 9-1: 렌탈 현장별 누적 매출 상세 ── */
+    const rentalDetail=computeRentalAccrualDetail();
+    const s9b=[
+      ["렌탈 현장별 누적 매출 상세 (월 이용료 × 청구 개월 수)"],
+      [`생성일: ${todayStr}`],
+      [],
+      ["현장명","고객사","월 이용료(원)","계약시작","계약종료","청구 개월 수","누적 매출(원)","보증금(원)"],
+      ...(rentalDetail.length?rentalDetail.map(r=>[r.name,r.client,r.monthly,r.contractStart,r.contractEnd||"(진행중)",r.months,r.accrued,r.deposit]):[["데이터 없음","","","","","","",""]])
+    ];
+    const ws9b=XLSX.utils.aoa_to_sheet(s9b);
+    ws9b["!cols"]=[{wch:20},{wch:16},{wch:14},{wch:12},{wch:12},{wch:12},{wch:16},{wch:14}];
+    XLSX.utils.book_append_sheet(wb,ws9b,"렌탈누적매출상세");
+
+    /* ── Sheet 9-2: 기간별(연도별/월별) 수익성 추이 ── */
+    const yearlyProfit=computePeriodProfitability("year");
+    const s9c=[
+      ["연도별 수익성 추이"],
+      [`생성일: ${todayStr}`],
+      [],
+      ["연도","렌탈 누적매출(원)","판매·기타 매출(원)","AS 매출(원)","총 매출(원)","총 원가(원)","이익(원)","이익률(%)"],
+      ...(yearlyProfit.length?yearlyProfit.map(r=>[r.key,r.rentalRevenue,r.contractRevenue,r.asRevenue,r.revenue,r.cost,r.profit,Number(r.margin)]):[["데이터 없음","","","","","","",""]])
+    ];
+    const ws9c=XLSX.utils.aoa_to_sheet(s9c);
+    ws9c["!cols"]=[{wch:10},{wch:16},{wch:16},{wch:14},{wch:16},{wch:16},{wch:16},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,ws9c,"연도별수익성");
+
+    const monthlyProfit=computePeriodProfitability("month");
+    const s9d=[
+      ["월별 수익성 추이"],
+      [`생성일: ${todayStr}`],
+      [],
+      ["연-월","렌탈 누적매출(원)","판매·기타 매출(원)","AS 매출(원)","총 매출(원)","총 원가(원)","이익(원)","이익률(%)"],
+      ...(monthlyProfit.length?monthlyProfit.map(r=>[r.key,r.rentalRevenue,r.contractRevenue,r.asRevenue,r.revenue,r.cost,r.profit,Number(r.margin)]):[["데이터 없음","","","","","","",""]])
+    ];
+    const ws9d=XLSX.utils.aoa_to_sheet(s9d);
+    ws9d["!cols"]=[{wch:10},{wch:16},{wch:16},{wch:14},{wch:16},{wch:16},{wch:16},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,ws9d,"월별수익성");
+
     /* ── Sheet 10: 고객사별 손익 분석 ── */
     const s10=[
       ["고객사별 손익 분석 (전체 누적)"],
@@ -3912,10 +4226,27 @@ function renderProfitability(){
     </div>
     <div class="card" style="margin-bottom:16px;">
       <div class="card-header">
+        <div class="card-title">📅 기간별 수익성 추이 (연도별 / 월별)</div>
+        <div class="stat-tab-group">
+          <button class="stat-tab profit-period-tab stat-tab-active" data-mode="year" onclick="_setProfitPeriodMode('year')">연도별</button>
+          <button class="stat-tab profit-period-tab" data-mode="month" onclick="_setProfitPeriodMode('month')">월별</button>
+        </div>
+      </div>
+      <div class="card-body" id="statPeriodProfitBody"></div>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header">
         <div class="card-title">📄 계약 유형별 수익성 (판매·렌탈·유지보수)</div>
         <div style="font-size:11.5px;color:var(--ink-5);">전체 누적 · Site Master 기준</div>
       </div>
       <div class="card-body" id="statContractTypeBody"></div>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header">
+        <div class="card-title">🏠 렌탈 현장별 누적 매출 상세</div>
+        <div style="font-size:11.5px;color:var(--ink-5);">월 이용료 × 청구 개월 수</div>
+      </div>
+      <div class="card-body" id="statRentalAccrualBody"></div>
     </div>
     <div class="card" style="margin-bottom:16px;">
       <div class="card-header">
@@ -3935,7 +4266,9 @@ function renderProfitability(){
       <div class="card-header"><div class="card-title">🧾 AS 원가 구조 분석</div><div class="stat-tab-group">${profitTabs}</div></div>
       <div class="card-body" id="statCostStructureBody"></div>
     </div>`;
+  renderStatPeriodProfitSection();
   renderStatContractTypeSection();
+  renderStatRentalAccrualSection();
   renderStatCustomerProfitSection();
   renderStatLifecycleSection();
   renderStatCostStructureSection();
@@ -3945,7 +4278,6 @@ function renderProfitability(){
    WEEKLY REPORT (개인별 주간업무보고)
 ════════════════════════════════════ */
 
-/* 선택된 PM·주차 기준으로 시스템 데이터에서 실적을 자동 집계 */
 /* ── AS이력카드 원인분석·조치사항 자동 반영 헬퍼 ──
    AS 이력카드(작업 상세)의 "원인 분석" 탭(causeType/causeDetail)과
    "완료 처리" 탭(actionType/actionResult) 입력값을 주간업무보고에서
@@ -3970,20 +4302,14 @@ function computeReportStats(pmName,wi){
   const pmTasks=pmName?tasks.filter(t=>(t.pm||"").trim()===pmName||(t.techEngineer||"").trim()===pmName):tasks.slice();
   const inWeekStr=v=>!!v&&v>=wi.startStr&&v<=wi.endStr;
 
-  // 접수: 접수일자(receiptDate, 직접 입력) 기준 — 없을 때만 등록 시각(createdAt)으로 대체
   const received=pmTasks.filter(t=>t.receiptDate?inWeekStr(t.receiptDate):inRange(t.createdAt,start,end));
-  // 완료: 완료일자(completeDate)가 있으면 그 값 기준, 없으면 방문일(visitDate)로 판단,
-  // 둘 다 없을 때만 "완료 처리" 버튼을 누른 시각(completedAt)으로 대체 — 실제 작업일이 아닌 클릭 시각으로
-  // 다른 주의 처리 건이 이번 주에 잘못 집계되는 것을 방지한다.
   const completed=pmTasks.filter(t=>{
     if(t.status!=="완료")return false;
     if(t.completeDate)return inWeekStr(t.completeDate);
     if(t.visitDate)return inWeekStr(t.visitDate);
     return inRange(t.completedAt,start,end);
   });
-  // 방문: 방문 예정/수행일(visitDate) 기준
   const visits=pmTasks.filter(t=>inWeekStr(t.visitDate));
-  // 견적: 견적일자(quoteDate) 기준
   const quoted=pmTasks.filter(t=>t.quoteItems&&t.quoteItems.length>0&&inWeekStr(t.quoteDate));
   const totalHours=completed.reduce((a,b)=>a+(b.processTime||0),0);
   const avgHours=completed.length?(totalHours/completed.length).toFixed(1):"0.0";
@@ -3991,7 +4317,6 @@ function computeReportStats(pmName,wi){
   const issuesThisWeek=pmIssues.filter(i=>inRange(i.createdAt,start,end));
   const issuesClosedThisWeek=pmIssues.filter(i=>i.status==="Closed"&&inRange(i.createdAt,start,end));
 
-  // 이번 주 관련된 전체 활동(접수/방문/완료 중 하나라도 이번 주 실제 업무일에 해당) — 표시용 통합 리스트
   const activityMap=new Map();
   [...received,...completed,...visits].forEach(t=>activityMap.set(t.id,t));
   const activities=Array.from(activityMap.values()).sort((a,b)=>{
@@ -4211,7 +4536,6 @@ window._exportReportExcel=function(){
     ws2["!cols"]=[{wch:12},{wch:26},{wch:26},{wch:26},{wch:26},{wch:26},{wch:28}];
     XLSX.utils.book_append_sheet(wb,ws2,"보고서상세");
 
-    // AS이력카드의 원인분석·조치사항을 담당자별로 자동 반영한 시트
     const asRows=[];
     team.forEach(r=>{
       r.activities.forEach(t=>{
@@ -4245,7 +4569,6 @@ function renderReport(){
   const isCurrentWeek=weekInfo(new Date()).key===wi.key;
   const days=weekdayList(wi);
 
-  // 담당자 본인의 보고서 이력 (최근 8건)
   const myHistory=reportPM?weeklyReports.filter(r=>r.pm===reportPM).slice().sort((a,b)=>(b.weekKey||"").localeCompare(a.weekKey||"")).slice(0,8):[];
   const team=computeTeamWeekly(wi);
 
