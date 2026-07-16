@@ -769,6 +769,7 @@ let site=[],tasks=[],issues=[],inventoryList=[],weeklyReports=[],errorCodes=[];
 let curPage="dashboard";
 let sq={site:"",project:"",issue:"",inventory:"",errorcode:""};
 let projSort={col:"receiptDate",dir:"desc"};
+let siteSort={col:"name",dir:"asc"};
 let invSort={col:"model",dir:"asc"};
 let statPeriod="week";
 let profitPeriodMode="year"; // 수익성 분석: 기간별 추이 보기 단위 ("year" | "month")
@@ -1818,11 +1819,28 @@ window._updateSiteStatus=async(id,status)=>{
   try{await updateDoc(doc(db,COL.site,id),{status});toast(`상태: ${status}`);}
   catch(e){toast("변경 실패","error");}
 };
+window._siteSortBy=col=>{
+  if(siteSort.col===col){siteSort.dir=siteSort.dir==="asc"?"desc":"asc";}
+  else{siteSort.col=col;siteSort.dir="asc";}
+  renderSiteResults();
+};
+const SITE_SORT_NUMERIC=["quantity","contractAmount","contractCost","deposit"];
+function siteSortIcon(col){
+  if(siteSort.col!==col)return`<span style="opacity:.3;font-size:10px;margin-left:3px;">↕</span>`;
+  return siteSort.dir==="asc"?`<span style="color:var(--teal);font-size:10px;margin-left:3px;">↑</span>`:`<span style="color:var(--teal);font-size:10px;margin-left:3px;">↓</span>`;
+}
 function renderSiteResults(){
-  const q=sq.site;const list=site.filter(s=>match(q,[s.name,s.client,s.equipment,s.serial,s.pm,s.contractType]));
+  const q=sq.site;let list=site.filter(s=>match(q,[s.name,s.client,s.equipment,s.serial,s.pm,s.contractType]));
   const ra=document.getElementById("siteRA");const ma=document.getElementById("sm_site");
   if(!ra)return;if(ma)ma.textContent=q?`${list.length}건 검색됨`:"";
   if(!list.length){ra.innerHTML=noResults(q);return;}
+  list=list.slice().sort((a,b)=>{
+    const col=siteSort.col;let va,vb;
+    if(SITE_SORT_NUMERIC.includes(col)){va=Number(a[col])||0;vb=Number(b[col])||0;}
+    else{va=(a[col]||"").toString();vb=(b[col]||"").toString();}
+    const cmp=va<vb?-1:va>vb?1:0;return siteSort.dir==="asc"?cmp:-cmp;
+  });
+  const thSort=(col,label,style="")=>`<th style="cursor:pointer;user-select:none;white-space:nowrap;${style}" onclick="_siteSortBy('${col}')">${label}${siteSortIcon(col)}</th>`;
   const tBody=list.map(s=>`<tr>
     <td style="font-weight:600;">${esc(s.name)}</td><td>${esc(s.client)}</td>
     <td>${esc(s.equipment)||"-"}</td><td>${esc(s.quantity)||"-"}</td>
@@ -1868,10 +1886,10 @@ function renderSiteResults(){
     </div>
   </div>`).join("");
   ra.innerHTML=`<div class="tbl-wrap"><table class="tbl"><thead><tr>
-    <th>현장명</th><th>고객사</th><th>장비</th><th>수량</th><th>시리얼</th><th>계약방식</th>
-    <th style="text-align:right;">계약금액(매출)</th><th style="text-align:right;">원가</th><th style="text-align:right;">보증금</th>
-    <th>계약시작</th><th>계약종료</th><th>유지보수기간</th><th>PM</th>
-    <th>상태</th><th style="color:var(--teal-dk);">AS 구분</th><th>관리</th>
+    ${thSort("name","현장명")}${thSort("client","고객사")}${thSort("equipment","장비")}${thSort("quantity","수량")}<th>시리얼</th>${thSort("contractType","계약방식")}
+    ${thSort("contractAmount","계약금액(매출)","text-align:right;")}${thSort("contractCost","원가","text-align:right;")}${thSort("deposit","보증금","text-align:right;")}
+    ${thSort("contractStart","계약시작")}${thSort("contractEnd","계약종료")}<th>유지보수기간</th>${thSort("pm","PM")}
+    ${thSort("status","상태")}<th style="color:var(--teal-dk);">AS 구분</th><th>관리</th>
   </tr></thead><tbody>${tBody}</tbody></table></div>
   <div class="mc-list">${mCards}</div>`;
 }
