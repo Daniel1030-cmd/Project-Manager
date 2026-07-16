@@ -2131,18 +2131,48 @@ const INVENTORY_FIELDS=[
   {key:"type",label:"타입",type:"select",opts:["디스크","실린더"],req:true,err:"타입을 선택해주세요"},
   {key:"status",label:"현황",type:"select",opts:["대체","데모","렌탈","재고","판매"],req:true,err:"현황을 선택해주세요",pair:true},
   {key:"location",label:"현위치",ph:"현재 위치 직접 입력"},
+  {key:"siteName",label:"배정 현장",type:"select",opts:[],ph:"현장 선택 시 원가가 Site Master에 자동 반영됩니다",pair:true},
+  {key:"cost",label:"원가(원)",type:"number",ph:"예: 3000000",pair:true},
   {key:"condition",label:"상태",type:"select",opts:["정상","수리"]},
   {key:"note",label:"비고",type:"textarea",ph:"비고 사항을 입력하세요"},
 ];
-window._openAddInventory=()=>openModal({title:"재고 등록",fields:INVENTORY_FIELDS,hint:"브랜드(NEO/SPARKOZ)와 시리얼을 반드시 지정해주세요. 등록 이후 시리얼별 사용 이력을 추가로 기록할 수 있습니다.",
-  onSave:async d=>{await addDoc(collection(db,COL.inventory),{...d,usageHistory:[],createdAt:serverTimestamp()});toast("재고가 등록되었습니다","success");}});
+function invFields(){return INVENTORY_FIELDS.map(f=>f.key==="siteName"?{...f,opts:site.map(s=>s.name).filter(Boolean)}:f);}
+/* 재고에 입력된 원가를 배정 현장(siteName)이 지정된 경우 Site Master의 원가(contractCost) 필드에 자동 반영 */
+async function _syncInventoryCostToSite(siteName,cost){
+  if(!siteName||!cost||Number(cost)<=0)return false;
+  const s=site.find(x=>x.name===siteName);
+  if(!s)return false;
+  try{
+    await updateDoc(doc(db,COL.site,s.id),{contractCost:Number(cost)});
+    return true;
+  }catch(e){console.error(e);return false;}
+}
+window._openAddInventory=()=>openModal({title:"재고 등록",fields:invFields(),hint:"브랜드(NEO/SPARKOZ)와 시리얼을 반드시 지정해주세요. 배정 현장과 원가를 함께 입력하면 Site Master의 원가에 자동 반영됩니다.",
+  onSave:async d=>{
+    await addDoc(collection(db,COL.inventory),{...d,usageHistory:[],createdAt:serverTimestamp()});
+    const synced=await _syncInventoryCostToSite(d.siteName,d.cost);
+    toast(synced?`재고가 등록되었습니다 · ${d.siteName} 원가에 자동 반영됨`:"재고가 등록되었습니다","success");
+  }});
 window._openEditInventory=id=>{
   const it=inventoryList.find(x=>x.id===id);if(!it)return;
-  openModal({title:"재고 수정",fields:INVENTORY_FIELDS,values:it,
-    onSave:async d=>{await updateDoc(doc(db,COL.inventory,id),d);toast("수정되었습니다","success");}});
+  openModal({title:"재고 수정",fields:invFields(),values:it,
+    onSave:async d=>{
+      await updateDoc(doc(db,COL.inventory,id),d);
+      const synced=await _syncInventoryCostToSite(d.siteName,d.cost);
+      toast(synced?`수정되었습니다 · ${d.siteName} 원가에 자동 반영됨`:"수정되었습니다","success");
+    }});
 };
 window._updateInvField=async(id,field,value)=>{
-  try{await updateDoc(doc(db,COL.inventory,id),{[field]:value});toast("변경되었습니다","success");}
+  try{
+    await updateDoc(doc(db,COL.inventory,id),{[field]:value});
+    if(field==="cost"||field==="siteName"){
+      const it=inventoryList.find(x=>x.id===id);
+      const siteName=field==="siteName"?value:it?.siteName;
+      const cost=field==="cost"?value:it?.cost;
+      await _syncInventoryCostToSite(siteName,cost);
+    }
+    toast("변경되었습니다","success");
+  }
   catch(e){console.error(e);toast("변경 실패","error");}
 };
 
@@ -2222,19 +2252,21 @@ function invSortIcon(col){
   if(invSort.col!==col)return`<span style="opacity:.3;font-size:10px;margin-left:3px;">↕</span>`;
   return invSort.dir==="asc"?`<span style="color:var(--teal);font-size:10px;margin-left:3px;">↑</span>`:`<span style="color:var(--teal);font-size:10px;margin-left:3px;">↓</span>`;
 }
-const INV_SORT_OPTIONS=[["model","모델"],["brand","브랜드"],["serial","시리얼"],["type","타입"],["status","현황"],["location","현위치"],["condition","상태"]];
+const INV_SORT_OPTIONS=[["model","모델"],["brand","브랜드"],["serial","시리얼"],["type","타입"],["status","현황"],["location","현위치"],["condition","상태"],["siteName","배정현장"],["cost","원가"]];
 window._invSortSelect=col=>{invSort.col=col;renderInventoryResults();};
 window._invSortToggleDir=()=>{invSort.dir=invSort.dir==="asc"?"desc":"asc";renderInventoryResults();};
 
 function renderInventoryResults(){
   const q=sq.inventory;
-  let list=inventoryList.filter(x=>match(q,[x.serial,x.location,x.model,x.type,x.status,x.condition,x.note,x.brand]));
+  let list=inventoryList.filter(x=>match(q,[x.serial,x.location,x.model,x.type,x.status,x.condition,x.note,x.brand,x.siteName]));
   const ra=document.getElementById("invRA");const ma=document.getElementById("sm_inventory");
   if(!ra)return;if(ma)ma.textContent=q?`${list.length}건 검색됨`:"";
   if(!list.length){ra.innerHTML=noResults(q);return;}
 
   list=list.slice().sort((a,b)=>{
-    let va=a[invSort.col]||"",vb=b[invSort.col]||"";
+    let va,vb;
+    if(invSort.col==="cost"){va=Number(a.cost)||0;vb=Number(b.cost)||0;}
+    else{va=a[invSort.col]||"";vb=b[invSort.col]||"";}
     const cmp=va<vb?-1:va>vb?1:0;
     return invSort.dir==="asc"?cmp:-cmp;
   });
@@ -2246,6 +2278,8 @@ function renderInventoryResults(){
     <td>${esc(x.type)||"-"}</td>
     <td>${bInvStatus(x.status)}</td>
     <td>${esc(x.location)||"-"}</td>
+    <td>${esc(x.siteName)||"-"}</td>
+    <td style="text-align:right;font-weight:600;color:var(--ink-3);">${x.cost?Number(x.cost).toLocaleString("ko-KR")+"원":"-"}</td>
     <td>${bInvCondition(x.condition)}</td>
     <td style="max-width:180px;white-space:normal;word-break:keep-all;line-height:1.4;">${esc(x.note)||"-"}</td>
     <td style="text-align:center;">${(x.usageHistory||[]).length}건</td>
@@ -2270,6 +2304,8 @@ function renderInventoryResults(){
         <div class="mc-field"><span class="mc-label">타입</span><span class="mc-val">${esc(x.type)||"-"}</span></div>
         <div class="mc-field"><span class="mc-label">현황</span><span class="mc-val">${bInvStatus(x.status)}</span></div>
         <div class="mc-field"><span class="mc-label">현위치</span><span class="mc-val">${esc(x.location)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">배정 현장</span><span class="mc-val">${esc(x.siteName)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">원가</span><span class="mc-val" style="font-weight:700;color:var(--ink-3);">${x.cost?Number(x.cost).toLocaleString("ko-KR")+"원":"-"}</span></div>
         <div class="mc-field"><span class="mc-label">상태</span><span class="mc-val">${bInvCondition(x.condition)}</span></div>
         <div class="mc-field"><span class="mc-label">비고</span><span class="mc-val">${esc(x.note)||"-"}</span></div>
         <div class="mc-field"><span class="mc-label">사용이력</span><span class="mc-val">${(x.usageHistory||[]).length}건</span></div>
@@ -2291,7 +2327,7 @@ function renderInventoryResults(){
   </div>`;
 
   ra.innerHTML=`<div class="tbl-wrap"><table class="tbl"><thead><tr>
-    ${invTh("brand","브랜드")}${invTh("model","모델")}${invTh("serial","시리얼")}${invTh("type","타입")}${invTh("status","현황")}${invTh("location","현위치")}${invTh("condition","상태")}<th>비고</th><th>이력</th><th>관리</th>
+    ${invTh("brand","브랜드")}${invTh("model","모델")}${invTh("serial","시리얼")}${invTh("type","타입")}${invTh("status","현황")}${invTh("location","현위치")}${invTh("siteName","배정현장")}${invTh("cost","원가")}${invTh("condition","상태")}<th>비고</th><th>이력</th><th>관리</th>
   </tr></thead><tbody>${tBody}</tbody></table></div>
   ${invMobileSort}
   <div class="mc-list">${mCards}</div>`;
@@ -2338,7 +2374,7 @@ function renderInventory(){
     ${!inventoryList.length?`<div class="card"><div class="card-body">${empty("📦","등록된 재고가 없습니다","+ 재고 등록 버튼으로 추가해보세요")}</div></div>`:`
     <div class="card">
       <div class="card-header"><div class="card-title">재고 목록</div></div>
-      <div class="card-body">${searchBox("inventory","브랜드, 모델, 시리얼, 위치, 구분, 타입, 비고로 검색")}<div id="invRA"></div></div>
+      <div class="card-body">${searchBox("inventory","브랜드, 모델, 시리얼, 위치, 배정현장, 구분, 타입, 비고로 검색")}<div id="invRA"></div></div>
     </div>`}`;
   renderInventoryResults();
 }
