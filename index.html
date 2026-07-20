@@ -2032,7 +2032,7 @@ const SITE_FIELDS=[
     return(monthly*months).toLocaleString("ko-KR")+"원 ("+monthly.toLocaleString("ko-KR")+"원 × "+months+"개월)";
   }},
   {key:"contractCost",label:"원가 · 매입/설치비(원)",readOnly:true,hint:"Inventory에 이 현장으로 배정된 재고들의 원가를 자동으로 합산한 금액입니다",pair:true,compute:vals=>{const c=_siteInventoryAgg(vals.name).totalCost;return c>0?c.toLocaleString("ko-KR"):"0";}},
-  {key:"profitMargin",label:"이익율(%)",readOnly:true,hint:"매출(렌탈은 계약금액×유지보수기간으로 산출한 금액, 그 외는 계약금액) 대비 원가 기준으로 자동 계산됩니다",compute:vals=>{
+  {key:"profitMargin",label:"이익율(%)",readOnly:true,hint:"매출([렌탈: 계약금액×유지보수기간으로 산출한 금액 / 그 외: 계약금액] + 보증금) 대비 원가 기준으로 자동 계산됩니다. 보증금이 있으면 매출에 포함됩니다",compute:vals=>{
     let revenue;
     if(vals.contractType==="렌탈"){
       const monthly=Number(vals.contractAmount)||0;
@@ -2041,14 +2041,15 @@ const SITE_FIELDS=[
     }else{
       revenue=Number(vals.contractAmount)||0;
     }
-    if(revenue<=0)return"계약금액(렌탈은 유지보수기간도) 입력 필요";
+    revenue+=Number(vals.deposit)||0;
+    if(revenue<=0)return"계약금액(렌탈은 유지보수기간도) 또는 보증금 입력 필요";
     const cost=_siteInventoryAgg(vals.name).totalCost;
     return(((revenue-cost)/revenue)*100).toFixed(1)+"%";
   }},
   {key:"contractStart",label:"계약 시작",type:"date",pair:true},
   {key:"contractEnd",label:"계약 종료",type:"date",pair:true},
   {key:"maintenancePeriod",label:"유지보수 기간",ph:"예: 12개월, 2년, 1년6개월",pair:true},
-  {key:"deposit",label:"보증금(원)",type:"number",ph:"예: 10000000"},
+  {key:"deposit",label:"보증금(원)",type:"number",ph:"예: 10000000",hint:"입력하면 위 이익율 계산 시 매출에 포함됩니다"},
   {key:"pm",label:"담당 PM",req:true},
 ];
 
@@ -3756,8 +3757,8 @@ function rentalContractTotal(s){
 /* 이익율 계산에 사용할 매출 — 렌탈은 rentalContractTotal()(계약금액×유지보수기간)을,
    그 외 계약방식은 계약금액을 그대로 매출로 사용한다. */
 function _siteMarginRevenue(s){
-  if(s.contractType==="렌탈")return rentalContractTotal(s);
-  return Number(s.contractAmount)||0;
+  const base=s.contractType==="렌탈"?rentalContractTotal(s):(Number(s.contractAmount)||0);
+  return base+(Number(s.deposit)||0); // 보증금이 있으면 이익율 계산 시 매출에 포함
 }
 /* 계약금액(매출) 표시 셀 — 렌탈은 입력한 월 이용료 옆에 "산출 금액"(월 이용료 ×
    유지보수기간)을 함께 표시한다. 유지보수 기간이 없으면 산출 금액은 표시하지 않는다. */
@@ -3779,11 +3780,12 @@ function siteAccruedRevenue(s){
   if(s.contractType==="렌탈")return amt*rentalMonthsAccrued(s);
   return amt;
 }
-/* 현장 이익율(%) — (매출-원가)/매출×100. 렌탈은 계약금액(월 이용료) × 유지보수기간으로
-   산출한 "렌탈 계약 총액"을 매출로 사용해 자동 계산되고, 그 외 계약방식은 계약금액을
-   매출로 사용한다. 원가는 Inventory 연동 원가(_siteDisplayCost)를 사용한다.
-   매출이 없으면(계약금액 미입력, 렌탈인데 유지보수기간 미입력 등) 계산할 수 없으므로
-   null을 반환한다. */
+/* 현장 이익율(%) — (매출-원가)/매출×100. 매출은 [렌탈: 계약금액(월 이용료)×유지보수기간으로
+   산출한 "렌탈 계약 총액", 그 외: 계약금액] + 보증금(deposit, 있는 경우)으로 계산한다.
+   보증금은 계약 종료 시 반환되는 예치금이지만, 계약 기간 동안 실제로 입금되어 자금으로
+   운용되는 금액이므로 이익율 산정 시 매출에 포함한다. 원가는 Inventory 연동 원가
+   (_siteDisplayCost)를 사용한다. 매출이 0이면(계약금액·보증금 모두 미입력, 렌탈인데
+   유지보수기간 미입력 등) 계산할 수 없으므로 null을 반환한다. */
 function _siteMargin(s){
   const revenue=_siteMarginRevenue(s);
   if(revenue<=0)return null;
