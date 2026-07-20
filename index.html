@@ -964,15 +964,22 @@ function fmtDatetime(v){
   return d.toLocaleDateString("ko-KR",{year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"});
 }
 
+/* "12개월", "2년", "1년6개월", "18" 등 자유 형식의 유지보수 기간 문자열에서
+   총 개월 수(소수 가능)를 파싱한다. 파싱할 숫자가 없으면 0을 반환한다. */
+function parseMonthsFromPeriod(mp){
+  if(!mp)return 0;
+  const s=String(mp).trim();
+  let totalMonths=0;
+  const yearMatch=s.match(/(\d+\.?\d*)\s*년/);const monthMatch=s.match(/(\d+\.?\d*)\s*개?월/);
+  if(yearMatch)totalMonths+=parseFloat(yearMatch[1])*12;
+  if(monthMatch)totalMonths+=parseFloat(monthMatch[1]);
+  if(!yearMatch&&!monthMatch){const n=parseFloat(s);if(!isNaN(n))totalMonths=n;}
+  return totalMonths>0?totalMonths:0;
+}
 function calcAS(contractStart,maintenancePeriod){
   if(!contractStart||!maintenancePeriod)return{type:"알수없음",expireDate:null,daysLeft:null};
   const start=new Date(contractStart);if(isNaN(start))return{type:"알수없음",expireDate:null,daysLeft:null};
-  let totalMonths=0;
-  const mp=String(maintenancePeriod).trim();
-  const yearMatch=mp.match(/(\d+\.?\d*)\s*년/);const monthMatch=mp.match(/(\d+\.?\d*)\s*개?월/);
-  if(yearMatch)totalMonths+=parseFloat(yearMatch[1])*12;
-  if(monthMatch)totalMonths+=parseFloat(monthMatch[1]);
-  if(!yearMatch&&!monthMatch){const n=parseFloat(mp);if(!isNaN(n))totalMonths=n;}
+  const totalMonths=parseMonthsFromPeriod(maintenancePeriod);
   if(totalMonths<=0)return{type:"알수없음",expireDate:null,daysLeft:null};
   const expire=new Date(start);expire.setMonth(expire.getMonth()+Math.floor(totalMonths));
   const remainDays=Math.ceil((expire-new Date())/86400000);
@@ -2016,7 +2023,28 @@ const SITE_FIELDS=[
   {key:"serial",label:"시리얼",readOnly:true,hint:"Inventory에 이 현장으로 배정된 재고의 시리얼입니다 (자동 연동, 여러 대인 경우 콤마로 합산 표시)",pair:true,compute:vals=>_siteInventoryAgg(vals.name).serials.join(", ")||"배정된 재고 없음"},
   {key:"contractType",label:"계약 방식",type:"select",opts:["신규","유지보수","연장","렌탈","판매"],pair:true},
   {key:"contractAmount",label:"계약 금액 · 매출(원)",type:"number",ph:"예: 15000000",pair:true},
+  {key:"rentalContractTotal",label:"산출 금액(렌탈, 원)",readOnly:true,hint:"렌탈인 경우 계약금액(월 이용료) × 유지보수기간(개월수)으로 자동 계산됩니다. 이 화면 하단의 '유지보수 기간'을 입력해야 계산됩니다",compute:vals=>{
+    if(vals.contractType!=="렌탈")return"해당 없음(렌탈 계약만 계산)";
+    const monthly=Number(vals.contractAmount)||0;
+    const months=parseMonthsFromPeriod(vals.maintenancePeriod);
+    if(monthly<=0)return"계약금액 입력 필요";
+    if(months<=0)return"유지보수 기간 입력 필요";
+    return(monthly*months).toLocaleString("ko-KR")+"원 ("+monthly.toLocaleString("ko-KR")+"원 × "+months+"개월)";
+  }},
   {key:"contractCost",label:"원가 · 매입/설치비(원)",readOnly:true,hint:"Inventory에 이 현장으로 배정된 재고들의 원가를 자동으로 합산한 금액입니다",pair:true,compute:vals=>{const c=_siteInventoryAgg(vals.name).totalCost;return c>0?c.toLocaleString("ko-KR"):"0";}},
+  {key:"profitMargin",label:"이익율(%)",readOnly:true,hint:"매출(렌탈은 계약금액×유지보수기간으로 산출한 금액, 그 외는 계약금액) 대비 원가 기준으로 자동 계산됩니다",compute:vals=>{
+    let revenue;
+    if(vals.contractType==="렌탈"){
+      const monthly=Number(vals.contractAmount)||0;
+      const months=parseMonthsFromPeriod(vals.maintenancePeriod);
+      revenue=monthly*months;
+    }else{
+      revenue=Number(vals.contractAmount)||0;
+    }
+    if(revenue<=0)return"계약금액(렌탈은 유지보수기간도) 입력 필요";
+    const cost=_siteInventoryAgg(vals.name).totalCost;
+    return(((revenue-cost)/revenue)*100).toFixed(1)+"%";
+  }},
   {key:"contractStart",label:"계약 시작",type:"date",pair:true},
   {key:"contractEnd",label:"계약 종료",type:"date",pair:true},
   {key:"maintenancePeriod",label:"유지보수 기간",ph:"예: 12개월, 2년, 1년6개월",pair:true},
@@ -2127,7 +2155,7 @@ window._applyContractAmountImport=async function(){
   }catch(e){console.error(e);toast("반영 중 오류가 발생했습니다","error");}
 };
 
-window._openAddSite=()=>openModal({title:"신규 현장 등록",fields:SITE_FIELDS,hint:"계약 시작일과 유지보수 기간 입력 시 AS 구분이 자동 산출됩니다. 시리얼·원가는 Inventory에서 이 현장으로 배정한 재고를 기준으로 자동 합산되며, 현장을 먼저 등록한 뒤 Inventory에서 재고를 배정해주세요.",
+window._openAddSite=()=>openModal({title:"신규 현장 등록",fields:SITE_FIELDS,hint:"계약 시작일과 유지보수 기간 입력 시 AS 구분이 자동 산출됩니다. 시리얼·원가는 Inventory에서 이 현장으로 배정한 재고를 기준으로 자동 합산되며, 현장을 먼저 등록한 뒤 Inventory에서 재고를 배정해주세요. 계약방식이 렌탈인 경우 계약금액(월 이용료) × 유지보수 기간(개월수)으로 산출 금액이 자동 계산되고, 이 산출 금액을 기준으로 이익율이 자동 계산됩니다.",
   onSave:async d=>{await addDoc(collection(db,COL.site),{...d,status:"준비",createdAt:serverTimestamp()});toast("현장이 등록되었습니다","success");}});
 window._openEditSite=id=>{
   const s=site.find(x=>x.id===id);if(!s)return;
@@ -2156,6 +2184,7 @@ function renderSiteResults(){
   list=list.slice().sort((a,b)=>{
     const col=siteSort.col;let va,vb;
     if(col==="contractCost"){va=_siteDisplayCost(a);vb=_siteDisplayCost(b);}
+    else if(col==="profitMargin"){va=_siteMargin(a);va=va===null?-Infinity:va;vb=_siteMargin(b);vb=vb===null?-Infinity:vb;}
     else if(SITE_SORT_NUMERIC.includes(col)){va=Number(a[col])||0;vb=Number(b[col])||0;}
     else{va=(a[col]||"").toString();vb=(b[col]||"").toString();}
     const cmp=va<vb?-1:va>vb?1:0;return siteSort.dir==="asc"?cmp:-cmp;
@@ -2165,8 +2194,9 @@ function renderSiteResults(){
     <td style="font-weight:600;">${esc(s.name)}</td><td>${esc(s.client)}</td>
     <td>${esc(s.equipment)||"-"}</td><td>${esc(s.quantity)||"-"}</td>
     <td>${bContract(s.contractType)}</td>
-    <td style="text-align:right;">${s.contractAmount?Number(s.contractAmount).toLocaleString("ko-KR")+"원":"-"}</td>
+    <td style="text-align:right;">${_siteContractAmountCell(s)}</td>
     <td style="text-align:right;color:var(--ink-5);">${_siteCostCell(s)}</td>
+    <td style="text-align:right;">${_siteMarginCell(s)}</td>
     <td style="text-align:right;color:var(--violet);">${s.deposit?Number(s.deposit).toLocaleString("ko-KR")+"원":"-"}</td>
     <td>${esc(s.contractStart)||"-"}</td>
     <td>${esc(s.contractEnd)||"-"}</td>
@@ -2189,8 +2219,9 @@ function renderSiteResults(){
       <hr class="mc-divider"/>
       <div class="mc-fields">
         <div class="mc-field"><span class="mc-label">장비</span><span class="mc-val">${esc(s.equipment)||"-"}</span></div>
-        <div class="mc-field"><span class="mc-label">계약금액(매출)</span><span class="mc-val">${s.contractAmount?Number(s.contractAmount).toLocaleString("ko-KR")+"원":"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">계약금액(매출)</span><span class="mc-val">${_siteContractAmountCell(s)}</span></div>
         <div class="mc-field"><span class="mc-label">원가</span><span class="mc-val">${_siteCostCell(s)}</span></div>
+        <div class="mc-field"><span class="mc-label">이익율</span><span class="mc-val">${_siteMarginCell(s)}</span></div>
         <div class="mc-field"><span class="mc-label">보증금</span><span class="mc-val">${s.deposit?Number(s.deposit).toLocaleString("ko-KR")+"원":"-"}</span></div>
         <div class="mc-field"><span class="mc-label">계약기간</span><span class="mc-val">${esc(s.contractStart)||"-"} ~ ${esc(s.contractEnd)||"-"}</span></div>
         <div class="mc-field"><span class="mc-label">유지보수</span><span class="mc-val">${esc(s.maintenancePeriod)||"-"}${asExpireText(s.contractStart,s.maintenancePeriod)}</span></div>
@@ -2205,7 +2236,7 @@ function renderSiteResults(){
   </div>`).join("");
   ra.innerHTML=`<div class="tbl-wrap"><table class="tbl"><thead><tr>
     ${thSort("name","현장명")}${thSort("client","고객사")}${thSort("equipment","장비")}${thSort("quantity","수량")}${thSort("contractType","계약방식")}
-    ${thSort("contractAmount","계약금액(매출)","text-align:right;")}${thSort("contractCost","원가","text-align:right;")}${thSort("deposit","보증금","text-align:right;")}
+    ${thSort("contractAmount","계약금액(매출)","text-align:right;")}${thSort("contractCost","원가","text-align:right;")}${thSort("profitMargin","이익율","text-align:right;")}${thSort("deposit","보증금","text-align:right;")}
     ${thSort("contractStart","계약시작")}${thSort("contractEnd","계약종료")}<th>유지보수기간</th>${thSort("pm","PM")}
     ${thSort("status","상태")}<th style="color:var(--teal-dk);">AS 구분</th><th>관리</th>
   </tr></thead><tbody>${tBody}</tbody></table></div>
@@ -3711,11 +3742,60 @@ function rentalMonthsAccrued(s){
   if(cutoff.getDate()>=start.getDate())months+=1; // 이번 결제 주기(청구일)가 이미 도래한 경우 1개월 추가 산입
   return Math.max(1,months);
 }
-/* 현장의 계약 누적 매출 — 렌탈은 (월 이용료 × 누적 청구 개월 수), 그 외 계약은 계약금액을 그대로 1회성 매출로 산정 */
+/* 렌탈 계약금액(산출 금액) — 월 이용료(계약금액) × 유지보수 기간(개월수)로
+   계산하는 "렌탈 계약 총액"이다. 실제 경과 개월 수(rentalMonthsAccrued, 지금까지
+   청구된 누적 매출 추적용)와는 별개로, 이익율 계산 및 "계약금액(산출 금액)" 표시에
+   사용하는 계약 전체 기간 기준 총액이다. 유지보수 기간이 입력되지 않았거나
+   파싱할 수 없는 형식이면(예: 빈 값) 계산할 수 없으므로 0을 반환한다. */
+function rentalContractTotal(s){
+  const monthly=Number(s.contractAmount)||0;
+  const months=parseMonthsFromPeriod(s.maintenancePeriod);
+  if(monthly<=0||months<=0)return 0;
+  return monthly*months;
+}
+/* 이익율 계산에 사용할 매출 — 렌탈은 rentalContractTotal()(계약금액×유지보수기간)을,
+   그 외 계약방식은 계약금액을 그대로 매출로 사용한다. */
+function _siteMarginRevenue(s){
+  if(s.contractType==="렌탈")return rentalContractTotal(s);
+  return Number(s.contractAmount)||0;
+}
+/* 계약금액(매출) 표시 셀 — 렌탈은 입력한 월 이용료 옆에 "산출 금액"(월 이용료 ×
+   유지보수기간)을 함께 표시한다. 유지보수 기간이 없으면 산출 금액은 표시하지 않는다. */
+function _siteContractAmountCell(s){
+  const amt=Number(s.contractAmount)||0;
+  const amtText=amt?amt.toLocaleString("ko-KR")+"원":"-";
+  if(s.contractType!=="렌탈"||!amt)return amtText;
+  const total=rentalContractTotal(s);
+  if(!total)return amtText;
+  return`${amtText}<div style="font-size:11px;font-weight:400;color:var(--ink-5);">(산출 금액 ${total.toLocaleString("ko-KR")}원)</div>`;
+}
+/* 현장의 계약 누적 매출 — 렌탈은 (월 이용료 × 누적 청구 개월 수), 그 외 계약은 계약금액을 그대로 1회성 매출로 산정
+   ※ 이 값은 "렌탈 현장별 누적 매출 상세"·"계약 유형별 수익성"·"고객사별 손익 분석"처럼
+     지금까지 실제로 청구된 누적 매출을 추적하는 화면에 사용된다. Site Master의
+     "이익율"은 계약 전체 기간 기준 총액(rentalContractTotal)을 사용하므로 이 값과는
+     다르다(용도가 다름: 누적 실적 vs 계약 전체 기준 수익성). */
 function siteAccruedRevenue(s){
   const amt=Number(s.contractAmount)||0;
   if(s.contractType==="렌탈")return amt*rentalMonthsAccrued(s);
   return amt;
+}
+/* 현장 이익율(%) — (매출-원가)/매출×100. 렌탈은 계약금액(월 이용료) × 유지보수기간으로
+   산출한 "렌탈 계약 총액"을 매출로 사용해 자동 계산되고, 그 외 계약방식은 계약금액을
+   매출로 사용한다. 원가는 Inventory 연동 원가(_siteDisplayCost)를 사용한다.
+   매출이 없으면(계약금액 미입력, 렌탈인데 유지보수기간 미입력 등) 계산할 수 없으므로
+   null을 반환한다. */
+function _siteMargin(s){
+  const revenue=_siteMarginRevenue(s);
+  if(revenue<=0)return null;
+  const cost=_siteDisplayCost(s);
+  return((revenue-cost)/revenue)*100;
+}
+/* 이익율 표시 셀 — 흑자(양수)는 청록, 적자(음수)는 로즈 색상으로 강조 */
+function _siteMarginCell(s){
+  const m=_siteMargin(s);
+  if(m===null)return`<span style="color:var(--ink-6);">-</span>`;
+  const color=m>=0?"var(--teal-dk)":"var(--rose)";
+  return`<span style="font-weight:700;color:${color};">${m.toFixed(1)}%</span>`;
 }
 
 /* 1) 계약 유형별 수익성 — 판매·렌탈·유지보수·신규·연장 */
