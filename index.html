@@ -654,6 +654,16 @@ input,select,textarea{font-family:inherit;}
 .cred-warn{background:var(--amber-lt);border:1px solid rgba(217,119,6,.2);color:#92400e;border-radius:var(--r);padding:10px 14px;font-size:12px;line-height:1.6;display:flex;gap:8px;align-items:flex-start;margin-bottom:14px;}
 .cred-warn .ic{flex-shrink:0;margin-top:1px;color:var(--amber);}
 
+/* ════ 매뉴얼 열람 전용 뷰어(다운로드 불가, 시스템 내 열람만 지원) ════ */
+.manual-view-overlay{display:none;position:fixed;inset:0;z-index:9999;background:#525659;}
+.manual-view-overlay.active{display:flex;flex-direction:column;}
+.manual-view-bar{flex-shrink:0;background:#fff;border-bottom:1px solid var(--line);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:var(--sh-sm);}
+.manual-view-bar-title{font-size:14px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px;}
+.manual-view-content{flex:1;min-height:0;}
+.manual-view-content iframe{width:100%;height:100%;border:none;display:block;}
+.manual-view-unsupported{height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#f1f5f9;font-size:13.5px;text-align:center;padding:24px;line-height:1.6;}
+.manual-view-unsupported .ic{width:38px;height:38px;opacity:.7;}
+
 /* ════ MOBILE ════ */
 @media(max-width:768px){
   :root{--sidebar-w:0px;}
@@ -754,9 +764,39 @@ input,select,textarea{font-family:inherit;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
 ::-webkit-scrollbar-thumb:hover{background:var(--ink-5);}
+
+/* ===== 보안 강화: 우클릭/선택/드래그 방지 ===== */
+html,body{
+  -webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;
+  -webkit-touch-callout:none;
+}
+input,textarea,[contenteditable="true"]{
+  -webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text;
+}
+img,svg{-webkit-user-drag:none;user-drag:none;pointer-events:auto;}
+
+/* 창 비활성/캡처 감지 시 화면 블러 오버레이 */
+#secBlurOverlay{
+  position:fixed;inset:0;z-index:99999;display:none;
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  background:rgba(15,23,42,.55);
+  align-items:center;justify-content:center;
+  color:#fff;font-size:14px;font-weight:600;text-align:center;
+  flex-direction:column;gap:10px;
+}
+#secBlurOverlay.show{display:flex;}
+#secWarnToast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--ink,#0f172a);color:#fff;padding:10px 18px;border-radius:10px;
+  font-size:13px;font-weight:600;z-index:100000;opacity:0;pointer-events:none;
+  transition:opacity .2s ease,transform .2s ease;box-shadow:0 8px 24px rgba(0,0,0,.25);
+}
+#secWarnToast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 </head>
 <body>
+<div id="secBlurOverlay"><div>🔒 보안을 위해 화면이 보호되었습니다</div><div style="font-size:12px;font-weight:400;opacity:.8;">창을 다시 활성화하면 자동으로 해제됩니다</div></div>
+<div id="secWarnToast"></div>
 <svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true">
 <defs>
 <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11 12 4l8 7"/><path d="M6 10v9a1 1 0 0 0 1 1h4v-6h2v6h4a1 1 0 0 0 1-1v-9"/></symbol>
@@ -896,6 +936,13 @@ input,select,textarea{font-family:inherit;}
 </div>
 
 <div id="quotePrintArea"></div>
+<div class="manual-view-overlay" id="manualViewOverlay">
+  <div class="manual-view-bar">
+    <div class="manual-view-bar-title"><svg class='ic'><use href='#i-book'/></svg> <span id="manualViewTitle">매뉴얼 열람</span></div>
+    <button class="btn btn-secondary btn-sm" onclick="window._closeManualView()"><svg class='ic'><use href='#i-x'/></svg> 닫기</button>
+  </div>
+  <div class="manual-view-content" id="manualViewContent" oncontextmenu="return false"></div>
+</div>
 <div class="toast" id="toast"></div>
 
 <!-- SheetJS: 통계 엑셀(.xlsx) 내보내기용 -->
@@ -1241,7 +1288,7 @@ function fld(f,vals){
     const meta=_manualFileMeta(existing);
     return`<div class="field file-upload-field">
       <label for="f_${f.key}_file">${esc(f.label)}${f.req?` <span style='color:var(--rose)'>*</span>`:""}</label>
-      <input type="file" id="f_${f.key}_file" accept=".pdf,.doc,.docx,.hwp,.hwpx" onchange="_handleManualUpload(this,'${f.key}')"/>
+      <input type="file" id="f_${f.key}_file" accept=".pdf" onchange="_handleManualUpload(this,'${f.key}')"/>
       <input type="hidden" id="f_${f.key}" name="${f.key}" value="${esc(existing)}"/>
       <div class="file-preview" id="f_${f.key}_preview">${meta?`<div class="file-preview-inner file-preview-doc"><svg class='ic'><use href='#i-file'/></svg><span class="file-doc-name">등록된 ${meta.ext.toUpperCase()} 파일</span><button type="button" class="file-remove" onclick="_removeManualUpload('${f.key}')">✕</button></div>`:""}</div>
       ${f.hint?`<div class="field-hint">${f.hint}</div>`:""}
@@ -1310,7 +1357,7 @@ function _manualFileMeta(dataUrl){
 window._handleManualUpload=(input,key)=>{
   const file=input.files&&input.files[0];if(!file)return;
   const ext="."+(file.name.split(".").pop()||"").toLowerCase();
-  if(![".pdf",".doc",".docx",".hwp",".hwpx"].includes(ext)){toast("PDF, DOC, DOCX, HWP 파일만 업로드 가능합니다","error");input.value="";return;}
+  if(ext!==".pdf"||file.type&&file.type!=="application/pdf"){toast("PDF 파일만 업로드 가능합니다 (열람 전용 뷰어는 PDF만 지원합니다)","error");input.value="";return;}
   if(file.size>800*1024){toast("파일 용량은 800KB 이하로 업로드해주세요. 용량이 큰 파일은 외부 링크(URL)로 등록해주세요","error");input.value="";return;}
   const reader=new FileReader();
   reader.onload=e=>{
@@ -3353,8 +3400,8 @@ const MANUAL_FIELDS=[
   {key:"brand",label:"브랜드",type:"select",opts:SUPPORT_BRANDS,req:true,err:"브랜드를 선택해주세요",pair:true},
   {key:"category",label:"구분",type:"select",opts:MANUAL_CATEGORIES,pair:true},
   {key:"title",label:"매뉴얼명",req:true,err:"매뉴얼명을 입력해주세요",ph:"예: NEO-100 사용자 매뉴얼 v2.1"},
-  {key:"fileData",label:"파일 업로드",type:"filedoc",hint:"PDF/DOC/DOCX/HWP, 800KB 이하만 업로드 가능합니다. 용량이 크면 아래 외부 링크를 이용해주세요."},
-  {key:"fileUrl",label:"외부 링크(URL)",ph:"https://... (대용량 파일은 구글드라이브·사내 NAS 링크 권장)"},
+  {key:"fileData",label:"파일 업로드",type:"filedoc",hint:"PDF 파일만 업로드 가능합니다 (800KB 이하). 다운로드는 지원하지 않으며 시스템 내에서 열람만 가능합니다."},
+  {key:"fileUrl",label:"외부 링크(URL)",ph:"https://... (PDF가 아니거나 용량이 큰 문서는 구글드라이브·사내 NAS 링크로 등록)"},
   {key:"note",label:"비고",type:"textarea",ph:"버전, 개정일 등 참고사항"},
 ];
 
@@ -3375,7 +3422,7 @@ window._deleteSupportSite=async id=>{
 
 /* ── 매뉴얼 CRUD ── */
 window._openAddManual=()=>openModal({title:"매뉴얼 등록",fields:MANUAL_FIELDS,
-  hint:"브랜드별 매뉴얼을 등록해두면 기술지원 메뉴에서 바로 다운로드하거나 외부 링크로 열람할 수 있습니다.",
+  hint:"브랜드별 매뉴얼을 등록해두면 기술지원 메뉴에서 바로 열람하거나 외부 링크로 확인할 수 있습니다. (파일은 다운로드되지 않고 시스템 내에서만 열람됩니다)",
   onSave:async d=>{await addDoc(collection(db,COL.manuals),{...d,createdAt:serverTimestamp()});toast("매뉴얼이 등록되었습니다","success");}});
 window._openEditManual=id=>{
   const m=manuals.find(x=>x.id===id);if(!m)return;
@@ -3387,6 +3434,27 @@ window._deleteManual=async id=>{
   try{await deleteDoc(doc(db,COL.manuals,id));toast("삭제되었습니다","success");}
   catch(e){console.error(e);toast("삭제 실패","error");}
 };
+
+/* 매뉴얼 열람 전용 뷰어 — 다운로드 링크를 제공하지 않고 내장 뷰어로만 PDF를 표시합니다 */
+window._viewManualFile=id=>{
+  const m=manuals.find(x=>x.id===id);if(!m)return;
+  const meta=_manualFileMeta(m.fileData);
+  const overlay=document.getElementById("manualViewOverlay");
+  const content=document.getElementById("manualViewContent");
+  const titleEl=document.getElementById("manualViewTitle");
+  if(titleEl)titleEl.textContent=m.title||"매뉴얼 열람";
+  if(meta&&meta.mime==="application/pdf"){
+    content.innerHTML=`<iframe src="${m.fileData}#toolbar=0&navpanes=0&scrollbar=1" title="${esc(m.title||"매뉴얼")}"></iframe>`;
+  }else{
+    content.innerHTML=`<div class="manual-view-unsupported"><svg class='ic'><use href='#i-file'/></svg><div>이 파일 형식은 시스템 내에서 바로 열람할 수 없습니다.<br/>담당자에게 문의해주세요.</div></div>`;
+  }
+  overlay.classList.add("active");
+};
+window._closeManualView=()=>{
+  document.getElementById("manualViewOverlay").classList.remove("active");
+  document.getElementById("manualViewContent").innerHTML="";
+};
+
 window._setSuppBrandFilter=b=>{
   suppBrandFilter=b;
   document.querySelectorAll(".supp-brand-tab").forEach(el=>el.classList.toggle("stat-tab-active",el.dataset.brand===b));
@@ -3452,9 +3520,9 @@ function renderManualResults(){
 
   const actionsOf=m=>{
     const fm=_manualFileMeta(m.fileData);
-    const dl=fm?`<a class="btn btn-primary btn-sm" href="${m.fileData}" download="${esc(m.title||"manual")}.${fm.ext}"><svg class='ic'><use href='#i-download'/></svg> 다운로드</a>`:"";
+    const view=fm?`<button type="button" class="btn btn-primary btn-sm" onclick="_viewManualFile('${m.id}')"><svg class='ic'><use href='#i-eye'/></svg> 열람</button>`:"";
     const link=m.fileUrl?`<a class="btn btn-secondary btn-sm" href="${esc(m.fileUrl)}" target="_blank" rel="noopener noreferrer"><svg class='ic'><use href='#i-link'/></svg> 링크 열기</a>`:"";
-    return dl+link;
+    return view+link;
   };
 
   const tBody=list.map(m=>`<tr>
@@ -3635,7 +3703,7 @@ function renderSupport(){
     <div class="card">
       <div class="card-body" style="font-size:12.5px;color:var(--ink-4);display:flex;align-items:center;gap:8px;">
         <span style="font-size:16px;"><svg class='ic'><use href='#i-bulb'/></svg></span>
-        <span>매뉴얼 파일 업로드는 <strong>800KB 이하</strong>의 PDF/DOC/DOCX/HWP만 지원합니다. 용량이 큰 매뉴얼은 구글드라이브 등에 올린 뒤 <strong>외부 링크(URL)</strong>로 등록해주세요.</span>
+        <span>매뉴얼은 <strong>다운로드 없이 시스템 내 열람만</strong> 지원합니다. 파일 업로드는 <strong>800KB 이하의 PDF</strong>만 가능하며, PDF가 아니거나 용량이 큰 문서는 구글드라이브 등에 올린 뒤 <strong>외부 링크(URL)</strong>로 등록해주세요.</span>
       </div>
     </div>`;
   renderSupportSiteResults();
@@ -6914,6 +6982,118 @@ document.querySelectorAll(".nav-item,.m-tab").forEach(el=>{
 });
 
 render("dashboard");
+</script>
+
+<script>
+(function(){
+  "use strict";
+
+  function toast(msg){
+    const t=document.getElementById("secWarnToast");
+    if(!t)return;
+    t.textContent=msg;
+    t.classList.add("show");
+    clearTimeout(toast._tm);
+    toast._tm=setTimeout(()=>t.classList.remove("show"),1800);
+  }
+
+  // 1) 우클릭(컨텍스트 메뉴) 방지
+  document.addEventListener("contextmenu",function(e){
+    e.preventDefault();
+    toast("우클릭이 비활성화되어 있습니다");
+    return false;
+  },false);
+
+  // 2) 드래그 방지 (이미지/텍스트 끌어서 복사 방지)
+  document.addEventListener("dragstart",function(e){e.preventDefault();return false;},false);
+
+  // 3) 복사/잘라내기 방지 (입력 필드는 예외)
+  ["copy","cut"].forEach(function(evt){
+    document.addEventListener(evt,function(e){
+      const tag=(e.target&&e.target.tagName)||"";
+      if(tag==="INPUT"||tag==="TEXTAREA"||(e.target&&e.target.isContentEditable))return;
+      e.preventDefault();
+      toast("복사가 제한되어 있습니다");
+    },false);
+  });
+
+  // 4) 주요 단축키 차단: F12, Ctrl+Shift+I/J/C, Ctrl+U, Ctrl+S, Ctrl+P, PrintScreen
+  document.addEventListener("keydown",function(e){
+    const k=e.key;
+    const ctrl=e.ctrlKey||e.metaKey;
+
+    // 개발자도구 관련
+    if(k==="F12"){e.preventDefault();toast("개발자 도구는 비활성화되어 있습니다");return false;}
+    if(ctrl&&e.shiftKey&&["I","i","J","j","C","c"].includes(k)){e.preventDefault();toast("개발자 도구는 비활성화되어 있습니다");return false;}
+    if(ctrl&&["U","u"].includes(k)){e.preventDefault();toast("소스 보기가 제한되어 있습니다");return false;}
+    if(ctrl&&["S","s"].includes(k)){e.preventDefault();toast("페이지 저장이 제한되어 있습니다");return false;}
+    if(ctrl&&["P","p"].includes(k)){e.preventDefault();toast("인쇄가 제한되어 있습니다");return false;}
+
+    // PrintScreen 키 감지 (브라우저 자체 차단은 불가하나 감지 후 대응 가능)
+    if(k==="PrintScreen"){
+      e.preventDefault();
+      handleScreenshotAttempt();
+    }
+  },false);
+
+  // 5) PrintScreen 이후 클립보드 무력화 시도 + 경고
+  function handleScreenshotAttempt(){
+    try{
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText("");
+      }
+    }catch(err){/* 클립보드 접근 제한 브라우저는 무시 */}
+    showBlurOverlay(1200);
+    toast("스크린샷 시도가 감지되어 화면이 보호되었습니다");
+  }
+
+  // 6) keyup에서도 한번 더 감지 (일부 브라우저는 keydown에서 PrintScreen을 못 잡음)
+  document.addEventListener("keyup",function(e){
+    if(e.key==="PrintScreen")handleScreenshotAttempt();
+  },false);
+
+  // 7) 창이 포커스를 잃거나 탭을 벗어날 때(다른 캡처 프로그램으로 전환 등) 블러 처리
+  let overlayTimer=null;
+  function showBlurOverlay(autoHideMs){
+    const el=document.getElementById("secBlurOverlay");
+    if(!el)return;
+    el.classList.add("show");
+    if(autoHideMs){
+      clearTimeout(overlayTimer);
+      overlayTimer=setTimeout(()=>el.classList.remove("show"),autoHideMs);
+    }
+  }
+  function hideBlurOverlay(){
+    const el=document.getElementById("secBlurOverlay");
+    if(el)el.classList.remove("show");
+  }
+
+  window.addEventListener("blur",function(){
+    showBlurOverlay(); // 자동 숨김 없음: 포커스 복귀 시 해제
+  });
+  window.addEventListener("focus",function(){
+    hideBlurOverlay();
+  });
+  document.addEventListener("visibilitychange",function(){
+    if(document.hidden)showBlurOverlay();
+    else hideBlurOverlay();
+  });
+
+  // 8) 개발자 도구 오픈 여부 대략 감지 (창 크기 변화 기반 휴리스틱)
+  let devtoolsWarned=false;
+  setInterval(function(){
+    const threshold=160;
+    const widthDiff=window.outerWidth-window.innerWidth>threshold;
+    const heightDiff=window.outerHeight-window.innerHeight>threshold;
+    if((widthDiff||heightDiff)&&!devtoolsWarned){
+      devtoolsWarned=true;
+      toast("개발자 도구 사용이 감지되었습니다");
+    }else if(!widthDiff&&!heightDiff){
+      devtoolsWarned=false;
+    }
+  },1000);
+
+})();
 </script>
 </body>
 </html>
