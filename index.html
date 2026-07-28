@@ -644,6 +644,16 @@ input,select,textarea{font-family:inherit;}
 .supp-quick-link:hover .ic{color:var(--teal);}
 .supp-quick-empty{font-size:12.5px;color:var(--ink-5);padding:6px 2px;}
 
+/* ════ 기술지원 : 제품 정보(관리자 ID/PW) ════ */
+.pw-input-wrap{position:relative;}
+.pw-input-wrap input{width:100%;padding-right:38px;}
+.pw-toggle{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;color:var(--ink-5);border-radius:6px;cursor:pointer;}
+.pw-toggle:hover{background:var(--bg-2);color:var(--ink-3);}
+.pw-cell{font-family:monospace;font-size:12.5px;color:var(--ink-3);letter-spacing:.5px;}
+.cred-actions{display:inline-flex;align-items:center;gap:3px;}
+.cred-warn{background:var(--amber-lt);border:1px solid rgba(217,119,6,.2);color:#92400e;border-radius:var(--r);padding:10px 14px;font-size:12px;line-height:1.6;display:flex;gap:8px;align-items:flex-start;margin-bottom:14px;}
+.cred-warn .ic{flex-shrink:0;margin-top:1px;color:var(--amber);}
+
 /* ════ MOBILE ════ */
 @media(max-width:768px){
   :root{--sidebar-w:0px;}
@@ -794,6 +804,7 @@ input,select,textarea{font-family:inherit;}
 <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
 <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
 <symbol id="i-life-buoy" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="14.83" y1="9.17" x2="18.36" y2="5.64"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
 </defs>
 </svg>
 <div class="app">
@@ -906,11 +917,11 @@ const fbCfg={
   appId:"1:808738416305:web:b366ad2258471790852490"
 };
 const db=getFirestore(initializeApp(fbCfg));
-const COL={site:"site",tasks:"tasks",issues:"issues",inventory:"inventory",weeklyReports:"weeklyReports",errorCodes:"errorCodes",employees:"employees",employeePayroll:"employeePayroll",supportSites:"supportSites",manuals:"manuals"};
+const COL={site:"site",tasks:"tasks",issues:"issues",inventory:"inventory",weeklyReports:"weeklyReports",errorCodes:"errorCodes",employees:"employees",employeePayroll:"employeePayroll",supportSites:"supportSites",manuals:"manuals",productInfo:"productInfo"};
 
-let site=[],tasks=[],issues=[],inventoryList=[],weeklyReports=[],errorCodes=[],employees=[],payrollRecords=[],supportSites=[],manuals=[];
+let site=[],tasks=[],issues=[],inventoryList=[],weeklyReports=[],errorCodes=[],employees=[],payrollRecords=[],supportSites=[],manuals=[],productInfo=[];
 let curPage="dashboard";
-let sq={site:"",project:"",issue:"",inventory:"",errorcode:"",supportSite:"",supportManual:""};
+let sq={site:"",project:"",issue:"",inventory:"",errorcode:"",supportSite:"",supportManual:"",productInfo:""};
 let projSort={col:"receiptDate",dir:"desc"};
 let siteSort={col:"name",dir:"asc"};
 let invSort={col:"model",dir:"asc"};
@@ -1145,6 +1156,7 @@ onSnapshot(collection(db,COL.employees),s=>{employees=s.docs.map(d=>({id:d.id,..
 onSnapshot(collection(db,COL.employeePayroll),s=>{payrollRecords=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
 onSnapshot(collection(db,COL.supportSites),s=>{supportSites=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
 onSnapshot(collection(db,COL.manuals),s=>{manuals=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
+onSnapshot(collection(db,COL.productInfo),s=>{productInfo=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
 
 const $overlay=document.getElementById("modalOverlay");
 const $modal=document.getElementById("modalEl");
@@ -1235,6 +1247,16 @@ function fld(f,vals){
       ${f.hint?`<div class="field-hint">${f.hint}</div>`:""}
       <div class="ferr">${esc(f.err||"필수 입력")}</div>
     </div>`;
+  }else if(f.type==="password"){
+    return`<div class="field">
+      <label for="f_${f.key}">${esc(f.label)}${f.req?` <span style='color:var(--rose)'>*</span>`:""}</label>
+      <div class="pw-input-wrap">
+        <input id="f_${f.key}" name="${f.key}" type="password" value="${val}" autocomplete="new-password" placeholder="${esc(f.ph||"")}"/>
+        <button type="button" class="pw-toggle" tabindex="-1" onclick="_togglePwVisibility('f_${f.key}')"><svg class='ic'><use href='#i-eye'/></svg></button>
+      </div>
+      ${f.hint?`<div class="field-hint">${f.hint}</div>`:""}
+      <div class="ferr">${esc(f.err||"필수 입력")}</div>
+    </div>`;
   }else{
     inner=`<input id="f_${f.key}" name="${f.key}" type="${f.type||"text"}" value="${val}" autocomplete="off" placeholder="${esc(f.ph||"")}"/>`;
   }
@@ -1305,6 +1327,25 @@ window._removeManualUpload=key=>{
   if(hidden)hidden.value="";
   if(fileInput)fileInput.value="";
   if(preview)preview.innerHTML="";
+};
+window._togglePwVisibility=id=>{
+  const el=document.getElementById(id);if(!el)return;
+  const btn=el.closest(".pw-input-wrap")?.querySelector(".pw-toggle");
+  el.type=el.type==="password"?"text":"password";
+  if(btn)btn.classList.toggle("active",el.type==="text");
+};
+window._toggleRevealPw=(id,field)=>{
+  const el=document.getElementById(`pwc_${id}_${field}`);if(!el)return;
+  const p=productInfo.find(x=>x.id===id);if(!p)return;
+  const visible=el.dataset.visible==="1";
+  el.dataset.visible=visible?"0":"1";
+  el.textContent=visible?"••••••••":(p[field]||"-");
+};
+window._copyProductField=async(id,field)=>{
+  const p=productInfo.find(x=>x.id===id);
+  if(!p||!p[field]){toast("복사할 값이 없습니다","error");return;}
+  try{await navigator.clipboard.writeText(p[field]);toast("클립보드에 복사되었습니다","success");}
+  catch(e){toast("복사 실패 — 브라우저 권한을 확인해주세요","error");}
 };
 window._toggleMC=id=>{
   const b=document.getElementById("mcb_"+id);const c=document.getElementById("mcc_"+id);
@@ -3452,8 +3493,96 @@ function renderManualResults(){
 }
 _renderers.supportManual=renderManualResults;
 
+/* ── 제품 정보(관리자 ID/PW, 접속정보) CRUD ── */
+const PRODUCT_INFO_FIELDS=[
+  {key:"brand",label:"브랜드",type:"select",opts:SUPPORT_BRANDS,req:true,err:"브랜드를 선택해주세요",pair:true},
+  {key:"modelName",label:"모델명 / 제품명",req:true,err:"모델명을 입력해주세요",ph:"예: NEO-100, SPARKOZ AGV-200",pair:true},
+  {key:"accessUrl",label:"관리자 접속 주소(IP/URL)",ph:"예: https://192.168.0.10 또는 admin.neo.local",pair:true},
+  {key:"port",label:"포트 / 연결방식",ph:"예: 22(SSH), 443(HTTPS), RS-485 등",pair:true},
+  {key:"adminId",label:"관리자 ID",ph:"관리자 계정",pair:true},
+  {key:"adminPw",label:"관리자 PW",type:"password",ph:"관리자 비밀번호",pair:true},
+  {key:"firmwareVersion",label:"펌웨어/소프트웨어 버전",ph:"예: v3.2.1"},
+  {key:"note",label:"비고",type:"textarea",ph:"초기화 방법, 주의사항, 담당자 연락처 등"},
+];
+window._openAddProductInfo=()=>openModal({title:"제품 정보 등록",fields:PRODUCT_INFO_FIELDS,
+  hint:"제품(장비)의 관리자 접속 정보를 등록해두면 현장 기술지원 시 바로 확인할 수 있습니다. 이 정보는 접속 계정 정보이므로 관계자 외 공유하지 않도록 주의해주세요.",
+  onSave:async d=>{await addDoc(collection(db,COL.productInfo),{...d,createdAt:serverTimestamp()});toast("제품 정보가 등록되었습니다","success");}});
+window._openEditProductInfo=id=>{
+  const p=productInfo.find(x=>x.id===id);if(!p)return;
+  openModal({title:"제품 정보 수정",fields:PRODUCT_INFO_FIELDS,values:p,
+    onSave:async d=>{await updateDoc(doc(db,COL.productInfo,id),d);toast("수정되었습니다","success");}});
+};
+window._deleteProductInfo=async id=>{
+  if(!confirm("이 제품 정보를 삭제하시겠습니까? 등록된 접속 계정 정보가 함께 삭제됩니다."))return;
+  try{await deleteDoc(doc(db,COL.productInfo,id));toast("삭제되었습니다","success");}
+  catch(e){console.error(e);toast("삭제 실패","error");}
+};
+
+function _pwCellHtml(id,field,val){
+  const masked=val?"••••••••":"-";
+  return`<span class="pw-cell" id="pwc_${id}_${field}" data-visible="0">${masked}</span>
+    ${val?`<span class="cred-actions">
+      <button type="button" class="btn-icon" style="width:26px;min-width:26px;height:26px;min-height:26px;" onclick="_toggleRevealPw('${id}','${field}')" title="표시/숨기기"><svg class='ic'><use href='#i-eye'/></svg></button>
+      <button type="button" class="btn-icon" style="width:26px;min-width:26px;height:26px;min-height:26px;" onclick="_copyProductField('${id}','${field}')" title="복사"><svg class='ic'><use href='#i-clipboard'/></svg></button>
+    </span>`:""}`;
+}
+function _idCellHtml(id,field,val){
+  return`<span>${esc(val)||"-"}</span>
+    ${val?`<button type="button" class="btn-icon" style="width:26px;min-width:26px;height:26px;min-height:26px;" onclick="_copyProductField('${id}','${field}')" title="복사"><svg class='ic'><use href='#i-clipboard'/></svg></button>`:""}`;
+}
+
+function renderProductInfoResults(){
+  const q=sq.productInfo;
+  let list=productInfo.filter(p=>suppBrandFilter==="all"||p.brand===suppBrandFilter);
+  list=list.filter(p=>match(q,[p.modelName,p.accessUrl,p.adminId,p.note,p.brand]));
+  const ra=document.getElementById("suppProductRA");const ma=document.getElementById("sm_productInfo");
+  if(!ra)return;if(ma)ma.textContent=q?`${list.length}건 검색됨`:"";
+  if(!list.length){ra.innerHTML=noResults(q||"제품 정보");return;}
+  list=list.slice().sort((a,b)=>(a.brand||"").localeCompare(b.brand||"")||(a.modelName||"").localeCompare(b.modelName||""));
+
+  const tBody=list.map(p=>`<tr>
+    <td>${bBrand(p.brand)}</td>
+    <td style="font-weight:700;">${esc(p.modelName)}</td>
+    <td style="max-width:180px;white-space:normal;word-break:break-all;color:var(--ink-4);">${esc(p.accessUrl)||"-"}${p.port?` <span style="color:var(--ink-5);">(${esc(p.port)})</span>`:""}</td>
+    <td>${_idCellHtml(p.id,"adminId",p.adminId)}</td>
+    <td>${_pwCellHtml(p.id,"adminPw",p.adminPw)}</td>
+    <td><div class="td-actions">
+      <button class="btn-icon edit" onclick="_openEditProductInfo('${p.id}')"><svg class='ic'><use href='#i-edit'/></svg></button>
+      <button class="btn-icon" style="color:var(--rose);" onclick="_deleteProductInfo('${p.id}')"><svg class='ic'><use href='#i-trash'/></svg></button>
+    </div></td>
+  </tr>`).join("");
+
+  const mCards=list.map(p=>`<div class="mc">
+    <div class="mc-head" onclick="_toggleMC('pi${p.id}')">
+      <div class="mc-title"><div class="mc-name">${esc(p.modelName)}</div><div class="mc-sub">${esc(p.accessUrl)||"-"}</div></div>
+      <div class="mc-badges">${bBrand(p.brand)}</div>
+      <span class="mc-chevron" id="mcc_pi${p.id}">▼</span>
+    </div>
+    <div class="mc-body" id="mcb_pi${p.id}">
+      <hr class="mc-divider"/>
+      <div class="mc-fields">
+        <div class="mc-field"><span class="mc-label">포트/연결방식</span><span class="mc-val">${esc(p.port)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">관리자 ID</span><span class="mc-val">${_idCellHtml(p.id,"adminId",p.adminId)}</span></div>
+        <div class="mc-field"><span class="mc-label">관리자 PW</span><span class="mc-val">${_pwCellHtml(p.id,"adminPw",p.adminPw)}</span></div>
+        <div class="mc-field"><span class="mc-label">펌웨어 버전</span><span class="mc-val">${esc(p.firmwareVersion)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">비고</span><span class="mc-val">${esc(p.note)||"-"}</span></div>
+      </div>
+      <div class="mc-actions">
+        <button class="btn btn-secondary btn-sm" onclick="_openEditProductInfo('${p.id}')"><svg class='ic'><use href='#i-edit'/></svg> 수정</button>
+        <button class="btn btn-sm" style="background:var(--rose-lt);color:var(--rose);" onclick="_deleteProductInfo('${p.id}')"><svg class='ic'><use href='#i-trash'/></svg> 삭제</button>
+      </div>
+    </div>
+  </div>`).join("");
+
+  ra.innerHTML=`<div class="tbl-wrap"><table class="tbl"><thead><tr>
+    <th>브랜드</th><th>모델명/제품명</th><th>접속주소</th><th>관리자 ID</th><th>관리자 PW</th><th>관리</th>
+  </tr></thead><tbody>${tBody}</tbody></table></div>
+  <div class="mc-list">${mCards}</div>`;
+}
+_renderers.productInfo=renderProductInfoResults;
+
 function renderSupport(){
-  const totalSites=supportSites.length,totalManuals=manuals.length;
+  const totalSites=supportSites.length,totalManuals=manuals.length,totalProducts=productInfo.length;
   const brandManualCounts={};SUPPORT_BRANDS.forEach(b=>brandManualCounts[b]=manuals.filter(m=>m.brand===b).length);
   const tabsHtml=[["all","전체"],...SUPPORT_BRANDS.map(b=>[b,b])].map(([v,l])=>
     `<button class="stat-tab supp-brand-tab${suppBrandFilter===v?" stat-tab-active":""}" data-brand="${v}" onclick="_setSuppBrandFilter('${v}')">${esc(l)}</button>`).join("");
@@ -3474,18 +3603,19 @@ function renderSupport(){
 
   $content.innerHTML=`
     <div class="page-head">
-      <div><div class="page-title">기술지원</div><div class="page-subtitle">NEO / SPARKOZ 브랜드별 기술 문의·제품 문제 접수 사이트와 매뉴얼을 관리합니다</div></div>
+      <div><div class="page-title">기술지원</div><div class="page-subtitle">NEO / SPARKOZ 브랜드별 기술 문의·제품 문제 접수 사이트, 매뉴얼, 제품 관리자 정보를 관리합니다</div></div>
       <div class="page-actions">
         <button class="btn btn-secondary" onclick="_openAddSupportSite()">+ 지원사이트 등록</button>
-        <button class="btn btn-primary" onclick="_openAddManual()">+ 매뉴얼 등록</button>
+        <button class="btn btn-secondary" onclick="_openAddManual()">+ 매뉴얼 등록</button>
+        <button class="btn btn-primary" onclick="_openAddProductInfo()">+ 제품 정보 등록</button>
       </div>
     </div>
     <div class="brand-grid" style="margin-bottom:20px;">${quickCards}</div>
     <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
       ${kpiHtml(totalSites,"전체 지원사이트","c-blue")}
       ${kpiHtml(totalManuals,"전체 매뉴얼","c-violet")}
-      ${kpiHtml(brandManualCounts["NEO"],"NEO 매뉴얼","c-blue")}
-      ${kpiHtml(brandManualCounts["SPARKOZ"],"SPARKOZ 매뉴얼","c-violet")}
+      ${kpiHtml(totalProducts,"등록된 제품 정보","c-amber")}
+      ${kpiHtml(brandManualCounts["NEO"]+" / "+brandManualCounts["SPARKOZ"],"NEO / SPARKOZ 매뉴얼","c-teal")}
     </div>
     <div class="card">
       <div class="card-header"><div class="card-title">지원사이트 목록</div><div class="stat-tab-group">${tabsHtml}</div></div>
@@ -3496,13 +3626,21 @@ function renderSupport(){
       <div class="card-body">${searchBox("supportManual","매뉴얼명, 구분, 비고로 검색")}<div id="suppManualRA"></div></div>
     </div>
     <div class="card">
+      <div class="card-header"><div class="card-title"><svg class='ic'><use href='#i-lock'/></svg> 제품 정보 (관리자 ID/PW)</div></div>
+      <div class="card-body">
+        <div class="cred-warn"><svg class='ic'><use href='#i-alert'/></svg><span>관리자 계정 정보입니다. 비밀번호는 기본적으로 마스킹 처리되며 <strong>표시(<svg class='ic'><use href='#i-eye'/></svg>) 버튼</strong>을 눌러야만 확인할 수 있습니다. 관계자 외 노출되지 않도록 화면 공유·캡처 시 주의해주세요.</span></div>
+        ${searchBox("productInfo","모델명, 접속주소, 관리자 ID, 비고로 검색")}<div id="suppProductRA"></div>
+      </div>
+    </div>
+    <div class="card">
       <div class="card-body" style="font-size:12.5px;color:var(--ink-4);display:flex;align-items:center;gap:8px;">
         <span style="font-size:16px;"><svg class='ic'><use href='#i-bulb'/></svg></span>
-        <span>파일 업로드는 <strong>800KB 이하</strong>의 PDF/DOC/DOCX/HWP만 지원합니다. 용량이 큰 매뉴얼은 구글드라이브 등에 올린 뒤 <strong>외부 링크(URL)</strong>로 등록해주세요.</span>
+        <span>매뉴얼 파일 업로드는 <strong>800KB 이하</strong>의 PDF/DOC/DOCX/HWP만 지원합니다. 용량이 큰 매뉴얼은 구글드라이브 등에 올린 뒤 <strong>외부 링크(URL)</strong>로 등록해주세요.</span>
       </div>
     </div>`;
   renderSupportSiteResults();
   renderManualResults();
+  renderProductInfoResults();
 }
 
 /* ════════════════════════════════════
