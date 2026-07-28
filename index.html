@@ -223,6 +223,10 @@ input,select,textarea{font-family:inherit;}
 .file-preview-inner img{display:block;max-width:100%;max-height:180px;border-radius:var(--r);border:1px solid var(--line);object-fit:cover;}
 .file-remove{position:absolute;top:6px;right:6px;background:rgba(15,23,42,.65);color:#fff;border:none;border-radius:999px;width:24px;height:24px;line-height:1;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;}
 .file-remove:hover{background:rgba(220,38,38,.85);}
+.file-preview-inner.file-preview-doc{display:flex;align-items:center;gap:8px;padding:9px 36px 9px 12px;background:var(--bg-2);border:1px solid var(--line);border-radius:var(--r);font-size:12.5px;color:var(--ink-3);font-weight:600;}
+.file-preview-inner.file-preview-doc .ic{color:var(--ink-4);flex-shrink:0;}
+.file-preview-inner.file-preview-doc .file-doc-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.file-preview-inner.file-preview-doc .file-remove{background:rgba(15,23,42,.35);}
 .site-photo-thumb{width:40px;height:40px;border-radius:var(--r-sm);object-fit:cover;border:1px solid var(--line);cursor:pointer;}
 .site-photo-view{max-width:100%;max-height:70vh;border-radius:var(--r);display:block;margin:0 auto;}
 .as-hint{background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:1px solid rgba(13,148,136,.2);border-radius:var(--r);padding:12px 14px;font-size:12.5px;color:var(--teal-dk);margin-bottom:14px;display:flex;align-items:flex-start;gap:8px;}
@@ -632,6 +636,14 @@ input,select,textarea{font-family:inherit;}
 .brand-stat-fill{height:100%;border-radius:5px;transition:width .4s ease;}
 .brand-stat-count{width:30px;text-align:right;font-size:12.5px;font-weight:700;flex-shrink:0;}
 
+/* ════ 기술지원 : 브랜드별 지원사이트 바로가기 ════ */
+.supp-quick-list{display:flex;flex-direction:column;gap:8px;}
+.supp-quick-link{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r);color:var(--ink-2);font-size:13px;font-weight:600;text-decoration:none;transition:all var(--dur) var(--ease);}
+.supp-quick-link:hover{background:var(--bg-2);border-color:var(--teal);color:var(--teal-dk);transform:translateX(2px);}
+.supp-quick-link .ic{color:var(--ink-4);flex-shrink:0;}
+.supp-quick-link:hover .ic{color:var(--teal);}
+.supp-quick-empty{font-size:12.5px;color:var(--ink-5);padding:6px 2px;}
+
 /* ════ MOBILE ════ */
 @media(max-width:768px){
   :root{--sidebar-w:0px;}
@@ -780,6 +792,8 @@ input,select,textarea{font-family:inherit;}
 <symbol id="i-pin" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
 <symbol id="i-layers" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></symbol>
 <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+<symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+<symbol id="i-life-buoy" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="14.83" y1="9.17" x2="18.36" y2="5.64"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></symbol>
 </defs>
 </svg>
 <div class="app">
@@ -806,6 +820,7 @@ input,select,textarea{font-family:inherit;}
         <li class="nav-item" data-page="project"><span class="nav-ic"><svg class='ic'><use href='#i-tool'/></svg></span>Project</li>
         <li class="nav-item" data-page="inventory"><span class="nav-ic"><svg class='ic'><use href='#i-package'/></svg></span>Inventory</li>
         <li class="nav-item" data-page="errorcode"><span class="nav-ic"><svg class='ic'><use href='#i-book'/></svg></span>오류코드 가이드</li>
+        <li class="nav-item" data-page="support"><span class="nav-ic"><svg class='ic'><use href='#i-life-buoy'/></svg></span>기술지원</li>
         <li class="nav-item" data-page="issue"><span class="nav-ic"><svg class='ic'><use href='#i-alert'/></svg></span>Issue</li>
         <li class="sidebar-section">분석</li>
         <li class="nav-item" data-page="statistics"><span class="nav-ic"><svg class='ic'><use href='#i-barchart'/></svg></span>Statistics</li>
@@ -845,6 +860,7 @@ input,select,textarea{font-family:inherit;}
     <li class="m-tab" data-page="project"><span class="m-tab-ic"><svg class='ic'><use href='#i-tool'/></svg></span>Project</li>
     <li class="m-tab" data-page="inventory"><span class="m-tab-ic"><svg class='ic'><use href='#i-package'/></svg></span>Stock</li>
     <li class="m-tab" data-page="errorcode"><span class="m-tab-ic"><svg class='ic'><use href='#i-book'/></svg></span>오류</li>
+    <li class="m-tab" data-page="support"><span class="m-tab-ic"><svg class='ic'><use href='#i-life-buoy'/></svg></span>기술지원</li>
     <li class="m-tab" data-page="statistics"><span class="m-tab-ic"><svg class='ic'><use href='#i-barchart'/></svg></span>Stats</li>
     <li class="m-tab" data-page="profitability"><span class="m-tab-ic"><svg class='ic'><use href='#i-dollar'/></svg></span>수익성</li>
     <li class="m-tab" data-page="report"><span class="m-tab-ic"><svg class='ic'><use href='#i-filetext'/></svg></span>Report</li>
@@ -890,11 +906,11 @@ const fbCfg={
   appId:"1:808738416305:web:b366ad2258471790852490"
 };
 const db=getFirestore(initializeApp(fbCfg));
-const COL={site:"site",tasks:"tasks",issues:"issues",inventory:"inventory",weeklyReports:"weeklyReports",errorCodes:"errorCodes",employees:"employees",employeePayroll:"employeePayroll"};
+const COL={site:"site",tasks:"tasks",issues:"issues",inventory:"inventory",weeklyReports:"weeklyReports",errorCodes:"errorCodes",employees:"employees",employeePayroll:"employeePayroll",supportSites:"supportSites",manuals:"manuals"};
 
-let site=[],tasks=[],issues=[],inventoryList=[],weeklyReports=[],errorCodes=[],employees=[],payrollRecords=[];
+let site=[],tasks=[],issues=[],inventoryList=[],weeklyReports=[],errorCodes=[],employees=[],payrollRecords=[],supportSites=[],manuals=[];
 let curPage="dashboard";
-let sq={site:"",project:"",issue:"",inventory:"",errorcode:""};
+let sq={site:"",project:"",issue:"",inventory:"",errorcode:"",supportSite:"",supportManual:""};
 let projSort={col:"receiptDate",dir:"desc"};
 let siteSort={col:"name",dir:"asc"};
 let invSort={col:"model",dir:"asc"};
@@ -904,6 +920,7 @@ let reportPM=""; // 선택된 담당자(작성자)
 let reportAnchor=new Date(); // 선택된 주(週)의 기준일
 let reportHistOpenId=null;
 let errCodeFilterBrand="all"; // 오류코드 가이드 브랜드 필터
+let suppBrandFilter="all"; // 기술지원(사이트/매뉴얼) 브랜드 필터
 
 const $content=document.getElementById("content");
 const isMobile=()=>window.innerWidth<=768;
@@ -1126,6 +1143,8 @@ onSnapshot(collection(db,COL.weeklyReports),s=>{weeklyReports=s.docs.map(d=>({id
 onSnapshot(collection(db,COL.errorCodes),s=>{errorCodes=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
 onSnapshot(collection(db,COL.employees),s=>{employees=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
 onSnapshot(collection(db,COL.employeePayroll),s=>{payrollRecords=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
+onSnapshot(collection(db,COL.supportSites),s=>{supportSites=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
+onSnapshot(collection(db,COL.manuals),s=>{manuals=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
 
 const $overlay=document.getElementById("modalOverlay");
 const $modal=document.getElementById("modalEl");
@@ -1205,6 +1224,17 @@ function fld(f,vals){
       ${f.hint?`<div class="field-hint">${f.hint}</div>`:""}
       <div class="ferr">${esc(f.err||"필수 입력")}</div>
     </div>`;
+  }else if(f.type==="filedoc"){
+    const existing=vals[f.key]||"";
+    const meta=_manualFileMeta(existing);
+    return`<div class="field file-upload-field">
+      <label for="f_${f.key}_file">${esc(f.label)}${f.req?` <span style='color:var(--rose)'>*</span>`:""}</label>
+      <input type="file" id="f_${f.key}_file" accept=".pdf,.doc,.docx,.hwp,.hwpx" onchange="_handleManualUpload(this,'${f.key}')"/>
+      <input type="hidden" id="f_${f.key}" name="${f.key}" value="${esc(existing)}"/>
+      <div class="file-preview" id="f_${f.key}_preview">${meta?`<div class="file-preview-inner file-preview-doc"><svg class='ic'><use href='#i-file'/></svg><span class="file-doc-name">등록된 ${meta.ext.toUpperCase()} 파일</span><button type="button" class="file-remove" onclick="_removeManualUpload('${f.key}')">✕</button></div>`:""}</div>
+      ${f.hint?`<div class="field-hint">${f.hint}</div>`:""}
+      <div class="ferr">${esc(f.err||"필수 입력")}</div>
+    </div>`;
   }else{
     inner=`<input id="f_${f.key}" name="${f.key}" type="${f.type||"text"}" value="${val}" autocomplete="off" placeholder="${esc(f.ph||"")}"/>`;
   }
@@ -1242,6 +1272,35 @@ window._handleFileUpload=(input,key)=>{
   reader.readAsDataURL(file);
 };
 window._removeFileUpload=key=>{
+  const hidden=document.getElementById("f_"+key);const fileInput=document.getElementById("f_"+key+"_file");const preview=document.getElementById("f_"+key+"_preview");
+  if(hidden)hidden.value="";
+  if(fileInput)fileInput.value="";
+  if(preview)preview.innerHTML="";
+};
+/* ════ 매뉴얼 파일(문서) 업로드 — 이미지가 아닌 PDF/DOC/HWP 등을 Base64로 저장 ════ */
+const MANUAL_MIME_EXT={"application/pdf":"pdf","application/msword":"doc","application/vnd.openxmlformats-officedocument.wordprocessingml.document":"docx","application/x-hwp":"hwp","application/haansofthwp":"hwp"};
+function _manualFileMeta(dataUrl){
+  if(!dataUrl)return null;
+  const m=String(dataUrl).match(/^data:([^;]+);base64,/);
+  if(!m)return null;
+  return{mime:m[1],ext:MANUAL_MIME_EXT[m[1]]||"dat"};
+}
+window._handleManualUpload=(input,key)=>{
+  const file=input.files&&input.files[0];if(!file)return;
+  const ext="."+(file.name.split(".").pop()||"").toLowerCase();
+  if(![".pdf",".doc",".docx",".hwp",".hwpx"].includes(ext)){toast("PDF, DOC, DOCX, HWP 파일만 업로드 가능합니다","error");input.value="";return;}
+  if(file.size>800*1024){toast("파일 용량은 800KB 이하로 업로드해주세요. 용량이 큰 파일은 외부 링크(URL)로 등록해주세요","error");input.value="";return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const dataUrl=e.target.result;
+    const hidden=document.getElementById("f_"+key);const preview=document.getElementById("f_"+key+"_preview");
+    if(hidden)hidden.value=dataUrl;
+    if(preview)preview.innerHTML=`<div class="file-preview-inner file-preview-doc"><svg class='ic'><use href='#i-file'/></svg><span class="file-doc-name">${esc(file.name)}</span><button type="button" class="file-remove" onclick="_removeManualUpload('${key}')">✕</button></div>`;
+  };
+  reader.onerror=()=>toast("파일을 읽는 중 오류가 발생했습니다","error");
+  reader.readAsDataURL(file);
+};
+window._removeManualUpload=key=>{
   const hidden=document.getElementById("f_"+key);const fileInput=document.getElementById("f_"+key+"_file");const preview=document.getElementById("f_"+key+"_preview");
   if(hidden)hidden.value="";
   if(fileInput)fileInput.value="";
@@ -3235,6 +3294,215 @@ function renderErrorCode(){
       </div>
     </div>`;
   renderErrorCodeResults();
+}
+
+/* ════════════════════════════════════
+   기술지원 (NEO / SPARKOZ 지원사이트 · 매뉴얼)
+════════════════════════════════════ */
+const SUPPORT_BRANDS=["NEO","SPARKOZ"];
+const SUPPORT_SITE_FIELDS=[
+  {key:"brand",label:"브랜드",type:"select",opts:SUPPORT_BRANDS,req:true,err:"브랜드를 선택해주세요",pair:true},
+  {key:"siteName",label:"사이트명",req:true,err:"사이트명을 입력해주세요",ph:"예: NEO 기술지원센터",pair:true},
+  {key:"url",label:"사이트 주소(URL)",type:"url",req:true,err:"URL을 입력해주세요 (https:// 포함)",ph:"https://support.example.com"},
+  {key:"account",label:"접속 계정 / 비고",ph:"로그인 계정, 담당 부서 등 (선택)"},
+  {key:"note",label:"설명",type:"textarea",ph:"이 사이트에서 무엇을 확인·접수할 수 있는지 설명해주세요"},
+];
+const MANUAL_CATEGORIES=["사용자 매뉴얼","설치 매뉴얼","정비 매뉴얼","오류 대응 매뉴얼","기타"];
+const MANUAL_FIELDS=[
+  {key:"brand",label:"브랜드",type:"select",opts:SUPPORT_BRANDS,req:true,err:"브랜드를 선택해주세요",pair:true},
+  {key:"category",label:"구분",type:"select",opts:MANUAL_CATEGORIES,pair:true},
+  {key:"title",label:"매뉴얼명",req:true,err:"매뉴얼명을 입력해주세요",ph:"예: NEO-100 사용자 매뉴얼 v2.1"},
+  {key:"fileData",label:"파일 업로드",type:"filedoc",hint:"PDF/DOC/DOCX/HWP, 800KB 이하만 업로드 가능합니다. 용량이 크면 아래 외부 링크를 이용해주세요."},
+  {key:"fileUrl",label:"외부 링크(URL)",ph:"https://... (대용량 파일은 구글드라이브·사내 NAS 링크 권장)"},
+  {key:"note",label:"비고",type:"textarea",ph:"버전, 개정일 등 참고사항"},
+];
+
+/* ── 지원사이트 CRUD ── */
+window._openAddSupportSite=()=>openModal({title:"지원사이트 등록",fields:SUPPORT_SITE_FIELDS,
+  hint:"NEO/SPARKOZ 브랜드별 기술 문의·제품 문제 접수 사이트 주소를 등록하면 기술지원 메뉴에서 바로 접속할 수 있습니다.",
+  onSave:async d=>{await addDoc(collection(db,COL.supportSites),{...d,createdAt:serverTimestamp()});toast("지원사이트가 등록되었습니다","success");}});
+window._openEditSupportSite=id=>{
+  const s=supportSites.find(x=>x.id===id);if(!s)return;
+  openModal({title:"지원사이트 수정",fields:SUPPORT_SITE_FIELDS,values:s,
+    onSave:async d=>{await updateDoc(doc(db,COL.supportSites,id),d);toast("수정되었습니다","success");}});
+};
+window._deleteSupportSite=async id=>{
+  if(!confirm("이 지원사이트를 삭제하시겠습니까?"))return;
+  try{await deleteDoc(doc(db,COL.supportSites,id));toast("삭제되었습니다","success");}
+  catch(e){console.error(e);toast("삭제 실패","error");}
+};
+
+/* ── 매뉴얼 CRUD ── */
+window._openAddManual=()=>openModal({title:"매뉴얼 등록",fields:MANUAL_FIELDS,
+  hint:"브랜드별 매뉴얼을 등록해두면 기술지원 메뉴에서 바로 다운로드하거나 외부 링크로 열람할 수 있습니다.",
+  onSave:async d=>{await addDoc(collection(db,COL.manuals),{...d,createdAt:serverTimestamp()});toast("매뉴얼이 등록되었습니다","success");}});
+window._openEditManual=id=>{
+  const m=manuals.find(x=>x.id===id);if(!m)return;
+  openModal({title:"매뉴얼 수정",fields:MANUAL_FIELDS,values:m,
+    onSave:async d=>{await updateDoc(doc(db,COL.manuals,id),d);toast("수정되었습니다","success");}});
+};
+window._deleteManual=async id=>{
+  if(!confirm("이 매뉴얼을 삭제하시겠습니까?"))return;
+  try{await deleteDoc(doc(db,COL.manuals,id));toast("삭제되었습니다","success");}
+  catch(e){console.error(e);toast("삭제 실패","error");}
+};
+window._setSuppBrandFilter=b=>{
+  suppBrandFilter=b;
+  document.querySelectorAll(".supp-brand-tab").forEach(el=>el.classList.toggle("stat-tab-active",el.dataset.brand===b));
+  renderSupportSiteResults();renderManualResults();
+};
+
+function renderSupportSiteResults(){
+  const q=sq.supportSite;
+  let list=supportSites.filter(s=>suppBrandFilter==="all"||s.brand===suppBrandFilter);
+  list=list.filter(s=>match(q,[s.siteName,s.url,s.note,s.brand]));
+  const ra=document.getElementById("suppSiteRA");const ma=document.getElementById("sm_supportSite");
+  if(!ra)return;if(ma)ma.textContent=q?`${list.length}건 검색됨`:"";
+  if(!list.length){ra.innerHTML=noResults(q||"지원사이트");return;}
+  list=list.slice().sort((a,b)=>(a.brand||"").localeCompare(b.brand||"")||(a.siteName||"").localeCompare(b.siteName||""));
+
+  const tBody=list.map(s=>`<tr>
+    <td>${bBrand(s.brand)}</td>
+    <td style="font-weight:700;">${esc(s.siteName)}</td>
+    <td style="max-width:260px;white-space:normal;word-break:break-all;"><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer" style="color:var(--blue);font-weight:600;">${esc(s.url)}</a></td>
+    <td style="max-width:180px;white-space:normal;word-break:keep-all;color:var(--ink-4);">${esc(s.note)||"-"}</td>
+    <td><div class="td-actions">
+      <a class="btn btn-primary btn-sm" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer"><svg class='ic'><use href='#i-link'/></svg> 접속</a>
+      <button class="btn-icon edit" onclick="_openEditSupportSite('${s.id}')"><svg class='ic'><use href='#i-edit'/></svg></button>
+      <button class="btn-icon" style="color:var(--rose);" onclick="_deleteSupportSite('${s.id}')"><svg class='ic'><use href='#i-trash'/></svg></button>
+    </div></td>
+  </tr>`).join("");
+
+  const mCards=list.map(s=>`<div class="mc">
+    <div class="mc-head" onclick="_toggleMC('ss${s.id}')">
+      <div class="mc-title"><div class="mc-name">${esc(s.siteName)}</div><div class="mc-sub" style="word-break:break-all;">${esc(s.url)}</div></div>
+      <div class="mc-badges">${bBrand(s.brand)}</div>
+      <span class="mc-chevron" id="mcc_ss${s.id}">▼</span>
+    </div>
+    <div class="mc-body" id="mcb_ss${s.id}">
+      <hr class="mc-divider"/>
+      <div class="mc-fields">
+        <div class="mc-field"><span class="mc-label">계정/비고</span><span class="mc-val">${esc(s.account)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">설명</span><span class="mc-val">${esc(s.note)||"-"}</span></div>
+      </div>
+      <div class="mc-actions">
+        <a class="btn btn-primary btn-sm" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer"><svg class='ic'><use href='#i-link'/></svg> 사이트 접속</a>
+        <button class="btn btn-secondary btn-sm" onclick="_openEditSupportSite('${s.id}')"><svg class='ic'><use href='#i-edit'/></svg> 수정</button>
+        <button class="btn btn-sm" style="background:var(--rose-lt);color:var(--rose);" onclick="_deleteSupportSite('${s.id}')"><svg class='ic'><use href='#i-trash'/></svg> 삭제</button>
+      </div>
+    </div>
+  </div>`).join("");
+
+  ra.innerHTML=`<div class="tbl-wrap"><table class="tbl"><thead><tr>
+    <th>브랜드</th><th>사이트명</th><th>URL</th><th>설명</th><th>관리</th>
+  </tr></thead><tbody>${tBody}</tbody></table></div>
+  <div class="mc-list">${mCards}</div>`;
+}
+_renderers.supportSite=renderSupportSiteResults;
+
+function renderManualResults(){
+  const q=sq.supportManual;
+  let list=manuals.filter(m=>suppBrandFilter==="all"||m.brand===suppBrandFilter);
+  list=list.filter(m=>match(q,[m.title,m.category,m.note,m.brand]));
+  const ra=document.getElementById("suppManualRA");const ma=document.getElementById("sm_supportManual");
+  if(!ra)return;if(ma)ma.textContent=q?`${list.length}건 검색됨`:"";
+  if(!list.length){ra.innerHTML=noResults(q||"매뉴얼");return;}
+  list=list.slice().sort((a,b)=>(a.brand||"").localeCompare(b.brand||"")||(a.title||"").localeCompare(b.title||""));
+
+  const actionsOf=m=>{
+    const fm=_manualFileMeta(m.fileData);
+    const dl=fm?`<a class="btn btn-primary btn-sm" href="${m.fileData}" download="${esc(m.title||"manual")}.${fm.ext}"><svg class='ic'><use href='#i-download'/></svg> 다운로드</a>`:"";
+    const link=m.fileUrl?`<a class="btn btn-secondary btn-sm" href="${esc(m.fileUrl)}" target="_blank" rel="noopener noreferrer"><svg class='ic'><use href='#i-link'/></svg> 링크 열기</a>`:"";
+    return dl+link;
+  };
+
+  const tBody=list.map(m=>`<tr>
+    <td>${bBrand(m.brand)}</td>
+    <td style="font-weight:700;">${esc(m.title)}</td>
+    <td>${m.category?`<span class="badge b-ready">${esc(m.category)}</span>`:"-"}</td>
+    <td style="max-width:200px;white-space:normal;word-break:keep-all;color:var(--ink-4);">${esc(m.note)||"-"}</td>
+    <td><div class="td-actions">${actionsOf(m)}
+      <button class="btn-icon edit" onclick="_openEditManual('${m.id}')"><svg class='ic'><use href='#i-edit'/></svg></button>
+      <button class="btn-icon" style="color:var(--rose);" onclick="_deleteManual('${m.id}')"><svg class='ic'><use href='#i-trash'/></svg></button>
+    </div></td>
+  </tr>`).join("");
+
+  const mCards=list.map(m=>`<div class="mc">
+    <div class="mc-head" onclick="_toggleMC('mn${m.id}')">
+      <div class="mc-title"><div class="mc-name">${esc(m.title)}</div><div class="mc-sub">${esc(m.category)||"-"}</div></div>
+      <div class="mc-badges">${bBrand(m.brand)}</div>
+      <span class="mc-chevron" id="mcc_mn${m.id}">▼</span>
+    </div>
+    <div class="mc-body" id="mcb_mn${m.id}">
+      <hr class="mc-divider"/>
+      <div class="mc-fields">
+        <div class="mc-field"><span class="mc-label">비고</span><span class="mc-val">${esc(m.note)||"-"}</span></div>
+      </div>
+      <div class="mc-actions">${actionsOf(m)}
+        <button class="btn btn-secondary btn-sm" onclick="_openEditManual('${m.id}')"><svg class='ic'><use href='#i-edit'/></svg> 수정</button>
+        <button class="btn btn-sm" style="background:var(--rose-lt);color:var(--rose);" onclick="_deleteManual('${m.id}')"><svg class='ic'><use href='#i-trash'/></svg> 삭제</button>
+      </div>
+    </div>
+  </div>`).join("");
+
+  ra.innerHTML=`<div class="tbl-wrap"><table class="tbl"><thead><tr>
+    <th>브랜드</th><th>매뉴얼명</th><th>구분</th><th>비고</th><th>관리</th>
+  </tr></thead><tbody>${tBody}</tbody></table></div>
+  <div class="mc-list">${mCards}</div>`;
+}
+_renderers.supportManual=renderManualResults;
+
+function renderSupport(){
+  const totalSites=supportSites.length,totalManuals=manuals.length;
+  const brandManualCounts={};SUPPORT_BRANDS.forEach(b=>brandManualCounts[b]=manuals.filter(m=>m.brand===b).length);
+  const tabsHtml=[["all","전체"],...SUPPORT_BRANDS.map(b=>[b,b])].map(([v,l])=>
+    `<button class="stat-tab supp-brand-tab${suppBrandFilter===v?" stat-tab-active":""}" data-brand="${v}" onclick="_setSuppBrandFilter('${v}')">${esc(l)}</button>`).join("");
+
+  const quickCards=SUPPORT_BRANDS.map(b=>{
+    const sites=supportSites.filter(s=>s.brand===b);
+    const theme=b==="NEO"?{cls:"neo",color:"#2563eb",label:"N"}:{cls:"sparkoz",color:"#7c3aed",label:"S"};
+    const links=sites.length
+      ?sites.map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer" class="supp-quick-link"><svg class='ic'><use href='#i-link'/></svg><span>${esc(s.siteName)}</span></a>`).join("")
+      :`<div class="supp-quick-empty">등록된 지원사이트가 없습니다. "+ 지원사이트 등록"으로 추가해주세요.</div>`;
+    return`<div class="brand-card">
+      <div class="brand-card-head ${theme.cls}">
+        <div class="brand-card-name"><span class="brand-card-icon" style="background:${theme.color};">${theme.label}</span>${b} 기술지원</div>
+      </div>
+      <div class="brand-card-body supp-quick-list">${links}</div>
+    </div>`;
+  }).join("");
+
+  $content.innerHTML=`
+    <div class="page-head">
+      <div><div class="page-title">기술지원</div><div class="page-subtitle">NEO / SPARKOZ 브랜드별 기술 문의·제품 문제 접수 사이트와 매뉴얼을 관리합니다</div></div>
+      <div class="page-actions">
+        <button class="btn btn-secondary" onclick="_openAddSupportSite()">+ 지원사이트 등록</button>
+        <button class="btn btn-primary" onclick="_openAddManual()">+ 매뉴얼 등록</button>
+      </div>
+    </div>
+    <div class="brand-grid" style="margin-bottom:20px;">${quickCards}</div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
+      ${kpiHtml(totalSites,"전체 지원사이트","c-blue")}
+      ${kpiHtml(totalManuals,"전체 매뉴얼","c-violet")}
+      ${kpiHtml(brandManualCounts["NEO"],"NEO 매뉴얼","c-blue")}
+      ${kpiHtml(brandManualCounts["SPARKOZ"],"SPARKOZ 매뉴얼","c-violet")}
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">지원사이트 목록</div><div class="stat-tab-group">${tabsHtml}</div></div>
+      <div class="card-body">${searchBox("supportSite","사이트명, URL, 설명으로 검색")}<div id="suppSiteRA"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">매뉴얼 목록</div></div>
+      <div class="card-body">${searchBox("supportManual","매뉴얼명, 구분, 비고로 검색")}<div id="suppManualRA"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-body" style="font-size:12.5px;color:var(--ink-4);display:flex;align-items:center;gap:8px;">
+        <span style="font-size:16px;"><svg class='ic'><use href='#i-bulb'/></svg></span>
+        <span>파일 업로드는 <strong>800KB 이하</strong>의 PDF/DOC/DOCX/HWP만 지원합니다. 용량이 큰 매뉴얼은 구글드라이브 등에 올린 뒤 <strong>외부 링크(URL)</strong>로 등록해주세요.</span>
+      </div>
+    </div>`;
+  renderSupportSiteResults();
+  renderManualResults();
 }
 
 /* ════════════════════════════════════
@@ -6484,6 +6752,7 @@ const PAGES={
   project:{fn:renderProject,label:"Project"},
   inventory:{fn:renderInventory,label:"Inventory"},
   errorcode:{fn:renderErrorCode,label:"오류코드 가이드"},
+  support:{fn:renderSupport,label:"기술지원"},
   statistics:{fn:renderStatistics,label:"Statistics"},
   profitability:{fn:renderProfitability,label:"수익성 분석"},
   report:{fn:renderReport,label:"주간업무보고"},
