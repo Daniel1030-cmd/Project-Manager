@@ -281,6 +281,9 @@ input,select,textarea{font-family:inherit;}
 .as-photo-lightbox{display:none;position:fixed;inset:0;background:rgba(15,23,42,.85);z-index:9999;align-items:center;justify-content:center;padding:24px;}
 .as-photo-lightbox.show{display:flex;}
 .as-photo-lightbox img{max-width:92vw;max-height:92vh;border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,.5);}
+.sign-pad-wrap{position:relative;border:1.5px dashed var(--line);border-radius:var(--r);background:#fff;touch-action:none;}
+.sign-pad-canvas{display:block;width:100%;height:160px;cursor:crosshair;border-radius:var(--r);}
+.sign-pad-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--ink-5);font-size:13px;pointer-events:none;}
 
 /* ════ 원인구분 셀렉트 컬러 ════ */
 .cause-hw{color:#d97706;}
@@ -811,9 +814,52 @@ img,svg{-webkit-user-drag:none;user-drag:none;pointer-events:auto;}
   transition:opacity .2s ease,transform .2s ease;box-shadow:0 8px 24px rgba(0,0,0,.25);
 }
 #secWarnToast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ════ 로그인 화면 (아이디/비밀번호 인증) ════ */
+.login-overlay{
+  position:fixed;inset:0;z-index:100001;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 20% 20%,#132033,var(--sidebar-bg) 60%);
+  padding:20px;
+}
+.login-overlay.hidden{display:none;}
+.login-box{
+  width:100%;max-width:380px;background:var(--surface);border-radius:var(--r-xl);
+  padding:32px 28px 28px;box-shadow:var(--sh-lg);border:1px solid var(--line);
+}
+.login-brand{text-align:center;margin-bottom:22px;}
+.login-brand .brand-icon{margin:0 auto 12px;background:linear-gradient(135deg,var(--teal),var(--blue));display:flex;align-items:center;justify-content:center;}
+.login-title{font-size:19px;font-weight:800;color:var(--ink);letter-spacing:-.3px;}
+.login-sub{font-size:12.5px;color:var(--ink-5);margin-top:5px;}
+.login-box .field{margin-bottom:14px;}
+.login-box .field label{display:block;font-size:12px;font-weight:600;color:var(--ink-3);margin-bottom:5px;}
+.login-box .field input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-sm);font-size:13.5px;background:var(--bg);transition:border-color .15s;}
+.login-box .field input:focus{outline:none;border-color:var(--teal);background:var(--surface);box-shadow:var(--focus-ring);}
+.login-error{min-height:18px;font-size:12px;color:var(--rose);font-weight:600;margin:-4px 0 12px;}
+#loginSubmitBtn:disabled{opacity:.6;cursor:not-allowed;}
+.sidebar-user{padding:2px 0 10px;font-size:11.5px;color:rgba(255,255,255,.55);word-break:break-all;}
 </style>
 </head>
 <body>
+<div id="loginOverlay" class="login-overlay">
+  <form id="loginForm" class="login-box" autocomplete="off">
+    <div class="login-brand">
+      <div class="brand-icon" style="width:44px;height:44px;border-radius:11px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="4" width="4" height="16" rx="1.5" fill="#fff"/>
+          <rect x="9" y="8" width="4" height="12" rx="1.5" fill="#fff" opacity=".8"/>
+          <rect x="15" y="12" width="4" height="8" rx="1.5" fill="#fff" opacity=".55"/>
+        </svg>
+      </div>
+      <div class="login-title">PMO System</div>
+      <div class="login-sub">아이디와 비밀번호를 입력해 로그인하세요</div>
+    </div>
+    <div class="field"><label>아이디 (이메일)</label><input id="loginEmail" type="email" placeholder="id@sungjurobot.com" autocomplete="username" required/></div>
+    <div class="field"><label>비밀번호</label><input id="loginPw" type="password" placeholder="비밀번호" autocomplete="current-password" required/></div>
+    <div id="loginError" class="login-error"></div>
+    <button type="submit" class="btn btn-primary" id="loginSubmitBtn" style="width:100%;justify-content:center;"><svg class='ic'><use href='#i-lock'/></svg> 로그인</button>
+  </form>
+</div>
 <div id="secBlurOverlay"><div>🔒 보안을 위해 화면이 보호되었습니다</div><div style="font-size:12px;font-weight:400;opacity:.8;">창을 다시 활성화하면 자동으로 해제됩니다</div></div>
 <div id="secWarnToast"></div>
 <svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true">
@@ -867,7 +913,7 @@ img,svg{-webkit-user-drag:none;user-drag:none;pointer-events:auto;}
 <symbol id="i-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
 </defs>
 </svg>
-<div class="app">
+<div class="app" id="appRoot" style="display:none;">
   <aside class="sidebar">
     <div class="sidebar-brand">
       <div class="brand-icon">
@@ -899,7 +945,10 @@ img,svg{-webkit-user-drag:none;user-drag:none;pointer-events:auto;}
         <li class="nav-item" data-page="report"><span class="nav-ic"><svg class='ic'><use href='#i-filetext'/></svg></span>Weekly Report</li>
       </ul>
     </nav>
-    <div class="sidebar-footer">PMO System v3.2</div>
+    <div class="sidebar-footer">
+      <div id="sidebarUserBox" class="sidebar-user"></div>
+      PMO System v3.2
+    </div>
   </aside>
 
   <div class="main">
@@ -921,6 +970,7 @@ img,svg{-webkit-user-drag:none;user-drag:none;pointer-events:auto;}
         <span>PMO System</span><span>›</span>
         <span id="topBreadcrumb">Dashboard</span>
       </div>
+      <button class="btn btn-secondary btn-sm" id="logoutBtn" style="margin-left:auto;" onclick="window._logout()"><svg class='ic'><use href='#i-x'/></svg> 로그아웃</button>
     </div>
     <main class="content" id="content"></main>
   </div>
@@ -968,12 +1018,19 @@ img,svg{-webkit-user-drag:none;user-drag:none;pointer-events:auto;}
 <!-- SheetJS: 통계 엑셀(.xlsx) 내보내기용 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
+<!-- EmailJS: 서버 없이 브라우저에서 바로 이메일을 발송하기 위한 SDK (AS 보고서 자동 발송용) -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
 import {
   getFirestore, collection, addDoc, updateDoc,
   doc, onSnapshot, serverTimestamp, setDoc, deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import {
+  getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut,
+  setPersistence, browserLocalPersistence
+} from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
 
 const fbCfg={
   apiKey:"AIzaSyBouCzxzCSpmCdVqVp9-h3zSR-jps4bNtM",
@@ -983,7 +1040,9 @@ const fbCfg={
   messagingSenderId:"808738416305",
   appId:"1:808738416305:web:b366ad2258471790852490"
 };
-const db=getFirestore(initializeApp(fbCfg));
+const fbApp=initializeApp(fbCfg);
+const db=getFirestore(fbApp);
+const auth=getAuth(fbApp);
 const COL={site:"site",tasks:"tasks",issues:"issues",inventory:"inventory",weeklyReports:"weeklyReports",errorCodes:"errorCodes",employees:"employees",employeePayroll:"employeePayroll",supportSites:"supportSites",manuals:"manuals",productInfo:"productInfo"};
 
 let site=[],tasks=[],issues=[],inventoryList=[],weeklyReports=[],errorCodes=[],employees=[],payrollRecords=[],supportSites=[],manuals=[],productInfo=[];
@@ -1011,6 +1070,17 @@ const COMPANY_TEL="1661-0731";
 const COMPANY_EMAIL="sj@sungju.com";
 const COMPANY_BIZ="106-86-80913";
 const TEAM_NAME="로봇사업팀"; // 주간업무보고서 "작성팀" 고정값
+
+/* ════ EmailJS 설정 (AS 보고서 고객 자동 이메일 발송) ════
+   1) https://www.emailjs.com 무료 가입 → Email Services에서 발신용 메일(Gmail 등) 연결 → SERVICE_ID 확인
+   2) Email Templates에서 새 템플릿 생성 → 아래 변수명({{to_email}} 등)을 템플릿 본문에 그대로 사용 → TEMPLATE_ID 확인
+   3) Account → General에서 Public Key 확인
+   4) 아래 3개 값을 실제 값으로 교체하면 즉시 동작함 (배포 전 값이 비어있으면 발송이 자동 비활성화됨) */
+const EMAILJS_SERVICE_ID="YOUR_EMAILJS_SERVICE_ID";
+const EMAILJS_TEMPLATE_ID="YOUR_EMAILJS_TEMPLATE_ID";
+const EMAILJS_PUBLIC_KEY="YOUR_EMAILJS_PUBLIC_KEY";
+const EMAILJS_READY=EMAILJS_SERVICE_ID!=="YOUR_EMAILJS_SERVICE_ID"&&EMAILJS_TEMPLATE_ID!=="YOUR_EMAILJS_TEMPLATE_ID"&&EMAILJS_PUBLIC_KEY!=="YOUR_EMAILJS_PUBLIC_KEY";
+if(EMAILJS_READY&&window.emailjs)window.emailjs.init({publicKey:EMAILJS_PUBLIC_KEY});
 
 /* ════ 원인 구분 옵션 ════ */
 const CAUSE_TYPES=["하드웨어 결함","소프트웨어 오류","운용자 조작 오류","환경·설치 문제","부품 노후화·마모","기타"];
@@ -1213,20 +1283,96 @@ function allPMNames(){
 }
 
 
-onSnapshot(collection(db,COL.site),s=>{site=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
-onSnapshot(collection(db,COL.tasks),s=>{tasks=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
-onSnapshot(collection(db,COL.issues),s=>{issues=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
-onSnapshot(collection(db,COL.inventory),s=>{inventoryList=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
-onSnapshot(collection(db,COL.weeklyReports),s=>{weeklyReports=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
-onSnapshot(collection(db,COL.errorCodes),s=>{errorCodes=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
-onSnapshot(collection(db,COL.employees),s=>{employees=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
-onSnapshot(collection(db,COL.employeePayroll),s=>{payrollRecords=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
-onSnapshot(collection(db,COL.supportSites),s=>{supportSites=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
-onSnapshot(collection(db,COL.manuals),s=>{manuals=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
-onSnapshot(collection(db,COL.productInfo),s=>{productInfo=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
+let _listenersStarted=false;
+function startDataListeners(){
+  if(_listenersStarted)return; // onAuthStateChanged가 재발화되어도 리스너가 중복 등록되지 않도록 방지
+  _listenersStarted=true;
+  onSnapshot(collection(db,COL.site),s=>{site=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
+  onSnapshot(collection(db,COL.tasks),s=>{tasks=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
+  onSnapshot(collection(db,COL.issues),s=>{issues=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
+  onSnapshot(collection(db,COL.inventory),s=>{inventoryList=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
+  onSnapshot(collection(db,COL.weeklyReports),s=>{weeklyReports=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
+  onSnapshot(collection(db,COL.errorCodes),s=>{errorCodes=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
+  onSnapshot(collection(db,COL.employees),s=>{employees=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
+  onSnapshot(collection(db,COL.employeePayroll),s=>{payrollRecords=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
+  onSnapshot(collection(db,COL.supportSites),s=>{supportSites=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
+  onSnapshot(collection(db,COL.manuals),s=>{manuals=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
+  onSnapshot(collection(db,COL.productInfo),s=>{productInfo=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
+}
+
+/* ════ 로그인 / 로그아웃 (Firebase Authentication - 이메일/비밀번호) ════
+   ※ Firebase 콘솔 → Authentication → Sign-in method 에서 "이메일/비밀번호" 제공업체를 활성화하고,
+      Authentication → Users 탭에서 접속을 허용할 아이디(이메일)·비밀번호 계정을 미리 등록해야 함.
+      또한 Firestore 보안 규칙에도 request.auth != null 조건을 추가해야 로그인하지 않은 사용자가
+      API를 직접 호출해 데이터를 읽는 것까지 막을 수 있음(이 파일만으로는 화면 접근만 차단됨). */
+const loginOverlay=document.getElementById("loginOverlay");
+const appRoot=document.getElementById("appRoot");
+const loginForm=document.getElementById("loginForm");
+const loginError=document.getElementById("loginError");
+const loginSubmitBtn=document.getElementById("loginSubmitBtn");
+
+setPersistence(auth,browserLocalPersistence).catch(e=>console.error("persistence 설정 실패",e));
+
+onAuthStateChanged(auth,user=>{
+  if(user){
+    loginOverlay.classList.add("hidden");
+    appRoot.style.display="";
+    const userBox=document.getElementById("sidebarUserBox");
+    if(userBox)userBox.innerHTML=`<svg class='ic' style='width:12px;height:12px;vertical-align:-2px;'><use href='#i-user'/></svg> ${esc(user.email||"")}`;
+    startDataListeners();
+    render(curPage);
+  }else{
+    appRoot.style.display="none";
+    loginOverlay.classList.remove("hidden");
+    if(loginForm)loginForm.reset();
+  }
+});
+
+if(loginForm)loginForm.addEventListener("submit",async e=>{
+  e.preventDefault();
+  const email=document.getElementById("loginEmail").value.trim();
+  const pw=document.getElementById("loginPw").value;
+  if(!email||!pw){loginError.textContent="아이디와 비밀번호를 모두 입력해주세요.";return;}
+  loginError.textContent="";
+  loginSubmitBtn.disabled=true;
+  loginSubmitBtn.innerHTML="로그인 중...";
+  try{
+    await signInWithEmailAndPassword(auth,email,pw);
+    // 성공 시 onAuthStateChanged가 화면 전환을 처리함
+  }catch(err){
+    console.error(err);
+    const code=err&&err.code||"";
+    let msg="로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.";
+    if(code==="auth/invalid-email")msg="이메일 형식이 올바르지 않습니다.";
+    else if(code==="auth/user-disabled")msg="비활성화된 계정입니다. 관리자에게 문의해주세요.";
+    else if(code==="auth/user-not-found"||code==="auth/wrong-password"||code==="auth/invalid-credential")msg="아이디 또는 비밀번호가 일치하지 않습니다.";
+    else if(code==="auth/too-many-requests")msg="로그인 시도가 너무 많습니다. 잠시 후 다시 시도해주세요.";
+    loginError.textContent=msg;
+  }finally{
+    loginSubmitBtn.disabled=false;
+    loginSubmitBtn.innerHTML="<svg class='ic'><use href='#i-lock'/></svg> 로그인";
+  }
+});
+
+window._logout=async function(){
+  if(!confirm("로그아웃 하시겠습니까?"))return;
+  try{await signOut(auth);}catch(e){console.error(e);toast("로그아웃 중 오류가 발생했습니다","error");}
+};
 
 const $overlay=document.getElementById("modalOverlay");
 const $modal=document.getElementById("modalEl");
+
+/* 모달 바깥(배경) 클릭 시 닫기 — 모든 모달(현장/접수/재고/AS이력카드 등)에 공통 적용되는
+   단 하나의 핸들러로 한 번만 등록한다 (이전에는 openModal() 호출 때마다 $overlay.onclick을
+   덮어써서, 이후 다른 종류의 모달을 열었을 때도 이 핸들러가 그대로 남아있는 문제가 있었음).
+   또한 mousedown이 배경에서 시작했을 때만 닫히도록 하여, 모달 안의 textarea/입력값을
+   드래그로 선택하다가 마우스를 배경 위에서 놓았을 때 의도치 않게 창이 닫히는 현상을 막는다. */
+let _overlayMouseDownOnBackdrop=false;
+$overlay.addEventListener("mousedown",e=>{_overlayMouseDownOnBackdrop=(e.target===$overlay);});
+$overlay.addEventListener("mouseup",e=>{
+  if(_overlayMouseDownOnBackdrop&&e.target===$overlay)$overlay.classList.add("hidden");
+  _overlayMouseDownOnBackdrop=false;
+});
 
 /* ════════════════════════════════════
    기본 모달 (현장/이슈/재고 등록)
@@ -1251,7 +1397,6 @@ function openModal({title,fields,values={},onSave,hint="",wide=false}){
   const close=()=>$overlay.classList.add("hidden");
   document.getElementById("mc-x").onclick=close;
   document.getElementById("mc-cancel").onclick=close;
-  $overlay.onclick=e=>{if(e.target===$overlay)close();};
   const doSave=async()=>{
     const data={},flds=fields.filter(f=>!f.hidden);let ok=true;
     flds.forEach(f=>{
@@ -1654,6 +1799,10 @@ function _renderDetailModal(task,linkedSite,asRes,activeTab){
           <div class="field"><label>고객 전달 사항</label>
             <textarea id="dd_customerMsg" rows="2" placeholder="방문 전 고객에게 안내할 내용">${esc(task.customerMsg||"")}</textarea>
           </div>
+          <div class="field"><label>고객 이메일 <span style="font-weight:400;color:var(--ink-5);">(입력해두면 완료 처리 시 AS 보고서가 자동 발송됩니다)</span></label>
+            <input id="dd_customerEmail" type="email" value="${esc(task.customerEmail||"")}" placeholder="customer@example.com"/>
+          </div>
+          ${task.reportEmailSentAt?`<div style="font-size:11px;color:var(--teal-dk);margin-top:-6px;">✓ ${esc(task.customerEmail||"")}로 보고서 발송됨 (${esc(toDate(task.reportEmailSentAt)?toDate(task.reportEmailSentAt).toLocaleString("ko-KR"):"")})</div>`:""}
         </div>
       </div>
 
@@ -1708,12 +1857,26 @@ function _renderDetailModal(task,linkedSite,asRes,activeTab){
             }).join("")}
           </div>
         </div>
+        <div class="as-section">
+          <div class="as-section-title"><span>9</span>고객 확인 서명 (현장 태블릿/모바일 서명)</div>
+          <div class="field"><label>서명자 이름</label><input id="dd_customerSignerName" value="${esc(task.customerSignerName||task.manager||"")}" placeholder="예: 홍길동 (고객 담당자)"/></div>
+          <div style="font-size:11.5px;color:var(--ink-5);margin-bottom:8px;">아래 서명란에 고객이 직접 손가락·터치펜으로 서명하면 AS 보고서에 자동으로 반영됩니다.</div>
+          <div class="sign-pad-wrap">
+            <canvas id="signPadCanvas" class="sign-pad-canvas"></canvas>
+            <div id="signPadEmpty" class="sign-pad-empty"${task.customerSignature?' style="display:none;"':""}>여기에 서명해주세요</div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="window._clearSignPad()"><svg class='ic'><use href='#i-trash'/></svg> 서명 지우기</button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="window._saveSignature('${task.id}')"><svg class='ic'><use href='#i-check'/></svg> 서명 저장</button>
+            ${task.customerSignature?`<span style="font-size:11.5px;color:var(--teal-dk);align-self:center;">✓ 서명 저장됨${task.customerSignedAt?` (${new Date(task.customerSignedAt).toLocaleString("ko-KR")})`:""}</span>`:""}
+          </div>
+        </div>
       </div>
 
       <!-- ⑤사진 첨부 -->
       <div class="as-tab-panel${activeTab==="photo"?" active":""}" id="dp_photo">
         <div class="as-section">
-          <div class="as-section-title"><span>9</span>현장 사진 첨부</div>
+          <div class="as-section-title"><span>10</span>현장 사진 첨부</div>
           <div style="font-size:11.5px;color:var(--ink-5);margin-bottom:10px;line-height:1.6;">고장 부위, 수리 전/후 등 현장 사진을 첨부하면 AS 보고서에 자동으로 포함됩니다. 최대 8장, 장당 10MB 이하 (자동으로 리사이즈·압축되어 저장됩니다)</div>
           <input type="file" id="asPhotoInput" accept="image/*" multiple style="display:none;" onchange="window._addASPhotos(this)"/>
           <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('asPhotoInput').click()"><svg class='ic'><use href='#i-image'/></svg> 사진 선택 / 촬영</button>
@@ -1726,6 +1889,7 @@ function _renderDetailModal(task,linkedSite,asRes,activeTab){
       <button class="btn btn-secondary" onclick="document.getElementById('modalOverlay').classList.add('hidden')">닫기</button>
       <button class="btn btn-secondary" style="background:var(--blue-lt);color:var(--blue);border-color:rgba(37,99,235,.2);" onclick="window._openQuoteModal('${task.id}')"><svg class='ic'><use href='#i-clipboard'/></svg> 견적서</button>
       <button class="btn btn-secondary" style="background:var(--teal-lt);color:var(--teal-dk);border-color:rgba(13,148,136,.25);" onclick="window._previewASReport('${task.id}')" title="현재 입력된 접수·원인·조치 내용을 바탕으로 전문가 수준의 AS 보고서를 자동으로 작성합니다"><svg class='ic'><use href='#i-filetext'/></svg> AS 보고서 자동작성</button>
+      ${task.customerEmail?`<button class="btn btn-secondary" style="background:var(--violet-lt);color:var(--violet);border-color:rgba(124,58,237,.25);" onclick="window._sendASReportEmail('${task.id}')" title="고객 이메일로 AS 보고서를 즉시 발송합니다"><svg class='ic'><use href='#i-inbox'/></svg> 보고서 이메일 발송</button>`:""}
       <button class="btn btn-primary" onclick="window._saveDetail()"><svg class='ic'><use href='#i-save'/></svg> 저장</button>
       ${task.status!=="완료"?`<button class="btn btn-primary" style="background:var(--green);" onclick="window._completeProject('${task.id}')"><svg class='ic'><use href='#i-check'/></svg> 완료 처리</button>`:""}
     </div>`;
@@ -1733,6 +1897,7 @@ function _renderDetailModal(task,linkedSite,asRes,activeTab){
   if(task.errorCode)setTimeout(()=>window._lookupErrorGuide(),0);
   if(task.symptom)setTimeout(()=>window._suggestBySymptom(),0);
   setTimeout(()=>window._renderASPhotoGallery(),0);
+  setTimeout(()=>window._initSignPad(),0);
 }
 
 window._switchDetailTab=function(tabId){
@@ -1743,15 +1908,91 @@ window._switchDetailTab=function(tabId){
   document.querySelectorAll(".as-tab-panel").forEach(el=>{
     el.classList.toggle("active",el.id==="dp_"+tabId);
   });
+  if(tabId==="complete")setTimeout(()=>window._initSignPad(),0); // 완료 처리 탭으로 전환될 때 서명 캔버스 크기를 다시 계산
 };
 
 window._toggleCheck=function(idx,val){
   const task=tasks.find(t=>t.id===_detailTaskId);if(!task)return;
   const checklist=task.checklist?{...task.checklist}:{};
   checklist[idx]=val;
+  task.checklist=checklist;
   const wrap=document.getElementById("chkwrap_"+idx);
   if(wrap)wrap.classList.toggle("done-item",val);
+  const box=wrap?wrap.querySelector('input[type="checkbox"]'):null;
+  if(box)box.checked=val;
   updateDoc(doc(db,COL.tasks,_detailTaskId),{checklist}).catch(e=>console.error(e));
+};
+
+/* ════ AS 이력카드 · 고객 확인 서명 (현장 태블릿/모바일 터치 서명 → AS 보고서에 자동 반영) ════ */
+let _signPadCtx=null,_signPadHasInk=false,_signPadDrawing=false,_signPadLast=[0,0];
+window._initSignPad=function(){
+  const canvas=document.getElementById("signPadCanvas");
+  if(!canvas||canvas._signInit)return; // 이벤트 리스너 중복 등록 방지 (탭 재방문 시에도 1회만 바인딩)
+  const wrap=canvas.parentElement;
+  const cssW=wrap.clientWidth||300,cssH=160;
+  if(!cssW)return; // 아직 숨겨진 탭이라 폭을 알 수 없으면 다음 호출(탭 전환 시)에서 재시도
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=cssW*dpr;canvas.height=cssH*dpr;
+  canvas.style.width=cssW+"px";canvas.style.height=cssH+"px";
+  const ctx=canvas.getContext("2d");
+  ctx.scale(dpr,dpr);
+  ctx.lineWidth=2.2;ctx.lineCap="round";ctx.lineJoin="round";ctx.strokeStyle="#0f172a";
+  _signPadCtx=ctx;_signPadHasInk=false;
+  const task=tasks.find(t=>t.id===_detailTaskId);
+  if(task&&task.customerSignature){
+    const img=new Image();
+    img.onload=()=>{ctx.drawImage(img,0,0,cssW,cssH);_signPadHasInk=true;};
+    img.src=task.customerSignature;
+    const empty=document.getElementById("signPadEmpty");if(empty)empty.style.display="none";
+  }
+  const pos=e=>{
+    const r=canvas.getBoundingClientRect();
+    const t=e.touches&&e.touches[0];
+    return[(t?t.clientX:e.clientX)-r.left,(t?t.clientY:e.clientY)-r.top];
+  };
+  const start=e=>{
+    e.preventDefault();_signPadDrawing=true;
+    const empty=document.getElementById("signPadEmpty");if(empty)empty.style.display="none";
+    _signPadLast=pos(e);
+  };
+  const move=e=>{
+    if(!_signPadDrawing)return;
+    e.preventDefault();
+    const p=pos(e);
+    ctx.beginPath();ctx.moveTo(_signPadLast[0],_signPadLast[1]);ctx.lineTo(p[0],p[1]);ctx.stroke();
+    _signPadLast=p;_signPadHasInk=true;
+  };
+  const end=()=>{_signPadDrawing=false;};
+  canvas.addEventListener("mousedown",start);
+  canvas.addEventListener("mousemove",move);
+  window.addEventListener("mouseup",end);
+  canvas.addEventListener("touchstart",start,{passive:false});
+  canvas.addEventListener("touchmove",move,{passive:false});
+  canvas.addEventListener("touchend",end);
+  canvas._signInit=true;
+};
+window._clearSignPad=function(){
+  const canvas=document.getElementById("signPadCanvas");
+  if(!canvas||!_signPadCtx)return;
+  _signPadCtx.clearRect(0,0,canvas.width,canvas.height);
+  _signPadHasInk=false;
+  const empty=document.getElementById("signPadEmpty");if(empty)empty.style.display="flex";
+};
+window._saveSignature=async function(taskId){
+  const canvas=document.getElementById("signPadCanvas");
+  if(!canvas){toast("서명란을 불러오지 못했습니다. 탭을 다시 열어주세요","error");return;}
+  if(!_signPadHasInk){toast("서명을 먼저 입력해주세요","error");return;}
+  const name=document.getElementById("dd_customerSignerName")?.value.trim()||"";
+  const dataUrl=canvas.toDataURL("image/png");
+  const signedAt=Date.now();
+  try{
+    await updateDoc(doc(db,COL.tasks,taskId),{customerSignature:dataUrl,customerSignerName:name,customerSignedAt:signedAt});
+    const task=tasks.find(t=>t.id===taskId);
+    if(task){task.customerSignature=dataUrl;task.customerSignerName=name;task.customerSignedAt=signedAt;}
+    const idx=CHECKLIST_ITEMS.indexOf("고객 확인 서명 수령");
+    if(idx>=0&&!(task.checklist&&task.checklist[idx]))window._toggleCheck(idx,true); // 서명 완료 시 체크리스트 항목 자동 체크
+    toast("고객 서명이 저장되었습니다 · AS 보고서에 반영됩니다","success");
+  }catch(e){console.error(e);toast("서명 저장 실패 - 잠시 후 다시 시도해주세요","error");}
 };
 
 /* ════ AS 이력카드 · 사진 첨부 (현장 고장/수리 사진, 리사이즈·압축 후 Base64로 저장하여 AS 보고서에 자동 반영) ════ */
@@ -2059,7 +2300,7 @@ window._saveDetail=async function(){
     actionType:g("dd_actionType"),techEngineer:g("dd_techEngineer"),
     visitDate:g("dd_visitDate"),visitTime:g("dd_visitTime"),
     estHour:g("dd_estHour"),prepParts:g("dd_prepParts"),
-    customerMsg:g("dd_customerMsg"),
+    customerMsg:g("dd_customerMsg"),customerEmail:g("dd_customerEmail"),
     actionResult:g("dd_actionResult"),usedParts:g("dd_usedParts"),
     actualHour:g("dd_actualHour"),completeDate:g("dd_completeDate"),
     followUp:g("dd_followUp"),actionNote:g("dd_actionNote"),
@@ -2290,20 +2531,42 @@ function _buildASReportHTML(task,linkedSite,asRes){
     ${block("3. 조치 내역",rep.actionResultText+(task.usedParts?`\n· 사용 부품(실제): ${task.usedParts}`:"")+(task.actualHour?`\n· 실제 소요시간: ${task.actualHour}`:""))}
     ${block("4. 재발 방지 대책",rep.recurrenceText)}
     ${block("5. 특이사항",rep.actionNoteText)}
-    ${(task.photos&&task.photos.length)?`<div class="qdoc-section-title">■ 6. 현장 사진</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">
-      ${task.photos.map(p=>`<div style="border:1px solid #dde3ee;border-radius:6px;overflow:hidden;background:#fff;">
-        <img src="${p.dataUrl}" style="width:100%;height:150px;object-fit:cover;display:block;"/>
-        ${p.caption?`<div style="font-size:11px;color:#555;padding:5px 8px;border-top:1px solid #eee;">${esc(p.caption)}</div>`:""}
-      </div>`).join("")}
-    </div>`:""}
-    <div class="qdoc-section-title">■ ${(task.photos&&task.photos.length)?"7":"6"}. 완료 점검 체크리스트</div>
-    <div class="qdoc-table-wrap" style="margin-bottom:14px;"><table class="qdoc-items-table"><tbody>${checklistRows}</tbody></table></div>
-    ${totalCost>0?`<div class="qdoc-section-title">■ ${(task.photos&&task.photos.length)?"8":"7"}. AS 원가 요약</div>
-    <div class="qdoc-table-wrap" style="margin-bottom:14px;"><table class="qdoc-items-table">
-      <thead><tr><th>인건비(원)</th><th>출장비(원)</th><th>부품비(원)</th><th>물류비(원)</th><th>합계(원)</th></tr></thead>
-      <tbody><tr class="num"><td class="num">${laborCost.toLocaleString("ko-KR")}</td><td class="num">${travelCost.toLocaleString("ko-KR")}</td><td class="num">${partsCost.toLocaleString("ko-KR")}</td><td class="num">${logisticsCost.toLocaleString("ko-KR")}</td><td class="num" style="font-weight:700;color:#1a3a6b;">${totalCost.toLocaleString("ko-KR")}</td></tr></tbody>
-    </table></div>`:""}
+    ${(()=>{
+      let n=5;
+      let out="";
+      if(task.photos&&task.photos.length){
+        n++;
+        out+=`<div class="qdoc-section-title">■ ${n}. 현장 사진</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">
+          ${task.photos.map(p=>`<div style="border:1px solid #dde3ee;border-radius:6px;overflow:hidden;background:#fff;">
+            <img src="${p.dataUrl}" style="width:100%;height:150px;object-fit:cover;display:block;"/>
+            ${p.caption?`<div style="font-size:11px;color:#555;padding:5px 8px;border-top:1px solid #eee;">${esc(p.caption)}</div>`:""}
+          </div>`).join("")}
+        </div>`;
+      }
+      n++;
+      out+=`<div class="qdoc-section-title">■ ${n}. 완료 점검 체크리스트</div>
+      <div class="qdoc-table-wrap" style="margin-bottom:14px;"><table class="qdoc-items-table"><tbody>${checklistRows}</tbody></table></div>`;
+      n++;
+      out+=`<div class="qdoc-section-title">■ ${n}. 고객 확인 서명</div>
+      <div style="border:1px solid #dde3ee;border-radius:6px;padding:14px;margin-bottom:14px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;">
+        ${task.customerSignature?`<img src="${task.customerSignature}" style="height:80px;background:#fff;border:1px solid #eee;border-radius:4px;padding:4px;object-fit:contain;"/>`:`<div style="font-size:12px;color:#999;border:1px dashed #ccc;border-radius:4px;padding:18px 28px;">서명 미수령</div>`}
+        <div style="font-size:12px;color:#333;line-height:1.8;">
+          <div>서명자: <strong>${esc(task.customerSignerName||task.manager||"-")}</strong></div>
+          <div>서명일시: ${esc(task.customerSignedAt?new Date(task.customerSignedAt).toLocaleString("ko-KR"):"-")}</div>
+          <div style="font-size:11px;color:#999;margin-top:4px;">본 서명은 현장에서 고객이 직접 태블릿·모바일 화면에 작성한 전자 서명입니다.</div>
+        </div>
+      </div>`;
+      if(totalCost>0){
+        n++;
+        out+=`<div class="qdoc-section-title">■ ${n}. AS 원가 요약</div>
+        <div class="qdoc-table-wrap" style="margin-bottom:14px;"><table class="qdoc-items-table">
+          <thead><tr><th>인건비(원)</th><th>출장비(원)</th><th>부품비(원)</th><th>물류비(원)</th><th>합계(원)</th></tr></thead>
+          <tbody><tr class="num"><td class="num">${laborCost.toLocaleString("ko-KR")}</td><td class="num">${travelCost.toLocaleString("ko-KR")}</td><td class="num">${partsCost.toLocaleString("ko-KR")}</td><td class="num">${logisticsCost.toLocaleString("ko-KR")}</td><td class="num" style="font-weight:700;color:#1a3a6b;">${totalCost.toLocaleString("ko-KR")}</td></tr></tbody>
+        </table></div>`;
+      }
+      return out;
+    })()}
     ${task.followUp&&task.followUp!=="없음 (완전 해결)"?`<div style="border:1px solid rgba(225,29,72,.25);background:var(--rose-lt);border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:12.5px;color:var(--rose);font-weight:700;">⚠ 후속 조치 필요: ${esc(task.followUp)}</div>`:""}
     <div class="qdoc-footer">
       <div class="qdoc-footer-company">
@@ -2887,6 +3150,59 @@ window._openEditProject=id=>{
   openModal({title:"접수 수정",fields:projFields(),values:t,
     onSave:async d=>{await updateDoc(doc(db,COL.tasks,id),d);toast("수정되었습니다","success");}});
 };
+/* ════ AS 보고서 고객 이메일 자동 발송 ════
+   완료 처리 시 고객 이메일이 입력되어 있으면 자동으로 호출되며, 모달의
+   "보고서 이메일 발송" 버튼으로 수동 재발송도 가능함. EmailJS 설정값이
+   비어 있으면(EMAILJS_READY=false) 조용히 건너뛰고 안내만 표시함. */
+window._sendASReportEmail=async function(taskId,opts){
+  opts=opts||{};
+  const task=tasks.find(t=>t.id===taskId);
+  if(!task){if(!opts.silent)toast("접수 정보를 찾을 수 없습니다","error");return false;}
+  const email=(task.customerEmail||"").trim();
+  if(!email){if(!opts.silent)toast("고객 이메일이 입력되어 있지 않습니다","error");return false;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){toast("고객 이메일 형식이 올바르지 않습니다","error");return false;}
+  if(!EMAILJS_READY||!window.emailjs){
+    toast("이메일 발송이 아직 설정되지 않았습니다 (EmailJS 연동 필요 - 관리자에게 문의)","error");
+    return false;
+  }
+  const linkedSite=site.find(s=>s.name===task.siteName);
+  const rep=_composeASReport(task);
+  const today=new Date().toISOString().slice(0,10);
+  const plainSummary=[
+    `[${COMPANY_NAME}] AS 서비스 보고서`,"",
+    `현장명: ${task.siteName||"-"}`,
+    `모델명: ${task.equipModel||"-"}  /  시리얼번호: ${task.equipSN||"-"}`,
+    `접수일: ${task.receiptDate||"-"}  /  완료일: ${task.completeDate||today}`,"",
+    `■ 접수 증상`,rep.symptomText,"",
+    `■ 원인 분석`,rep.causeText,"",
+    `■ 조치 내역`,rep.actionResultText,"",
+    `■ 재발 방지 대책`,rep.recurrenceText,"",
+    `■ 특이사항`,rep.actionNoteText,"",
+    `문의: ${COMPANY_NAME} · ${COMPANY_TEL} · ${COMPANY_EMAIL}`,
+  ].join("\n");
+  const params={
+    to_email:email,
+    customer_name:task.manager||task.siteName||"고객",
+    site_name:task.siteName||"",
+    equip_model:task.equipModel||"",
+    equip_sn:task.equipSN||"",
+    report_date:today,
+    report_summary:plainSummary,
+    company_name:COMPANY_NAME,company_tel:COMPANY_TEL,company_email:COMPANY_EMAIL,
+  };
+  try{
+    if(!opts.silent)toast("보고서 이메일을 발송 중입니다...","success");
+    await window.emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,params);
+    await updateDoc(doc(db,COL.tasks,taskId),{reportEmailSentAt:serverTimestamp()});
+    toast(`${email} 로 AS 보고서가 발송되었습니다`,"success");
+    return true;
+  }catch(e){
+    console.error("EmailJS 발송 실패",e);
+    toast("이메일 발송에 실패했습니다. 잠시 후 다시 시도해주세요","error");
+    return false;
+  }
+};
+
 window._completeProject=async id=>{
   const t=tasks.find(x=>x.id===id);if(!t)return;
   const start=t.createdAt?toDate(t.createdAt):new Date();
@@ -2897,6 +3213,7 @@ window._completeProject=async id=>{
     await updateDoc(doc(db,COL.tasks,id),{status:"완료",completedAt:serverTimestamp(),processTime:hrs,asType});
     $overlay.classList.add("hidden");
     toast(`완료 처리 완료 · 처리시간 ${hrs}시간 · AS: ${asType}`,"success");
+    if((t.customerEmail||"").trim())window._sendASReportEmail(id,{silent:true}); // 고객 이메일이 있으면 완료 처리와 동시에 보고서 자동 발송
   }catch(e){toast("처리 실패","error");}
 };
 window._deleteProject=async id=>{
@@ -7344,7 +7661,7 @@ document.querySelectorAll(".nav-item,.m-tab").forEach(el=>{
   el.addEventListener("click",()=>navigate(el.dataset.page));
 });
 
-render("dashboard");
+curPage="dashboard"; // 초기 페이지 지정 (실제 렌더링은 로그인 성공 후 onAuthStateChanged에서 수행됨)
 </script>
 
 <script>
