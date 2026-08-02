@@ -1076,9 +1076,9 @@ const TEAM_NAME="로봇사업팀"; // 주간업무보고서 "작성팀" 고정�
    2) Email Templates에서 새 템플릿 생성 → 아래 변수명({{to_email}} 등)을 템플릿 본문에 그대로 사용 → TEMPLATE_ID 확인
    3) Account → General에서 Public Key 확인
    4) 아래 3개 값을 실제 값으로 교체하면 즉시 동작함 (배포 전 값이 비어있으면 발송이 자동 비활성화됨) */
-const EMAILJS_SERVICE_ID="YOUR_EMAILJS_SERVICE_ID";
-const EMAILJS_TEMPLATE_ID="YOUR_EMAILJS_TEMPLATE_ID";
-const EMAILJS_PUBLIC_KEY="YOUR_EMAILJS_PUBLIC_KEY";
+const EMAILJS_SERVICE_ID="service_chzsg9a";
+const EMAILJS_TEMPLATE_ID="template_bdqml8l";
+const EMAILJS_PUBLIC_KEY="km25SZq2ZZgL-zM-g";
 const EMAILJS_READY=EMAILJS_SERVICE_ID!=="YOUR_EMAILJS_SERVICE_ID"&&EMAILJS_TEMPLATE_ID!=="YOUR_EMAILJS_TEMPLATE_ID"&&EMAILJS_PUBLIC_KEY!=="YOUR_EMAILJS_PUBLIC_KEY";
 if(EMAILJS_READY&&window.emailjs)window.emailjs.init({publicKey:EMAILJS_PUBLIC_KEY});
 
