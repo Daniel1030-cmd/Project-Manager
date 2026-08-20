@@ -327,6 +327,41 @@ input,select,textarea{font-family:inherit;}
 .check-item-text{font-size:13px;color:var(--ink-2);line-height:1.4;}
 .check-item.done-item .check-item-text{text-decoration:line-through;color:var(--ink-5);}
 
+/* ════ 현장 답사 체크리스트(TN70) ════ */
+.sv-section{border:1px solid var(--line);border-radius:var(--r-lg);margin-bottom:14px;overflow:hidden;}
+.sv-section-head{background:#0f2942;color:#fff;padding:10px 14px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.sv-section-note{background:#fffbeb;color:#92400e;font-size:11.5px;padding:8px 14px;border-bottom:1px solid #fde68a;line-height:1.6;}
+.sv-item{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:8px;}
+.sv-item:last-child{border-bottom:none;}
+.sv-item-top{display:flex;gap:10px;align-items:flex-start;}
+.sv-item-id{flex-shrink:0;width:40px;height:22px;border-radius:5px;background:var(--teal-lt);color:var(--teal-dk);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+.sv-item-criteria{flex:1;font-size:12.5px;color:var(--ink-2);line-height:1.65;white-space:pre-line;}
+.sv-item-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;}
+.sv-item-row input[type="text"]{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:var(--r-sm);font-size:12.5px;background:var(--bg);}
+.sv-verdict{display:flex;gap:6px;flex-shrink:0;}
+.sv-verdict label{display:flex;align-items:center;gap:4px;padding:6px 10px;border:1px solid var(--line);border-radius:999px;font-size:11.5px;font-weight:600;color:var(--ink-4);cursor:pointer;white-space:nowrap;user-select:none;transition:.15s;}
+.sv-verdict input{accent-color:var(--teal);margin:0;}
+.sv-verdict label.sv-v-ok{border-color:rgba(13,148,136,.3);}
+.sv-verdict input:checked + span{font-weight:800;}
+.sv-verdict label:has(input:checked).sv-v-ok{background:var(--teal-lt);color:var(--teal-dk);border-color:var(--teal);}
+.sv-verdict label:has(input:checked).sv-v-bad{background:var(--rose-lt);color:var(--rose);border-color:var(--rose);}
+.sv-verdict label:has(input:checked).sv-v-chk{background:var(--amber-lt,#fef3c7);color:var(--warn,#b45309);border-color:var(--warn,#d97706);}
+.sv-meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+@media(max-width:768px){.sv-meta-grid{grid-template-columns:1fr;}.sv-item-row{grid-template-columns:1fr;}.sv-verdict{flex-wrap:wrap;}}
+.sv-conclusion{display:flex;gap:8px;flex-wrap:wrap;}
+.sv-conclusion label{display:flex;align-items:center;gap:6px;padding:9px 14px;border:1.5px solid var(--line);border-radius:var(--r);font-size:12.5px;font-weight:700;color:var(--ink-4);cursor:pointer;}
+.sv-conclusion label:has(input:checked){border-color:var(--teal);background:var(--teal-lt);color:var(--teal-dk);}
+.sv-card{border:1px solid var(--line);border-radius:var(--r-lg);padding:14px 16px;background:var(--surface);display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:.15s;}
+.sv-card:hover{border-color:var(--teal);box-shadow:0 2px 10px rgba(0,0,0,.05);}
+.sv-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+.sv-card-title{font-size:14px;font-weight:800;color:var(--ink-1);}
+.sv-card-sub{font-size:11.5px;color:var(--ink-5);}
+.sv-concl-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;flex-shrink:0;}
+.sv-concl-ready{background:var(--teal-lt);color:var(--teal-dk);}
+.sv-concl-fix{background:var(--amber-lt,#fef3c7);color:var(--warn,#b45309);}
+.sv-concl-no{background:var(--rose-lt);color:var(--rose);}
+.sv-concl-none{background:var(--line-2);color:var(--ink-5);}
+
 /* ════ 이력 타임라인 ════ */
 .history-list{display:flex;flex-direction:column;gap:0;}
 .history-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line);}
@@ -935,6 +970,7 @@ img,svg{-webkit-user-drag:none;user-drag:none;pointer-events:auto;}
         <li class="sidebar-section">관리</li>
         <li class="nav-item" data-page="site"><span class="nav-ic"><svg class='ic'><use href='#i-building'/></svg></span>Site Master</li>
         <li class="nav-item" data-page="project"><span class="nav-ic"><svg class='ic'><use href='#i-tool'/></svg></span>Project</li>
+        <li class="nav-item" data-page="survey"><span class="nav-ic"><svg class='ic'><use href='#i-clipboard'/></svg></span>현장 답사 체크리스트</li>
         <li class="nav-item" data-page="inventory"><span class="nav-ic"><svg class='ic'><use href='#i-package'/></svg></span>Inventory</li>
         <li class="nav-item" data-page="errorcode"><span class="nav-ic"><svg class='ic'><use href='#i-book'/></svg></span>오류코드 가이드</li>
         <li class="nav-item" data-page="support"><span class="nav-ic"><svg class='ic'><use href='#i-life-buoy'/></svg></span>기술지원</li>
@@ -980,6 +1016,7 @@ img,svg{-webkit-user-drag:none;user-drag:none;pointer-events:auto;}
     <li class="m-tab" data-page="dashboard"><span class="m-tab-ic"><svg class='ic'><use href='#i-home'/></svg></span>Home</li>
     <li class="m-tab" data-page="site"><span class="m-tab-ic"><svg class='ic'><use href='#i-building'/></svg></span>Site</li>
     <li class="m-tab" data-page="project"><span class="m-tab-ic"><svg class='ic'><use href='#i-tool'/></svg></span>Project</li>
+    <li class="m-tab" data-page="survey"><span class="m-tab-ic"><svg class='ic'><use href='#i-clipboard'/></svg></span>답사</li>
     <li class="m-tab" data-page="inventory"><span class="m-tab-ic"><svg class='ic'><use href='#i-package'/></svg></span>Stock</li>
     <li class="m-tab" data-page="errorcode"><span class="m-tab-ic"><svg class='ic'><use href='#i-book'/></svg></span>오류</li>
     <li class="m-tab" data-page="support"><span class="m-tab-ic"><svg class='ic'><use href='#i-life-buoy'/></svg></span>기술지원</li>
@@ -1048,9 +1085,9 @@ const fbCfg={
 const fbApp=initializeApp(fbCfg);
 const db=getFirestore(fbApp);
 const auth=getAuth(fbApp);
-const COL={site:"site",tasks:"tasks",issues:"issues",inventory:"inventory",weeklyReports:"weeklyReports",errorCodes:"errorCodes",employees:"employees",employeePayroll:"employeePayroll",supportSites:"supportSites",manuals:"manuals",productInfo:"productInfo"};
+const COL={site:"site",tasks:"tasks",issues:"issues",inventory:"inventory",weeklyReports:"weeklyReports",errorCodes:"errorCodes",employees:"employees",employeePayroll:"employeePayroll",supportSites:"supportSites",manuals:"manuals",productInfo:"productInfo",siteSurveys:"siteSurveys"};
 
-let site=[],tasks=[],issues=[],inventoryList=[],weeklyReports=[],errorCodes=[],employees=[],payrollRecords=[],supportSites=[],manuals=[],productInfo=[];
+let site=[],tasks=[],issues=[],inventoryList=[],weeklyReports=[],errorCodes=[],employees=[],payrollRecords=[],supportSites=[],manuals=[],productInfo=[],siteSurveys=[];
 let curPage="dashboard";
 let sq={site:"",project:"",issue:"",inventory:"",errorcode:"",supportSite:"",supportManual:"",productInfo:""};
 let projSort={col:"receiptDate",dir:"desc"};
@@ -1097,6 +1134,67 @@ const CHECKLIST_ITEMS=[
   "소프트웨어 버전 확인","청소 구역 맵 정합성 확인","기계적 이상음·진동 확인",
   "부품 체결 상태 확인","고객 확인 서명 수령"
 ];
+/* ════ 산업용 청소로봇(TN70) 현장 답사 적합성 평가 체크리스트 ════
+   출처: 산업용 청소로봇(TN70) 현장 답사 적합성 평가 체크리스트.pdf */
+const SV_VERDICTS=[
+  {v:"적합",cls:"sv-v-ok",ic:"i-check"},
+  {v:"부적합",cls:"sv-v-bad",ic:"i-x"},
+  {v:"추가확인 필요",cls:"sv-v-chk",ic:"i-alert"},
+];
+const SV_SECTIONS=[
+  {no:"1",title:"면적 및 주차면 수",
+    note:"※ 1일 유효 가동시간(약 9시간) 내 완료가 불가능할 것으로 판단되는 경우, 견적 단계에서 로봇 증대수를 사전 제안할 것",
+    items:[
+      {id:"1-1",criteria:"로봇 1대: 1일 유효 청소 면적 = 회차 포함 약 220~260개 주차면\n로봇 1대: 주 단위 순환 커버 = 최대 1,100~1,300개 주차면(1일 약 9시간 가동 기준)\n요구 청소 범위가 이를 초과할 경우 로봇 대수 증설 검토 필요",dataLabel:"총 주차면수 / 요청 청소 주기"},
+    ]},
+  {no:"2",title:"지하 주차장 층수",
+    items:[
+      {id:"2-1",criteria:"지하 주차장이 다층 구조인 경우, 원칙적으로 각 층별 워크스테이션 설치 권장\n층간 자동 이동 조건이 충족되는 경우 워크스테이션 1대로 통합 운영 가능",dataLabel:"지하 층수 / 층별 면적"},
+    ]},
+  {no:"3",title:"층간 전환(이동) 조건",
+    items:[
+      {id:"3-1",criteria:"지하 주차장 경사로를 통한 층간 이동은 안전 위험으로 인해 금지\n출입통제(자동감지 게이트) 또는 엘리베이터 제어(승강기 연동 모듈) 방식으로 자동 전환 지원 가능(고객 협의 및 별도 모듈 설치 필요)",dataLabel:"전환 방식(게이트/승강기)"},
+      {id:"3-2",criteria:"엘리베이터 이용 시 카 출입문 폭 100cm 초과\n엘리베이터 카 내부 깊이 150cm 초과\n이동 동선 내 단차 없이 평탄해야 함",dataLabel:"승강기 문 폭 / 카 깊이 실측값"},
+    ]},
+  {no:"4",title:"중간층·단차 경사로 통행 가능 여부",
+    note:"※ 경사각이 4°~6° 구간인 경우 현장 노면 상태(마찰계수, 습윤 여부)를 종합 확인 후 개별 판단",
+    items:[
+      {id:"4-1",criteria:"우회 불가능한 중간층/단차 경사로가 있는 경우에 한해 적용\n경사도 4° 이내: 자동 통행 가능(정상 사용)\n경사도 6° 초과: 전도·미끄러짐 위험으로 통행 불가",dataLabel:"경사각(°) 실측값"},
+    ]},
+  {no:"5",title:"바닥 재질",
+    items:[
+      {id:"5-1",criteria:"지원 재질: 에폭시 바닥, 물갈기(테라조), 타일, 청석판, 시멘트 경화 바닥 등 일반 재질\n미지원 재질: 아스팔트, 거친 입자 미끄럼방지 바닥재(흡입 세척 효율 저하)\n대규모 인테리어 공사 분진 오염 구역, 미개척(未開荒) 구역은 작업 대상에서 제외",dataLabel:"바닥 재질 종류"},
+    ]},
+  {no:"6",title:"감속턱(과속방지턱) 통과",
+    items:[
+      {id:"6-1",criteria:"지원: 높이 6cm 이하의 PVC/고무 재질 일반 과속방지턱\n미지원(개별 판정 필요): 못(돌기)형, 강제(鋼製), 불규칙 형태의 감속턱\n감속턱 구간에는 로봇 통행용으로 폭 약 1m 이상 여유 공간 확보 권장",dataLabel:"감속턱 재질/높이/폭"},
+    ]},
+  {no:"7",title:"바닥 파손·박리 현황",
+    items:[
+      {id:"7-1",criteria:"소면적 파손: 해당 구역을 가상 차단(우회 설정)하여 운영 — 미설정 시 세척 과정에서 파손 확대 위험\n대면적 파손·박리: 바닥 보수공사 선행 후 로봇 청소 방안 재검토 권장",dataLabel:"파손 위치/면적(대략)"},
+    ]},
+  {no:"8",title:"지면등(유도등) 및 주차구획 잠금장치",
+    items:[
+      {id:"8-1",criteria:"주차구획 잠금장치(파킹락): 로봇이 자동 인식하여 우회 주행",dataLabel:"설치 수량/위치"},
+      {id:"8-2",criteria:"바닥 매립형 유도등(지면등): 자동 인식 불가 — 별도 가상 차단(우회) 설정 필요",dataLabel:"설치 수량/위치"},
+    ]},
+  {no:"9",title:"방화문 · 인방(人防)공사 문턱",
+    items:[
+      {id:"9-1",criteria:"지원 기준: 문턱 높이 2cm 이하, 폭 3.5cm 이하\n기준 초과 시: 규격에 맞는 로봇용 보조 경사판 구매 또는 문턱 평탄화 시공 필요",dataLabel:"문턱 높이/폭 실측값"},
+    ]},
+  {no:"10",title:"워크스테이션(충전·급배수 기지국) 입지 조건(TN70W 한정)",
+    note:"워크스테이션 주변은 급수·배수·전력·공간 조건을 모두 충족해야 하며, 미충족 시 배관·배선 개조 공사 여부를 사전 검토합니다.",
+    items:[
+      {id:"10-1",label:"입지",criteria:"분리 구역의 기하학적 중심에 배치하여 회귀(급수·충전) 공주행 거리 최소화\n구역 경계는 실체벽, 방화셔터, 영구 칸막이 등 물리적 경계를 우선 활용\n단일 구역 유효 청소면적(실세척면적) ≤ 30,000㎡ 로 제한(여유 확보, 상한 근접 금지)",dataLabel:"예정 위치 / 구역면적"},
+      {id:"10-2",label:"공간",criteria:"기지국 좌우 각 0.5m(기지국 폭 포함 총 1.5m) 무장애물\n기지국 전방 2.5m 구간 무장애물(즉 1.5m × 2.5m 개방 공간 확보)",dataLabel:"확보 가능 공간(가로×세로)"},
+      {id:"10-3",label:"전원",criteria:"전원 콘센트는 벽 부착형, 설치 높이 약 1m\n워크스테이션과의 거리 0.5m 이내\n2.5㎟ 규격 220V 전선, 방수 커버형 3구 콘센트 박스 권장",dataLabel:"기존 전원 위치/거리"},
+      {id:"10-4",label:"급수",criteria:"급수관 5m 기본 제공(권장 설치 높이 약 1m, 강제 기준 아님)\n워크스테이션과의 거리 3m 이내\n수도꼭지 별도 설치 불필요(로봇 기기에 기본 포함)",dataLabel:"급수원 위치/거리"},
+      {id:"10-5",label:"배수",criteria:"워크스테이션 배수관 3m 기본 제공\n인근 오수구 또는 배수 트렌치/맨홀에 2m 이내로 연결 가능해야 함",dataLabel:"배수구 위치/거리"},
+      {id:"10-6",label:"설치·고정",criteria:"벽면에 밀착 설치(벽면 부착 방식)\n별도의 바닥 고정(앵커 등) 불필요",dataLabel:"설치 벽면 상태"},
+    ]},
+];
+const SV_CONCLUSIONS=["즉시 투입 가능","보완 공사 후 투입 가능","투입 불가"];
+
 /* ════ 재고 브랜드 / 현황 구분 ════ */
 const INV_BRANDS=["NEO","SPARKOZ"];
 const INV_STATUS_LIST=["판매","렌탈","재고","데모","대체"];
@@ -1364,6 +1462,7 @@ function startDataListeners(){
   onSnapshot(collection(db,COL.site),s=>{site=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
   onSnapshot(collection(db,COL.tasks),s=>{tasks=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
   onSnapshot(collection(db,COL.issues),s=>{issues=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
+  onSnapshot(collection(db,COL.siteSurveys),s=>{siteSurveys=s.docs.map(d=>({id:d.id,...d.data()}));if(curPage==="survey")render(curPage);});
   onSnapshot(collection(db,COL.inventory),s=>{inventoryList=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
   onSnapshot(collection(db,COL.weeklyReports),s=>{weeklyReports=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
   onSnapshot(collection(db,COL.errorCodes),s=>{errorCodes=s.docs.map(d=>({id:d.id,...d.data()}));render(curPage);});
@@ -2662,7 +2761,7 @@ function _buildASReportHTML(task,linkedSite,asRes){
 ════════════════════════════════════ */
 let quoteItems=[],quoteTaskId=null,_previewKind="quote";
 function quoteItemsTotal(){return quoteItems.reduce((s,it)=>s+((parseInt(it.qty)||0)*(parseInt(it.unitPrice)||0)),0);}
-window._printPreview=function(){if(_previewKind==="report")window._printReport();else if(_previewKind==="asreport")window._printASReport(_asReportTaskId);else window._printQuote();};
+window._printPreview=function(){if(_previewKind==="report")window._printReport();else if(_previewKind==="asreport")window._printASReport(_asReportTaskId);else if(_previewKind==="survey")window._svPrint();else window._printQuote();};
 
 window._openQuoteModal=function(taskId){
   const task=tasks.find(t=>t.id===taskId);
@@ -7930,10 +8029,305 @@ function renderDashboard(){
 
 function empty(icon,title,body){return`<div class="empty"><div class="empty-icon">${icon}</div><div class="empty-title">${esc(title)}</div><div class="empty-body">${esc(body)}</div></div>`;}
 
+/* ════════════════════════════════════
+   현장 답사 체크리스트(TN70) 엔진
+════════════════════════════════════ */
+let svCurrentId=null,svItemState={};
+
+function svConclBadge(c){
+  const m={"즉시 투입 가능":["sv-concl-ready","<svg class='ic'><use href='#i-check'/></svg>"],"보완 공사 후 투입 가능":["sv-concl-fix","<svg class='ic'><use href='#i-tool'/></svg>"],"투입 불가":["sv-concl-no","<svg class='ic'><use href='#i-x'/></svg>"]};
+  const hit=m[c];
+  return hit?`<span class="sv-concl-badge ${hit[0]}">${hit[1]} ${esc(c)}</span>`:`<span class="sv-concl-badge sv-concl-none">판정 미정</span>`;
+}
+function svVerdictCounts(items){
+  const vals=Object.values(items||{});
+  return{ok:vals.filter(x=>x.verdict==="적합").length,bad:vals.filter(x=>x.verdict==="부적합").length,chk:vals.filter(x=>x.verdict==="추가확인 필요").length,total:vals.length};
+}
+
+function renderSurvey(){
+  const list=[...siteSurveys].sort((a,b)=>{const da=toDate(a.visitDate)||toDate(a.createdAt)||0,db2=toDate(b.visitDate)||toDate(b.createdAt)||0;return db2-da;});
+  $content.innerHTML=`
+    <div class="page-head">
+      <div><div class="page-title">현장 답사 체크리스트</div><div class="page-subtitle">산업용 청소로봇(TN70) 투입 가능 여부를 판단하는 현장 답사용 적합성 평가 도구입니다</div></div>
+      <div class="page-actions"><button class="btn btn-primary" onclick="window._openSurveyForm()">+ 새 체크리스트 작성</button></div>
+    </div>
+    ${!site.length?`<div class="no-sites"><svg class='ic'><use href='#i-alert'/></svg> Site 메뉴에서 먼저 현장을 등록해두면 프로젝트명·주소를 빠르게 불러올 수 있습니다.</div>`:""}
+    ${!list.length?`<div class="card"><div class="card-body">${empty("<svg class='ic'><use href='#i-clipboard'/></svg>","작성된 체크리스트가 없습니다","+ 새 체크리스트 작성 버튼으로 현장 답사 결과를 기록해보세요")}</div></div>`:`
+    <div class="card">
+      <div class="card-header"><div class="card-title">체크리스트 목록 (${list.length}건)</div></div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">
+          ${list.map(sv=>{
+            const cnt=svVerdictCounts(sv.items);
+            const visitDate=sv.visitDate||fmtDate(sv.createdAt)||"-";
+            return`<div class="sv-card" onclick="window._openSurveyForm('${sv.id}')">
+              <div class="sv-card-top">
+                <div>
+                  <div class="sv-card-title">${esc(sv.projectName)||"프로젝트명 미입력"}</div>
+                  <div class="sv-card-sub">${esc(sv.siteAddress)||"현장 주소 미입력"}</div>
+                </div>
+                ${svConclBadge(sv.conclusion)}
+              </div>
+              <div class="sv-card-sub">방문일자: ${esc(visitDate)} · 방문자: ${esc(sv.visitor)||"-"}</div>
+              <div style="display:flex;gap:6px;font-size:11px;font-weight:700;margin-top:2px;">
+                <span style="color:var(--teal-dk);">적합 ${cnt.ok}</span>
+                <span style="color:var(--ink-5);">/</span>
+                <span style="color:var(--rose);">부적합 ${cnt.bad}</span>
+                <span style="color:var(--ink-5);">/</span>
+                <span style="color:var(--warn,#b45309);">확인필요 ${cnt.chk}</span>
+              </div>
+              <div style="display:flex;gap:6px;margin-top:6px;" onclick="event.stopPropagation();">
+                <button class="btn btn-ghost btn-sm" onclick="window._svPreview('${sv.id}')"><svg class='ic'><use href='#i-eye'/></svg> 보고서</button>
+                <button class="btn btn-ghost btn-sm" style="color:var(--rose);" onclick="window._svDeleteSurvey('${sv.id}')"><svg class='ic'><use href='#i-x'/></svg> 삭제</button>
+              </div>
+            </div>`;
+          }).join("")}
+        </div>
+      </div>
+    </div>`}`;
+}
+
+function _svItemsHTML(existingItems){
+  existingItems=existingItems||{};
+  return SV_SECTIONS.map(sec=>`
+    <div class="sv-section">
+      <div class="sv-section-head"><span>${esc(sec.no)}. ${esc(sec.title)}</span></div>
+      ${sec.note?`<div class="sv-section-note">${esc(sec.note)}</div>`:""}
+      ${sec.items.map(it=>{
+        const cur=existingItems[it.id]||{};
+        return`<div class="sv-item">
+          <div class="sv-item-top">
+            <div class="sv-item-id">${esc(it.label||it.id)}</div>
+            <div class="sv-item-criteria">${esc(it.criteria)}</div>
+          </div>
+          <div class="sv-item-row">
+            <input type="text" id="sv_data_${it.id}" placeholder="${esc(it.dataLabel)} 기입" value="${esc(cur.data||"")}"/>
+            <div class="sv-verdict">
+              ${SV_VERDICTS.map(v=>`<label class="${v.cls}"><input type="radio" name="sv_verdict_${it.id}" value="${esc(v.v)}"${cur.verdict===v.v?" checked":""}/><span>${esc(v.v)}</span></label>`).join("")}
+            </div>
+          </div>
+        </div>`;
+      }).join("")}
+    </div>`).join("");
+}
+
+window._openSurveyForm=function(id){
+  const existing=id?siteSurveys.find(s=>s.id===id):null;
+  svCurrentId=id||null;
+  const v=existing||{};
+  $modal.className="modal modal-wide";
+  $modal.innerHTML=`
+    <div class="modal-header">
+      <div class="modal-title"><svg class='ic'><use href='#i-clipboard'/></svg> 산업용 청소로봇(TN70) 현장 답사 적합성 평가 체크리스트</div>
+      <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.add('hidden')"><svg class='ic'><use href='#i-x'/></svg></button>
+    </div>
+    <div class="modal-body" style="padding:14px 16px;">
+      <div class="sv-meta-grid">
+        <div class="field"><label>프로젝트명</label><input id="sv_projectName" type="text" value="${esc(v.projectName||"")}"/></div>
+        <div class="field"><label>현장 주소</label><input id="sv_siteAddress" type="text" value="${esc(v.siteAddress||"")}"/></div>
+        <div class="field"><label>방문 일자</label><input id="sv_visitDate" type="date" value="${esc(v.visitDate||new Date().toISOString().slice(0,10))}"/></div>
+        <div class="field"><label>방 문 자</label><input id="sv_visitor" type="text" value="${esc(v.visitor||"")}"/></div>
+        <div class="field"><label>고객 사명</label><input id="sv_customerCompany" type="text" value="${esc(v.customerCompany||"")}"/></div>
+        <div class="field"><label>고객 담당자</label><input id="sv_customerManager" type="text" value="${esc(v.customerManager||"")}"/></div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;">평가 항목</div>
+      <div id="svItemsWrap">${_svItemsHTML(v.items)}</div>
+      <div class="sv-section" style="margin-top:4px;">
+        <div class="sv-section-head" style="background:var(--teal-dk);"><span>★ 종합 판정 및 특이사항</span></div>
+        <div style="padding:14px;">
+          <div class="field" style="margin-bottom:12px;">
+            <label>종합 결론</label>
+            <div class="sv-conclusion">
+              ${SV_CONCLUSIONS.map(c=>`<label><input type="radio" name="sv_conclusion" value="${esc(c)}"${v.conclusion===c?" checked":""}/> ${esc(c)}</label>`).join("")}
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>권장 로봇 대수</label><input id="sv_robotCount" type="number" min="0" value="${esc(v.robotCount||"")}"/></div>
+            <div class="field"><label>워크스테이션 대수</label><input id="sv_wsCount" type="number" min="0" value="${esc(v.wsCount||"")}"/></div>
+          </div>
+          <div class="field"><label>보완 필요 사항 / 특이사항</label><textarea id="sv_notes" rows="4" placeholder="보완 공사, 별도 협의 필요 항목 등을 기입하세요">${esc(v.notes||"")}</textarea></div>
+          <div class="field-row">
+            <div class="field"><label>방문자 서명(성명)</label><input id="sv_signerName" type="text" value="${esc(v.signerName||"")}"/></div>
+            <div class="field"><label>확인일자</label><input id="sv_confirmDate" type="date" value="${esc(v.confirmDate||"")}"/></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="document.getElementById('modalOverlay').classList.add('hidden')">닫기</button>
+      <button class="btn btn-secondary" onclick="window._svSaveSurvey(true)"><svg class='ic'><use href='#i-save'/></svg> 저장</button>
+      <button class="btn btn-secondary" style="background:var(--blue-lt);color:var(--blue);border-color:rgba(37,99,235,.2);" onclick="window._svPreview()"><svg class='ic'><use href='#i-eye'/></svg> 미리보기</button>
+      <button class="btn btn-primary" onclick="window._svSaveAndPrint()"><svg class='ic'><use href='#i-printer'/></svg> 인쇄/PDF</button>
+    </div>`;
+  $overlay.classList.remove("hidden");
+};
+
+function _svGather(){
+  const g=id=>document.getElementById(id)?.value.trim()||"";
+  const items={};
+  SV_SECTIONS.forEach(sec=>sec.items.forEach(it=>{
+    const data=g("sv_data_"+it.id);
+    const checked=document.querySelector(`input[name="sv_verdict_${it.id}"]:checked`);
+    const verdict=checked?checked.value:"";
+    if(data||verdict)items[it.id]={data,verdict};
+  }));
+  const conclEl=document.querySelector('input[name="sv_conclusion"]:checked');
+  return{
+    projectName:g("sv_projectName"),siteAddress:g("sv_siteAddress"),visitDate:g("sv_visitDate"),
+    visitor:g("sv_visitor"),customerCompany:g("sv_customerCompany"),customerManager:g("sv_customerManager"),
+    items,conclusion:conclEl?conclEl.value:"",robotCount:g("sv_robotCount"),wsCount:g("sv_wsCount"),
+    notes:g("sv_notes"),signerName:g("sv_signerName"),confirmDate:g("sv_confirmDate"),
+  };
+}
+
+window._svSaveSurvey=async function(showToast){
+  const data=_svGather();
+  if(!data.projectName&&!data.siteAddress){toast("프로젝트명 또는 현장 주소를 입력해주세요","error");return null;}
+  try{
+    if(svCurrentId){
+      await updateDoc(doc(db,COL.siteSurveys,svCurrentId),{...data,updatedAt:serverTimestamp()});
+    }else{
+      const ref=await addDoc(collection(db,COL.siteSurveys),{...data,createdAt:serverTimestamp()});
+      svCurrentId=ref.id;
+    }
+    if(showToast)toast("체크리스트가 저장되었습니다","success");
+    return data;
+  }catch(e){console.error(e);toast("저장 실패","error");return null;}
+};
+
+window._svDeleteSurvey=async function(id){
+  if(!confirm("이 체크리스트를 삭제하시겠습니까?"))return;
+  try{await deleteDoc(doc(db,COL.siteSurveys,id));toast("삭제되었습니다","success");}
+  catch(e){console.error(e);toast("삭제 실패","error");}
+};
+
+function _svVerdictTag(verdict){
+  const m={"적합":["#0d9488","i-check"],"부적합":["#e11d48","i-x"],"추가확인 필요":["#b45309","i-alert"]};
+  const hit=m[verdict];
+  if(!hit)return`<span style="color:#999;">미입력</span>`;
+  return`<span style="color:${hit[0]};font-weight:700;"><svg class='ic'><use href='#${hit[1]}'/></svg> ${esc(verdict)}</span>`;
+}
+
+function _buildSurveyReportHTML(data){
+  const today=new Date().toISOString().slice(0,10);
+  const reportNo=`SV-${(data.visitDate||today).replace(/-/g,"")}-${String(svCurrentId||Date.now()).slice(-4).toUpperCase()}`;
+  const items=data.items||{};
+  const sectionsHTML=SV_SECTIONS.map(sec=>{
+    const rows=sec.items.map(it=>{
+      const cur=items[it.id]||{};
+      return`<tr>
+        <td class="ctr" style="width:46px;font-weight:700;">${esc(it.label||it.id)}</td>
+        <td style="font-size:11px;white-space:pre-line;">${esc(it.criteria)}</td>
+        <td style="width:150px;">${esc(cur.data||"-")}</td>
+        <td class="ctr" style="width:100px;">${_svVerdictTag(cur.verdict)}</td>
+      </tr>`;
+    }).join("");
+    return`<div class="qdoc-section-title">■ ${esc(sec.no)}. ${esc(sec.title)}</div>
+    ${sec.note?`<div style="font-size:10.5px;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:4px;padding:6px 10px;margin-bottom:6px;">${esc(sec.note)}</div>`:""}
+    <div class="qdoc-table-wrap" style="margin-bottom:14px;"><table class="qdoc-items-table">
+      <thead><tr><th style="width:46px;">구분</th><th>로봇 기준값 / 판정 조건</th><th style="width:150px;">현장 실측·확인 데이터</th><th style="width:100px;">적합 여부</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>`;
+  }).join("");
+  const cnt=svVerdictCounts(items);
+  return`<div class="qdoc">
+    <div class="qdoc-header">
+      <img src="${COMPANY_LOGO}" class="qdoc-logo" alt="${esc(COMPANY_NAME)}"/>
+      <div class="qdoc-title-block"><div class="qdoc-title">산업용 청소로봇(TN70)<br/>현장 답사 적합성 평가 체크리스트</div><div class="qdoc-no">No. ${esc(reportNo)}</div><div style="font-size:11px;color:#888;margin-top:2px;">작성일: ${esc(today)}</div></div>
+    </div>
+    <div class="qdoc-meta-grid">
+      <div class="qdoc-meta-col">
+        <div class="qdoc-meta-row" style="background:#f0f7ff;"><span class="qdoc-meta-label" style="background:#1a73c8;color:#fff;border-right:none;">프로젝트명</span><span class="qdoc-meta-val" style="font-weight:800;font-size:13px;color:#1a3a6b;">${esc(data.projectName)||"-"}</span></div>
+        <div class="qdoc-meta-row"><span class="qdoc-meta-label">현장 주소</span><span class="qdoc-meta-val">${esc(data.siteAddress)||"-"}</span></div>
+        <div class="qdoc-meta-row"><span class="qdoc-meta-label">방문 일자</span><span class="qdoc-meta-val">${esc(data.visitDate)||"-"}</span></div>
+      </div>
+      <div class="qdoc-meta-col">
+        <div class="qdoc-meta-row" style="background:#f0f7ff;"><span class="qdoc-meta-label" style="background:#1a73c8;color:#fff;border-right:none;">방 문 자</span><span class="qdoc-meta-val" style="font-weight:800;font-size:13px;color:#1a3a6b;">${esc(data.visitor)||"-"}</span></div>
+        <div class="qdoc-meta-row"><span class="qdoc-meta-label">고객 사명</span><span class="qdoc-meta-val">${esc(data.customerCompany)||"-"}</span></div>
+        <div class="qdoc-meta-row"><span class="qdoc-meta-label">고객 담당자</span><span class="qdoc-meta-val">${esc(data.customerManager)||"-"}</span></div>
+      </div>
+    </div>
+    <div style="border:1px solid #c5d3e8;border-radius:6px;padding:8px 14px;margin-bottom:14px;background:#f0f7ff;font-size:11.5px;color:#333;">
+      본 체크리스트는 산업용 청소로봇의 투입 가능 여부를 판단하기 위한 현장 답사용 평가 도구입니다. 각 항목의 로봇 기준값과 현장 실측 데이터를 비교하여 적합 여부를 판정하고, 부적합 또는 확인 필요 항목은 별도 협의 및 보완 공사 여부를 검토합니다.
+      <div style="margin-top:4px;font-weight:700;">평가 결과: <span style="color:#0d9488;">적합 ${cnt.ok}건</span> · <span style="color:#e11d48;">부적합 ${cnt.bad}건</span> · <span style="color:#b45309;">추가확인 필요 ${cnt.chk}건</span></div>
+    </div>
+    ${sectionsHTML}
+    <div class="qdoc-section-title">■ 종합 판정 및 특이사항</div>
+    <div class="qdoc-table-wrap" style="margin-bottom:14px;"><table class="qdoc-items-table">
+      <thead><tr><th>종합 결론</th><th>권장 로봇 대수</th><th>워크스테이션 대수</th></tr></thead>
+      <tbody><tr><td class="ctr" style="font-weight:700;">${esc(data.conclusion)||"미정"}</td><td class="ctr">${esc(data.robotCount)||"-"}</td><td class="ctr">${esc(data.wsCount)||"-"}</td></tr></tbody>
+    </table></div>
+    ${data.notes?`<div class="qdoc-section-title">■ 보완 필요 사항 / 특이사항</div><div style="border:1px solid #dde3ee;border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:12.5px;line-height:1.7;color:#333;white-space:pre-line;">${esc(data.notes)}</div>`:""}
+    <div class="qdoc-footer">
+      <div class="qdoc-footer-company">
+        <div><strong>${esc(COMPANY_NAME)}</strong></div>
+        <div>대표이사: ${esc(COMPANY_CEO)}</div>
+        <div>Tel: ${esc(COMPANY_TEL)} | E-mail: ${esc(COMPANY_EMAIL)}</div>
+        <div>${esc(COMPANY_ADDR)}</div>
+        <div style="margin-top:10px;font-size:12px;color:#333;">방문자 서명: <strong>${esc(data.signerName)||"________________"}</strong> &nbsp;&nbsp; 확인일자: <strong>${esc(data.confirmDate)||"____________"}</strong></div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <img src="${COMPANY_LOGO}" style="height:38px;object-fit:contain;opacity:.7;" alt="logo"/>
+      </div>
+    </div>
+  </div>`;
+}
+
+window._svPreview=async function(id){
+  let data;
+  if(id){
+    const rec=siteSurveys.find(s=>s.id===id);
+    if(!rec){toast("체크리스트를 찾을 수 없습니다","error");return;}
+    svCurrentId=id;data=rec;
+  }else{
+    data=await window._svSaveSurvey(false);
+    if(!data)return;
+  }
+  _previewKind="survey";
+  const html=_buildSurveyReportHTML(data);
+  if(isMobile()){
+    const overlay=document.getElementById("quotePreviewOverlay");
+    document.getElementById("quotePreviewContent").innerHTML=html;
+    document.querySelector(".quote-preview-bar-title").innerHTML="<svg class='ic'><use href='#i-clipboard'/></svg> 현장 답사 체크리스트 미리보기";
+    overlay.classList.add("active");overlay.scrollTop=0;
+    $overlay.classList.add("hidden");
+  }else{
+    const pa=document.getElementById("quotePrintArea");
+    pa.style.cssText="display:block;position:fixed;inset:0;z-index:9998;background:#fff;overflow:auto;padding:20px;";
+    pa.innerHTML=`<div style="max-width:820px;margin:0 auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;" class="no-print">
+        <div style="font-size:15px;font-weight:700;">현장 답사 체크리스트 미리보기</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary no-print" onclick="window._svPrint()"><svg class='ic'><use href='#i-printer'/></svg> 인쇄/PDF</button>
+          <button class="btn btn-secondary no-print" onclick="document.getElementById('quotePrintArea').style.display='none'"><svg class='ic'><use href='#i-x'/></svg> 닫기</button>
+        </div>
+      </div>${html}</div>`;
+  }
+};
+
+window._svSaveAndPrint=async function(){
+  const data=await window._svSaveSurvey(false);
+  if(!data)return;
+  window._svPrint(data);
+};
+
+window._svPrint=async function(dataArg){
+  let data=dataArg;
+  if(!data){
+    if(svCurrentId){const rec=siteSurveys.find(s=>s.id===svCurrentId);data=rec||_svGather();}
+    else data=_svGather();
+  }
+  document.getElementById("quotePreviewOverlay").classList.remove("active");
+  const pa=document.getElementById("quotePrintArea");
+  pa.style.cssText="display:block;";pa.innerHTML=_buildSurveyReportHTML(data);
+  setTimeout(()=>{window.print();setTimeout(()=>{pa.style.display="none";},800);},200);
+};
+
 const PAGES={
   dashboard:{fn:renderDashboard,label:"Dashboard"},
   site:{fn:renderSite,label:"Site Master"},
   project:{fn:renderProject,label:"Project"},
+  survey:{fn:renderSurvey,label:"현장 답사 체크리스트"},
   inventory:{fn:renderInventory,label:"Inventory"},
   errorcode:{fn:renderErrorCode,label:"오류코드 가이드"},
   support:{fn:renderSupport,label:"기술지원"},
