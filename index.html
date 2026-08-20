@@ -215,6 +215,47 @@ input,select,textarea{font-family:inherit;}
 .field .ferr{font-size:12px;color:var(--rose);margin-top:5px;display:none;}
 .field.invalid input,.field.invalid select{border-color:var(--rose);}
 .field.invalid .ferr{display:block;}
+/* ── 후보 장소(복수) 입력 필드 ── */
+.multiloc-list{display:flex;flex-direction:column;gap:8px;}
+.multiloc-empty{padding:14px 12px;border:1px dashed var(--line);border-radius:var(--r);font-size:12.5px;color:var(--ink-5);text-align:center;background:var(--bg-2);}
+.multiloc-row{border:1px solid var(--line);border-radius:var(--r);padding:10px;background:var(--bg-2);transition:border-color .15s;}
+.multiloc-row:focus-within{border-color:var(--teal);}
+.multiloc-row[data-status="확정"]{border-left:3px solid var(--green);}
+.multiloc-row[data-status="검토중"]{border-left:3px solid var(--amber);}
+.multiloc-row[data-status="보류"]{border-left:3px solid var(--ink-5);}
+.multiloc-row[data-status="제외"]{border-left:3px solid var(--rose);opacity:.7;}
+.multiloc-row-top{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+.multiloc-row-idx{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:var(--surface);border:1px solid var(--line);color:var(--ink-4);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.multiloc-name{flex:1 1 auto;min-width:0;padding:8px 10px!important;font-size:13.5px!important;background:var(--surface)!important;}
+.multiloc-status{flex:0 0 auto;width:auto;padding:8px 8px!important;font-size:12.5px!important;font-weight:600;background:var(--surface)!important;}
+.multiloc-remove{flex-shrink:0;width:32px;height:32px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;background:var(--rose-lt);color:var(--rose);font-size:13px;}
+.multiloc-remove:hover{background:var(--rose);color:#fff;}
+.multiloc-note{width:100%;padding:7px 10px!important;font-size:12.5px!important;background:var(--surface)!important;color:var(--ink-3)!important;}
+.multiloc-add{margin-top:8px;display:inline-flex;align-items:center;gap:5px;}
+.multiloc-chip{display:inline-flex;align-items:center;gap:4px;margin:2px 4px 2px 0;}
+/* ── 후보 장소 열람용 패널(목록/카드 화면) ── */
+.loc-panel{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface);width:100%;}
+.loc-panel-empty{padding:9px 12px;font-size:12px;color:var(--ink-5);display:flex;align-items:center;gap:6px;background:var(--bg-2);border-radius:var(--r);border:1px dashed var(--line);width:100%;}
+.loc-panel-head{display:flex;align-items:center;gap:6px;padding:7px 10px;background:var(--bg-2);font-size:11px;font-weight:700;color:var(--ink-3);border-bottom:1px solid var(--line);letter-spacing:.1px;}
+.loc-panel-list{display:flex;flex-direction:column;}
+.loc-panel-item{display:flex;align-items:center;gap:8px;padding:7px 10px;font-size:12.5px;border-bottom:1px dashed var(--line-2);}
+.loc-panel-item:last-child{border-bottom:none;}
+.loc-panel-item.is-confirmed{background:var(--green-lt);}
+.loc-panel-item.is-excluded{opacity:.55;}
+.loc-panel-icon{flex-shrink:0;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;}
+.loc-panel-icon svg{width:10px;height:10px;}
+.loc-panel-icon.st-확정{background:var(--green);}
+.loc-panel-icon.st-검토중{background:var(--amber);}
+.loc-panel-icon.st-보류{background:var(--ink-5);}
+.loc-panel-icon.st-제외{background:var(--rose);}
+.loc-panel-name{flex:1;min-width:0;color:var(--ink-2);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.loc-panel-badge{flex-shrink:0;font-size:10px!important;padding:2px 7px!important;}
+.loc-panel-note{flex-basis:100%;font-size:11px;color:var(--ink-5);padding-left:24px;margin-top:-2px;}
+.loc-table-cell{display:inline-flex;align-items:center;gap:5px;max-width:180px;}
+.loc-table-cell .loc-panel-icon{width:14px;height:14px;}
+.loc-table-cell .loc-panel-icon svg{width:9px;height:9px;}
+.loc-table-cell-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.loc-table-cell-more{flex-shrink:0;font-size:10.5px;color:var(--ink-5);background:var(--bg-2);border-radius:20px;padding:1px 6px;}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .file-upload-field input[type="file"]{padding:8px 10px;font-size:13px;cursor:pointer;}
 .file-preview{margin-top:10px;}
@@ -914,6 +955,7 @@ img,svg{-webkit-user-drag:none;user-drag:none;pointer-events:auto;}
 <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></symbol>
 <symbol id="i-printer" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
 <symbol id="i-check" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
 <symbol id="i-radio" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49M7.76 16.25a6 6 0 0 1 0-8.49M19.07 4.93a10 10 0 0 1 0 14.14M4.93 19.07a10 10 0 0 1 0-14.14"/></symbol>
 <symbol id="i-bolt" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M8 12h8"/></symbol>
@@ -1550,6 +1592,126 @@ $overlay.addEventListener("mouseup",e=>{
 /* ════════════════════════════════════
    기본 모달 (현장/이슈/재고 등록)
 ════════════════════════════════════ */
+/* ════════════════════════════════════
+   후보 장소(복수) 입력 필드 — "multilocation" 타입
+   항목 하나(예: 현장 설치 위치)에 대해 검토 중인 후보지를
+   여러 곳 등록하고, 각 후보의 검토 상태(검토중/확정/보류/제외)와
+   비고를 함께 관리할 수 있도록 지원한다.
+════════════════════════════════════ */
+const MULTILOC_STATUS=["검토중","확정","보류","제외"];
+const MULTILOC_STATUS_BADGE={"검토중":"b-progress","확정":"b-done","보류":"b-warn-soon","제외":"b-expired"};
+let _multilocState={}; // 모달이 열려 있는 동안에만 사용하는 임시 편집 상태 { [fieldKey]: [{id,name,status,note}] }
+function _uid(){return Math.random().toString(36).slice(2,9);}
+/* 저장된 값(raw)을 후보 배열로 정규화한다.
+   구버전 데이터(단일 텍스트 문자열)와의 하위 호환을 위해,
+   JSON 배열이 아닌 값은 '확정' 상태의 단일 후보 1건으로 자동 변환한다. */
+function _parseLocations(raw){
+  if(raw==null||raw==="")return[];
+  if(Array.isArray(raw))return raw.map(r=>({id:r.id||_uid(),name:r.name||"",status:MULTILOC_STATUS.includes(r.status)?r.status:"검토중",note:r.note||""}));
+  const s=String(raw).trim();if(!s)return[];
+  try{
+    const p=JSON.parse(s);
+    if(Array.isArray(p))return p.map(r=>({id:r.id||_uid(),name:r.name||"",status:MULTILOC_STATUS.includes(r.status)?r.status:"검토중",note:r.note||""}));
+  }catch(e){/* JSON이 아니면 레거시 단일 텍스트 값으로 처리 */}
+  return[{id:_uid(),name:s,status:"확정",note:""}];
+}
+function _locationRowHTML(key,r,idx){
+  return`<div class="multiloc-row" data-id="${r.id}" data-status="${esc(r.status)}">
+    <div class="multiloc-row-top">
+      <span class="multiloc-row-idx">${idx+1}</span>
+      <input type="text" class="multiloc-name" placeholder="예: 3층 로비 / B동 창고 옆 등 상세 위치" value="${esc(r.name)}" oninput="_updateLocationRow('${key}','${r.id}','name',this.value)"/>
+      <select class="multiloc-status" onchange="_updateLocationRow('${key}','${r.id}','status',this.value)">
+        ${MULTILOC_STATUS.map(s=>`<option value="${s}"${r.status===s?" selected":""}>${s}</option>`).join("")}
+      </select>
+      <button type="button" class="multiloc-remove" onclick="_removeLocationRow('${key}','${r.id}')" title="이 후보 삭제"><svg class='ic'><use href='#i-trash'/></svg></button>
+    </div>
+    <input type="text" class="multiloc-note" placeholder="검토 의견 · 특이사항(선택) — 예: 급수/배수 여건, 동선 영향, 고객 요청사항 등" value="${esc(r.note)}" oninput="_updateLocationRow('${key}','${r.id}','note',this.value)"/>
+  </div>`;
+}
+function _renderLocationRows(key){
+  const arr=_multilocState[key]||[];
+  const list=document.getElementById("f_"+key+"_list");
+  if(!list)return;
+  list.innerHTML=arr.length?arr.map((r,i)=>_locationRowHTML(key,r,i)).join(""):`<div class="multiloc-empty">등록된 후보 장소가 없습니다. 아래 '후보 장소 추가' 버튼으로 검토할 장소를 등록하세요.</div>`;
+}
+function _syncLocationHidden(key){
+  const el=document.getElementById("f_"+key);
+  if(el)el.value=JSON.stringify(_multilocState[key]||[]);
+}
+window._addLocationRow=function(key){
+  if(!_multilocState[key])_multilocState[key]=[];
+  _multilocState[key].push({id:_uid(),name:"",status:"검토중",note:""});
+  _renderLocationRows(key);_syncLocationHidden(key);
+  const list=document.getElementById("f_"+key+"_list");
+  list?.querySelector(".multiloc-row:last-child .multiloc-name")?.focus();
+};
+window._removeLocationRow=function(key,id){
+  _multilocState[key]=(_multilocState[key]||[]).filter(r=>r.id!==id);
+  _renderLocationRows(key);_syncLocationHidden(key);
+};
+window._updateLocationRow=function(key,id,field,value){
+  const row=(_multilocState[key]||[]).find(r=>r.id===id);if(!row)return;
+  row[field]=value;_syncLocationHidden(key);
+  if(field==="status"){
+    const rowEl=document.querySelector(`#f_${key}_list .multiloc-row[data-id="${id}"]`);
+    if(rowEl)rowEl.dataset.status=value;
+  }
+};
+/* 저장된 후보 장소 목록을 요약 텍스트(뱃지 포함)로 표시 — 간단 요약용 */
+function _locationsSummary(raw){
+  const arr=_parseLocations(raw);
+  if(!arr.length)return`<span class="mc-val" style="color:var(--ink-5);">미등록</span>`;
+  const confirmed=arr.find(r=>r.status==="확정");
+  const main=confirmed||arr[0];
+  const rest=arr.length-1;
+  return`${esc(main.name)||"-"} <span class="badge ${MULTILOC_STATUS_BADGE[main.status]||"b-ready"}" style="margin-left:4px;">${esc(main.status)}</span>${rest>0?` <span style="color:var(--ink-5);font-size:11px;">외 후보 ${rest}건</span>`:""}`;
+}
+/* 저장된 후보 장소 전체를 칩 형태로 나열 — 보조용(레거시) */
+function _locationsChipsHTML(raw){
+  const arr=_parseLocations(raw);
+  if(!arr.length)return`<span style="color:var(--ink-5);">등록된 후보 장소 없음</span>`;
+  return arr.map(r=>`<span class="badge ${MULTILOC_STATUS_BADGE[r.status]||"b-ready"} multiloc-chip" title="${esc(r.note)||""}"><svg class='ic'><use href='#i-pin'/></svg> ${esc(r.name)||"-"} · ${esc(r.status)}</span>`).join("");
+}
+/* 검색 필터용 — 후보 장소명을 공백으로 합친 문자열 */
+function _locationsSearchText(raw){return _parseLocations(raw).map(r=>r.name).join(" ");}
+/* 상태별 정렬 우선순위(확정→검토중→보류→제외) — 카드/패널에서 가장 중요한 후보를 위로 */
+const _LOC_STATUS_ORDER={"확정":0,"검토중":1,"보류":2,"제외":3};
+function _sortedLocations(arr){return arr.slice().sort((a,b)=>(_LOC_STATUS_ORDER[a.status]??9)-(_LOC_STATUS_ORDER[b.status]??9));}
+const _LOC_STATUS_ICON={"확정":"i-check","검토중":"i-pin","보류":"i-clock","제외":"i-x"};
+/* 카드(모바일)/상세 화면용 — 후보 장소 전체를 한눈에 보여주는 시각적 패널
+   상태별 색상 아이콘 + 뱃지로 구분하고, 확정 후보는 배경을 강조해 가장 먼저 눈에 띄도록 정렬한다. */
+function _locationsPanelHTML(raw){
+  const arr=_parseLocations(raw);
+  if(!arr.length)return`<div class="loc-panel-empty"><svg class='ic'><use href='#i-pin'/></svg> 등록된 설치 위치 후보가 없습니다</div>`;
+  const confirmedCnt=arr.filter(r=>r.status==="확정").length;
+  const reviewingCnt=arr.filter(r=>r.status==="검토중").length;
+  const head=`총 ${arr.length}건${confirmedCnt?` · <span style="color:var(--green);">확정 ${confirmedCnt}</span>`:""}${reviewingCnt?` · <span style="color:var(--amber-lt);color:var(--amber);">검토중 ${reviewingCnt}</span>`:""}`;
+  const rows=_sortedLocations(arr).map(r=>{
+    const cls=r.status==="확정"?" is-confirmed":r.status==="제외"?" is-excluded":"";
+    return`<div class="loc-panel-item${cls}">
+      <span class="loc-panel-icon st-${esc(r.status)}"><svg class='ic'><use href='#${_LOC_STATUS_ICON[r.status]||"i-pin"}'/></svg></span>
+      <span class="loc-panel-name" title="${esc(r.name)||"-"}">${esc(r.name)||"-"}</span>
+      <span class="badge ${MULTILOC_STATUS_BADGE[r.status]||"b-ready"} loc-panel-badge">${esc(r.status)}</span>
+      ${r.note?`<span class="loc-panel-note">${esc(r.note)}</span>`:""}
+    </div>`;
+  }).join("");
+  return`<div class="loc-panel"><div class="loc-panel-head"><svg class='ic'><use href='#i-pin'/></svg><span>${head}</span></div><div class="loc-panel-list">${rows}</div></div>`;
+}
+/* 데스크톱 표(테이블)용 — 대표 후보 1건 + 나머지 건수를 한 줄로 압축 표시, 전체 목록은 title 툴팁으로 제공 */
+function _locationsTableCell(raw){
+  const arr=_parseLocations(raw);
+  if(!arr.length)return`<span style="color:var(--ink-5);">-</span>`;
+  const confirmed=arr.find(r=>r.status==="확정");
+  const main=confirmed||_sortedLocations(arr)[0];
+  const rest=arr.length-1;
+  const tip=arr.map(r=>`${r.name||"-"}(${r.status})`).join(", ");
+  return`<span class="loc-table-cell" title="${esc(tip)}">
+    <span class="loc-panel-icon st-${esc(main.status)}"><svg class='ic'><use href='#${_LOC_STATUS_ICON[main.status]||"i-pin"}'/></svg></span>
+    <span class="loc-table-cell-name">${esc(main.name)||"-"}</span>
+    ${rest>0?`<span class="loc-table-cell-more">+${rest}</span>`:""}
+  </span>`;
+}
+
 function openModal({title,fields,values={},onSave,hint="",wide=false}){
   $modal.className="modal"+(wide?" modal-wide":"");
   $modal.innerHTML=`
@@ -1575,7 +1737,17 @@ function openModal({title,fields,values={},onSave,hint="",wide=false}){
     flds.forEach(f=>{
       if(f.readOnly)return; // 재고에서 자동 연동되는 필드는 별도 로직이 관리하므로 폼 저장 데이터에서 제외
       const el=document.getElementById("f_"+f.key);if(!el)return;
-      const v=el.value.trim();const wrap=el.closest(".field");
+      const wrap=el.closest(".field");
+      if(f.type==="multilocation"){
+        // 이름이 비어있는 빈 후보 행은 저장 시 정리한다
+        let arr=[];try{arr=JSON.parse(el.value||"[]");}catch(e){arr=[];}
+        arr=arr.filter(r=>r&&String(r.name||"").trim());
+        if(f.req&&!arr.length){wrap?.classList.add("invalid");ok=false;}
+        else wrap?.classList.remove("invalid");
+        data[f.key]=JSON.stringify(arr);
+        return;
+      }
+      const v=el.value.trim();
       if(f.req&&!v){wrap?.classList.add("invalid");ok=false;}
       else wrap?.classList.remove("invalid");
       data[f.key]=v;
@@ -1629,6 +1801,17 @@ function fld(f,vals){
       <input type="file" id="f_${f.key}_file" accept=".pdf" onchange="_handleManualUpload(this,'${f.key}')"/>
       <input type="hidden" id="f_${f.key}" name="${f.key}" value="${esc(existing)}"/>
       <div class="file-preview" id="f_${f.key}_preview">${meta?`<div class="file-preview-inner file-preview-doc"><svg class='ic'><use href='#i-file'/></svg><span class="file-doc-name">등록된 ${meta.ext.toUpperCase()} 파일</span><button type="button" class="file-remove" onclick="_removeManualUpload('${f.key}')">✕</button></div>`:""}</div>
+      ${f.hint?`<div class="field-hint">${f.hint}</div>`:""}
+      <div class="ferr">${esc(f.err||"필수 입력")}</div>
+    </div>`;
+  }else if(f.type==="multilocation"){
+    const arr=_parseLocations(vals[f.key]);
+    _multilocState[f.key]=arr;
+    return`<div class="field multiloc-field">
+      <label for="f_${f.key}">${esc(f.label)}${f.req?` <span style='color:var(--rose)'>*</span>`:""}</label>
+      <input type="hidden" id="f_${f.key}" name="${f.key}" value='${esc(JSON.stringify(arr))}'/>
+      <div class="multiloc-list" id="f_${f.key}_list">${arr.length?arr.map((r,i)=>_locationRowHTML(f.key,r,i)).join(""):`<div class="multiloc-empty">등록된 후보 장소가 없습니다. 아래 '후보 장소 추가' 버튼으로 검토할 장소를 등록하세요.</div>`}</div>
+      <button type="button" class="btn btn-secondary btn-sm multiloc-add" onclick="_addLocationRow('${f.key}')"><svg class='ic'><use href='#i-plus'/></svg> 후보 장소 추가</button>
       ${f.hint?`<div class="field-hint">${f.hint}</div>`:""}
       <div class="ferr">${esc(f.err||"필수 입력")}</div>
     </div>`;
@@ -3021,7 +3204,7 @@ const SITE_FIELDS=[
   {key:"client",label:"고객사",req:true},
   {key:"siteManager",label:"현장 담당자",ph:"현장 담당자 이름 입력",pair:true},
   {key:"siteManagerPhone",label:"연락처",type:"tel",ph:"010-0000-0000",pair:true},
-  {key:"installLocation",label:"현장 설치 위치",ph:"예: 3층 로비, B동 창고 옆 등 상세 위치 입력"},
+  {key:"installLocation",label:"현장 설치 위치(복수 후보 검토)",type:"multilocation",hint:"현장 내 설치 후보 위치를 여러 곳 등록해 비교 검토할 수 있습니다. 검토가 끝나면 최종 위치의 상태를 '확정'으로 변경하세요."},
   {key:"equipment",label:"장비",ph:"장비명 입력",pair:true},
   {key:"quantity",label:"수량",type:"number",pair:true},
   {key:"serial",label:"시리얼",readOnly:true,hint:"Inventory에 이 현장으로 배정된 재고의 시리얼입니다 (자동 연동, 여러 대인 경우 콤마로 합산 표시)",pair:true,compute:vals=>_siteInventoryAgg(vals.name).serials.join(", ")||"배정된 재고 없음"},
@@ -3198,7 +3381,7 @@ window._viewSitePhoto=id=>{
     <div class="modal-body"><img src="${s.photo}" class="site-photo-view" alt="현장 사진"/></div>`;
 };
 function renderSiteResults(){
-  const q=sq.site;let list=site.filter(s=>match(q,[s.name,s.client,s.equipment,s.serial,s.pm,s.contractType,s.siteManager,s.siteManagerPhone,s.installLocation]));
+  const q=sq.site;let list=site.filter(s=>match(q,[s.name,s.client,s.equipment,s.serial,s.pm,s.contractType,s.siteManager,s.siteManagerPhone,_locationsSearchText(s.installLocation)]));
   const ra=document.getElementById("siteRA");const ma=document.getElementById("sm_site");
   if(!ra)return;if(ma)ma.textContent=q?`${list.length}건 검색됨`:"";
   if(!list.length){ra.innerHTML=noResults(q);return;}
@@ -3214,6 +3397,7 @@ function renderSiteResults(){
   const tBody=list.map(s=>`<tr>
     <td style="font-weight:600;">${esc(s.name)}</td><td>${esc(s.client)}</td>
     <td>${esc(s.siteManager)||"-"}</td><td>${esc(s.siteManagerPhone)||"-"}</td>
+    <td>${_locationsTableCell(s.installLocation)}</td>
     <td>${esc(s.equipment)||"-"}</td><td>${esc(s.quantity)||"-"}</td>
     <td>${bContract(s.contractType)}</td>
     <td style="text-align:right;">${_siteContractAmountCell(s)}</td>
@@ -3243,7 +3427,7 @@ function renderSiteResults(){
       <div class="mc-fields">
         <div class="mc-field"><span class="mc-label">현장 담당자</span><span class="mc-val">${esc(s.siteManager)||"-"}</span></div>
         <div class="mc-field"><span class="mc-label">연락처</span><span class="mc-val">${esc(s.siteManagerPhone)||"-"}</span></div>
-        <div class="mc-field"><span class="mc-label">현장 설치 위치</span><span class="mc-val">${esc(s.installLocation)||"-"}</span></div>
+        <div class="mc-field" style="flex-direction:column;align-items:stretch;gap:6px;"><span class="mc-label">현장 설치 위치(후보 검토)</span>${_locationsPanelHTML(s.installLocation)}</div>
         <div class="mc-field"><span class="mc-label">장비</span><span class="mc-val">${esc(s.equipment)||"-"}</span></div>
         <div class="mc-field"><span class="mc-label">계약금액(매출)</span><span class="mc-val">${_siteContractAmountCell(s)}</span></div>
         <div class="mc-field"><span class="mc-label">원가</span><span class="mc-val">${_siteCostCell(s)}</span></div>
@@ -3263,7 +3447,7 @@ function renderSiteResults(){
     </div>
   </div>`).join("");
   ra.innerHTML=`<div class="tbl-wrap"><table class="tbl"><thead><tr>
-    ${thSort("name","현장명")}${thSort("client","고객사")}${thSort("siteManager","현장 담당자")}${thSort("siteManagerPhone","연락처")}${thSort("equipment","장비")}${thSort("quantity","수량")}${thSort("contractType","계약방식")}
+    ${thSort("name","현장명")}${thSort("client","고객사")}${thSort("siteManager","현장 담당자")}${thSort("siteManagerPhone","연락처")}<th>설치 위치(후보)</th>${thSort("equipment","장비")}${thSort("quantity","수량")}${thSort("contractType","계약방식")}
     ${thSort("contractAmount","계약금액(매출)","text-align:right;")}${thSort("contractCost","원가","text-align:right;")}${thSort("profitMargin","이익율","text-align:right;")}${thSort("deposit","보증금","text-align:right;")}
     ${thSort("contractStart","계약시작")}${thSort("contractEnd","계약종료")}<th>유지보수기간</th>${thSort("pm","PM")}
     ${thSort("status","상태")}<th style="color:var(--teal-dk);">AS 구분</th><th>사진</th><th>관리</th>
