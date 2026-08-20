@@ -313,6 +313,9 @@ input,select,textarea{font-family:inherit;}
 .as-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-5);margin-bottom:10px;display:flex;align-items:center;gap:6px;padding-bottom:7px;border-bottom:1px solid var(--line-2);}
 .as-section-title span{width:18px;height:18px;border-radius:50%;background:var(--teal-lt);color:var(--teal-dk);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;}
 .as-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;}
+.sv-item-photo-grid{grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;}
+.sv-item-photo-grid .as-photo-thumb{height:64px;}
+.sv-item-loc-input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:var(--r-sm);font-size:12.5px;background:var(--bg);}
 .as-photo-card{position:relative;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface);box-shadow:var(--sh-xs);}
 .as-photo-thumb{width:100%;height:110px;object-fit:cover;display:block;cursor:pointer;background:var(--bg-2);}
 .as-photo-caption{width:100%;border:none;border-top:1px solid var(--line);font-size:11px;padding:6px 8px;color:var(--ink-3);background:transparent;}
@@ -8216,7 +8219,7 @@ function empty(icon,title,body){return`<div class="empty"><div class="empty-icon
 /* ════════════════════════════════════
    현장 답사 체크리스트(TN70) 엔진
 ════════════════════════════════════ */
-let svCurrentId=null,svItemState={};
+let svCurrentId=null,svItemState={},svPhotos=[],svItemPhotos={};
 
 function svConclBadge(c){
   const m={"즉시 투입 가능":["sv-concl-ready","<svg class='ic'><use href='#i-check'/></svg>"],"보완 공사 후 투입 가능":["sv-concl-fix","<svg class='ic'><use href='#i-tool'/></svg>"],"투입 불가":["sv-concl-no","<svg class='ic'><use href='#i-x'/></svg>"]};
@@ -8244,21 +8247,25 @@ function renderSurvey(){
           ${list.map(sv=>{
             const cnt=svVerdictCounts(sv.items);
             const visitDate=sv.visitDate||fmtDate(sv.createdAt)||"-";
+            const locCnt=_parseLocations(sv.siteAddress).length;
+            const itemPhotoCnt=Object.values(sv.items||{}).reduce((a,it)=>a+((it&&it.photos&&it.photos.length)||0),0);
+            const photoCnt=((sv.photos&&sv.photos.length)||0)+itemPhotoCnt;
             return`<div class="sv-card" onclick="window._openSurveyForm('${sv.id}')">
               <div class="sv-card-top">
                 <div>
                   <div class="sv-card-title">${esc(sv.projectName)||"프로젝트명 미입력"}</div>
-                  <div class="sv-card-sub">${esc(sv.siteAddress)||"현장 주소 미입력"}</div>
+                  <div class="sv-card-sub">${_locationsTableCell(sv.siteAddress)}${locCnt>1?` <span style="color:var(--ink-5);font-size:11px;">(총 ${locCnt}개 장소)</span>`:""}</div>
                 </div>
                 ${svConclBadge(sv.conclusion)}
               </div>
               <div class="sv-card-sub">방문일자: ${esc(visitDate)} · 방문자: ${esc(sv.visitor)||"-"}</div>
-              <div style="display:flex;gap:6px;font-size:11px;font-weight:700;margin-top:2px;">
+              <div style="display:flex;gap:6px;font-size:11px;font-weight:700;margin-top:2px;align-items:center;">
                 <span style="color:var(--teal-dk);">적합 ${cnt.ok}</span>
                 <span style="color:var(--ink-5);">/</span>
                 <span style="color:var(--rose);">부적합 ${cnt.bad}</span>
                 <span style="color:var(--ink-5);">/</span>
                 <span style="color:var(--warn,#b45309);">확인필요 ${cnt.chk}</span>
+                ${photoCnt?`<span style="color:var(--ink-4);margin-left:6px;display:inline-flex;align-items:center;gap:3px;"><svg class='ic' style="width:12px;height:12px;"><use href='#i-image'/></svg>${photoCnt}</span>`:""}
               </div>
               <div style="display:flex;gap:6px;margin-top:6px;" onclick="event.stopPropagation();">
                 <button class="btn btn-ghost btn-sm" onclick="window._svPreview('${sv.id}')"><svg class='ic'><use href='#i-eye'/></svg> 보고서</button>
@@ -8271,6 +8278,16 @@ function renderSurvey(){
     </div>`}`;
 }
 
+/* 항목별 첨부 사진 미리보기 그리드 — svItemPhotos[itemId]를 기준으로 렌더링 */
+function _itemPhotoGridHTML(itemId){
+  const photos=svItemPhotos[itemId]||[];
+  if(!photos.length)return"";
+  return photos.map((p,i)=>`
+    <div class="as-photo-card">
+      <img src="${p.dataUrl}" class="as-photo-thumb" alt="항목 사진" onclick="window._viewItemPhoto('${itemId}',${i})"/>
+      <button type="button" class="as-photo-remove" onclick="window._removeItemPhoto('${itemId}',${i})" title="삭제"><svg class='ic'><use href='#i-x'/></svg></button>
+    </div>`).join("");
+}
 function _svItemsHTML(existingItems){
   existingItems=existingItems||{};
   return SV_SECTIONS.map(sec=>`
@@ -8290,6 +8307,14 @@ function _svItemsHTML(existingItems){
               ${SV_VERDICTS.map(v=>`<label class="${v.cls}"><input type="radio" name="sv_verdict_${it.id}" value="${esc(v.v)}"${cur.verdict===v.v?" checked":""}/><span>${esc(v.v)}</span></label>`).join("")}
             </div>
           </div>
+          <div class="sv-item-loc-photo" style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
+            <input type="text" class="sv-item-loc-input" id="sv_loc_${it.id}" placeholder="확인 장소 (예: 지하 2층 A구역, B동 로비 등 이 항목을 확인한 구체적 위치)" value="${esc(cur.location||"")}"/>
+            <div>
+              <input type="file" id="sv_photoinput_${it.id}" accept="image/*" multiple style="display:none;" onchange="window._addItemPhotos('${it.id}',this)"/>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('sv_photoinput_${it.id}').click()"><svg class='ic'><use href='#i-image'/></svg> 이 항목에 사진 추가 (최대 4장)</button>
+              <div class="as-photo-grid sv-item-photo-grid" id="sv_photogrid_${it.id}" style="margin-top:8px;">${_itemPhotoGridHTML(it.id)}</div>
+            </div>
+          </div>
         </div>`;
       }).join("")}
     </div>`).join("");
@@ -8299,6 +8324,15 @@ window._openSurveyForm=function(id){
   const existing=id?siteSurveys.find(s=>s.id===id):null;
   svCurrentId=id||null;
   const v=existing||{};
+  const locKey="svSiteAddress";
+  const locArr=_parseLocations(v.siteAddress);
+  _multilocState[locKey]=locArr;
+  svPhotos=(v.photos||[]).map(p=>({...p}));
+  svItemPhotos={};
+  SV_SECTIONS.forEach(sec=>sec.items.forEach(it=>{
+    const cur=(v.items&&v.items[it.id])||{};
+    svItemPhotos[it.id]=(cur.photos||[]).map(p=>({...p}));
+  }));
   $modal.className="modal modal-wide";
   $modal.innerHTML=`
     <div class="modal-header">
@@ -8308,14 +8342,29 @@ window._openSurveyForm=function(id){
     <div class="modal-body" style="padding:14px 16px;">
       <div class="sv-meta-grid">
         <div class="field"><label>프로젝트명</label><input id="sv_projectName" type="text" value="${esc(v.projectName||"")}"/></div>
-        <div class="field"><label>현장 주소</label><input id="sv_siteAddress" type="text" value="${esc(v.siteAddress||"")}"/></div>
         <div class="field"><label>방문 일자</label><input id="sv_visitDate" type="date" value="${esc(v.visitDate||new Date().toISOString().slice(0,10))}"/></div>
         <div class="field"><label>방 문 자</label><input id="sv_visitor" type="text" value="${esc(v.visitor||"")}"/></div>
         <div class="field"><label>고객 사명</label><input id="sv_customerCompany" type="text" value="${esc(v.customerCompany||"")}"/></div>
         <div class="field"><label>고객 담당자</label><input id="sv_customerManager" type="text" value="${esc(v.customerManager||"")}"/></div>
       </div>
+      <div class="field multiloc-field" style="margin-bottom:14px;">
+        <label for="f_${locKey}">현장 주소(복수 후보 등록 가능)</label>
+        <input type="hidden" id="f_${locKey}" name="${locKey}" value='${esc(JSON.stringify(locArr))}'/>
+        <div class="multiloc-list" id="f_${locKey}_list">${locArr.length?locArr.map((r,i)=>_locationRowHTML(locKey,r,i)).join(""):`<div class="multiloc-empty">등록된 후보 장소가 없습니다. 아래 '후보 장소 추가' 버튼으로 검토할 장소를 등록하세요.</div>`}</div>
+        <button type="button" class="btn btn-secondary btn-sm multiloc-add" onclick="_addLocationRow('${locKey}')"><svg class='ic'><use href='#i-plus'/></svg> 후보 장소 추가</button>
+        <div class="field-hint">한 프로젝트 안에 지하주차장·로비·사무공간 등 여러 구역/후보 현장을 함께 검토하는 경우, 장소를 추가로 등록하고 각 후보의 검토 상태(검토중/확정/보류/제외)를 관리하세요.</div>
+      </div>
       <div style="font-size:12px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;">평가 항목</div>
       <div id="svItemsWrap">${_svItemsHTML(v.items)}</div>
+      <div class="sv-section" style="margin-top:4px;">
+        <div class="sv-section-head"><span><svg class='ic'><use href='#i-image'/></svg> 현장 개요 사진(전체)</span></div>
+        <div style="padding:14px;">
+          <div style="font-size:11.5px;color:var(--ink-5);margin-bottom:10px;line-height:1.6;">특정 평가 항목에 속하지 않는 건물 외관, 출입구, 전체 배치 등 개요 사진을 첨부하세요. 개별 평가 항목(바닥 재질, 경사로, 문턱 등)과 관련된 사진은 위 각 항목의 '이 항목에 사진 추가' 버튼으로 첨부해주세요. 최대 12장, 장당 10MB 이하 (자동으로 리사이즈·압축되어 저장됩니다)</div>
+          <input type="file" id="svPhotoInput" accept="image/*" multiple style="display:none;" onchange="window._addSurveyPhotos(this)"/>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('svPhotoInput').click()"><svg class='ic'><use href='#i-image'/></svg> 사진 선택 / 촬영</button>
+          <div class="as-photo-grid" id="svPhotoGallery" style="margin-top:14px;"></div>
+        </div>
+      </div>
       <div class="sv-section" style="margin-top:4px;">
         <div class="sv-section-head" style="background:var(--teal-dk);"><span>★ 종합 판정 및 특이사항</span></div>
         <div style="padding:14px;">
@@ -8342,8 +8391,10 @@ window._openSurveyForm=function(id){
       <button class="btn btn-secondary" onclick="window._svSaveSurvey(true)"><svg class='ic'><use href='#i-save'/></svg> 저장</button>
       <button class="btn btn-secondary" style="background:var(--blue-lt);color:var(--blue);border-color:rgba(37,99,235,.2);" onclick="window._svPreview()"><svg class='ic'><use href='#i-eye'/></svg> 미리보기</button>
       <button class="btn btn-primary" onclick="window._svSaveAndPrint()"><svg class='ic'><use href='#i-printer'/></svg> 인쇄/PDF</button>
-    </div>`;
+    </div>
+    <div class="as-photo-lightbox" id="svPhotoLightbox" onclick="this.classList.remove('show')"><img id="svPhotoLightboxImg" src=""/></div>`;
   $overlay.classList.remove("hidden");
+  setTimeout(()=>window._renderSurveyPhotoGallery(),0);
 };
 
 function _svGather(){
@@ -8351,22 +8402,29 @@ function _svGather(){
   const items={};
   SV_SECTIONS.forEach(sec=>sec.items.forEach(it=>{
     const data=g("sv_data_"+it.id);
+    const location=g("sv_loc_"+it.id);
     const checked=document.querySelector(`input[name="sv_verdict_${it.id}"]:checked`);
     const verdict=checked?checked.value:"";
-    if(data||verdict)items[it.id]={data,verdict};
+    const photos=svItemPhotos[it.id]||[];
+    if(data||verdict||location||photos.length)items[it.id]={data,verdict,location,photos};
   }));
   const conclEl=document.querySelector('input[name="sv_conclusion"]:checked');
+  let locs=[];
+  try{locs=JSON.parse(document.getElementById("f_svSiteAddress")?.value||"[]");}catch(e){locs=[];}
+  locs=locs.filter(r=>r&&String(r.name||"").trim());
   return{
-    projectName:g("sv_projectName"),siteAddress:g("sv_siteAddress"),visitDate:g("sv_visitDate"),
+    projectName:g("sv_projectName"),siteAddress:JSON.stringify(locs),visitDate:g("sv_visitDate"),
     visitor:g("sv_visitor"),customerCompany:g("sv_customerCompany"),customerManager:g("sv_customerManager"),
     items,conclusion:conclEl?conclEl.value:"",robotCount:g("sv_robotCount"),wsCount:g("sv_wsCount"),
     notes:g("sv_notes"),signerName:g("sv_signerName"),confirmDate:g("sv_confirmDate"),
+    photos:svPhotos,
   };
 }
 
 window._svSaveSurvey=async function(showToast){
   const data=_svGather();
-  if(!data.projectName&&!data.siteAddress){toast("프로젝트명 또는 현장 주소를 입력해주세요","error");return null;}
+  const hasAddress=_parseLocations(data.siteAddress).length>0;
+  if(!data.projectName&&!hasAddress){toast("프로젝트명 또는 현장 주소를 입력해주세요","error");return null;}
   try{
     if(svCurrentId){
       await updateDoc(doc(db,COL.siteSurveys,svCurrentId),{...data,updatedAt:serverTimestamp()});
@@ -8385,11 +8443,128 @@ window._svDeleteSurvey=async function(id){
   catch(e){console.error(e);toast("삭제 실패","error");}
 };
 
+/* ════ 현장 답사 체크리스트 — 사진 첨부 공용 압축 유틸
+   이미지 1장을 받아 리사이즈·압축한 dataUrl을 콜백으로 전달한다(실패 시 null).
+   전체 개요 사진(svPhotos)과 항목별 사진(svItemPhotos) 양쪽에서 공통으로 사용 ════ */
+function _compressImageFile(file,cb){
+  if(!file.type.startsWith("image/")){toast("이미지 파일만 업로드 가능합니다","error");cb(null);return;}
+  if(file.size>10*1024*1024){toast("이미지 용량은 10MB 이하로 업로드해주세요","error");cb(null);return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      const maxDim=1000;
+      let width=img.width,height=img.height;
+      if(width>maxDim||height>maxDim){const scale=maxDim/Math.max(width,height);width=Math.round(width*scale);height=Math.round(height*scale);}
+      const canvas=document.createElement("canvas");canvas.width=width;canvas.height=height;
+      const ctx=canvas.getContext("2d");ctx.drawImage(img,0,0,width,height);
+      let quality=0.72,dataUrl=canvas.toDataURL("image/jpeg",quality);
+      while(dataUrl.length>350*1024&&quality>0.25){quality-=0.08;dataUrl=canvas.toDataURL("image/jpeg",quality);}
+      if(dataUrl.length<=350*1024)cb(dataUrl);
+      else{toast("이미지 용량이 너무 커서 저장할 수 없습니다","error");cb(null);}
+    };
+    img.onerror=()=>cb(null);
+    img.src=e.target.result;
+  };
+  reader.onerror=()=>cb(null);
+  reader.readAsDataURL(file);
+}
+
+/* ── 현장 개요 사진(전체) — 작성 중에는 svPhotos에 임시 보관, 저장 시 함께 저장됨 ── */
+window._renderSurveyPhotoGallery=function(){
+  const wrap=document.getElementById("svPhotoGallery");if(!wrap)return;
+  if(!svPhotos.length){wrap.innerHTML=`<div style="font-size:12.5px;color:var(--ink-5);padding:14px;text-align:center;border:1px dashed var(--line);border-radius:var(--r);">첨부된 사진이 없습니다</div>`;return;}
+  wrap.innerHTML=svPhotos.map((p,i)=>`
+    <div class="as-photo-card">
+      <img src="${p.dataUrl}" class="as-photo-thumb" alt="현장 사진 ${i+1}" onclick="window._viewSurveyPhoto(${i})"/>
+      <input type="text" class="as-photo-caption" placeholder="사진 설명 (예: 건물 외관, 출입구 등)" value="${esc(p.caption||"")}" oninput="window._setSurveyPhotoCaption(${i},this.value)"/>
+      <button type="button" class="as-photo-remove" onclick="window._removeSurveyPhoto(${i})" title="삭제"><svg class='ic'><use href='#i-x'/></svg></button>
+    </div>`).join("");
+};
+window._addSurveyPhotos=function(input){
+  const files=Array.from(input.files||[]);
+  if(!files.length)return;
+  if(svPhotos.length>=12){toast("사진은 최대 12장까지 첨부할 수 있습니다","error");input.value="";return;}
+  const room=12-svPhotos.length;
+  const toProcess=files.slice(0,room);
+  if(files.length>room)toast(`최대 12장까지 첨부 가능하여 ${toProcess.length}장만 추가됩니다`,"error");
+  let remaining=toProcess.length;
+  if(!remaining){input.value="";return;}
+  const finalize=()=>{window._renderSurveyPhotoGallery();input.value="";};
+  toProcess.forEach(file=>{
+    _compressImageFile(file,dataUrl=>{
+      if(dataUrl)svPhotos.push({dataUrl,caption:"",ts:Date.now()});
+      remaining--;if(remaining===0)finalize();
+    });
+  });
+};
+window._setSurveyPhotoCaption=function(idx,val){if(svPhotos[idx])svPhotos[idx].caption=val;};
+window._removeSurveyPhoto=function(idx){
+  if(!svPhotos[idx])return;
+  if(!confirm("이 사진을 삭제하시겠습니까?"))return;
+  svPhotos.splice(idx,1);
+  window._renderSurveyPhotoGallery();
+};
+window._viewSurveyPhoto=function(idx){
+  const p=svPhotos[idx];if(!p)return;
+  const lb=document.getElementById("svPhotoLightbox"),img=document.getElementById("svPhotoLightboxImg");
+  if(!lb||!img)return;
+  img.src=p.dataUrl;lb.classList.add("show");
+};
+
+/* ── 평가 항목별 사진(각 항목 최대 4장) — 작성 중에는 svItemPhotos[itemId]에 임시 보관 ── */
+function _renderItemPhotoGrid(itemId){
+  const wrap=document.getElementById("sv_photogrid_"+itemId);if(!wrap)return;
+  wrap.innerHTML=_itemPhotoGridHTML(itemId);
+}
+window._addItemPhotos=function(itemId,input){
+  const files=Array.from(input.files||[]);
+  if(!files.length)return;
+  if(!svItemPhotos[itemId])svItemPhotos[itemId]=[];
+  const existing=svItemPhotos[itemId];
+  if(existing.length>=4){toast("항목별 사진은 최대 4장까지 첨부할 수 있습니다","error");input.value="";return;}
+  const room=4-existing.length;
+  const toProcess=files.slice(0,room);
+  if(files.length>room)toast(`최대 4장까지 첨부 가능하여 ${toProcess.length}장만 추가됩니다`,"error");
+  let remaining=toProcess.length;
+  if(!remaining){input.value="";return;}
+  const finalize=()=>{_renderItemPhotoGrid(itemId);input.value="";};
+  toProcess.forEach(file=>{
+    _compressImageFile(file,dataUrl=>{
+      if(dataUrl)existing.push({dataUrl,ts:Date.now()});
+      remaining--;if(remaining===0)finalize();
+    });
+  });
+};
+window._removeItemPhoto=function(itemId,idx){
+  const arr=svItemPhotos[itemId];if(!arr||!arr[idx])return;
+  if(!confirm("이 사진을 삭제하시겠습니까?"))return;
+  arr.splice(idx,1);
+  _renderItemPhotoGrid(itemId);
+};
+window._viewItemPhoto=function(itemId,idx){
+  const p=(svItemPhotos[itemId]||[])[idx];if(!p)return;
+  const lb=document.getElementById("svPhotoLightbox"),img=document.getElementById("svPhotoLightboxImg");
+  if(!lb||!img)return;
+  img.src=p.dataUrl;lb.classList.add("show");
+};
+
 function _svVerdictTag(verdict){
   const m={"적합":["#0d9488","i-check"],"부적합":["#e11d48","i-x"],"추가확인 필요":["#b45309","i-alert"]};
   const hit=m[verdict];
   if(!hit)return`<span style="color:#999;">미입력</span>`;
   return`<span style="color:${hit[0]};font-weight:700;"><svg class='ic'><use href='#${hit[1]}'/></svg> ${esc(verdict)}</span>`;
+}
+
+/* 인쇄용 보고서 상단 메타 영역 — 후보 장소가 여러 건인 경우 상태 뱃지와 함께 모두 나열 */
+function _svAddressReportHTML(raw){
+  const arr=_parseLocations(raw);
+  if(!arr.length)return"-";
+  if(arr.length===1)return esc(arr[0].name)||"-";
+  const order={"확정":0,"검토중":1,"보류":2,"제외":3};
+  const sorted=arr.slice().sort((a,b)=>(order[a.status]??9)-(order[b.status]??9));
+  const colorMap={"확정":"#0d9488","검토중":"#1a73c8","보류":"#b45309","제외":"#999"};
+  return sorted.map(r=>`<span style="display:inline-block;margin:0 8px 2px 0;">${esc(r.name)||"-"} <span style="color:${colorMap[r.status]||"#999"};font-weight:700;font-size:10.5px;">[${esc(r.status)}]</span></span>`).join("");
 }
 
 function _buildSurveyReportHTML(data){
@@ -8399,17 +8574,24 @@ function _buildSurveyReportHTML(data){
   const sectionsHTML=SV_SECTIONS.map(sec=>{
     const rows=sec.items.map(it=>{
       const cur=items[it.id]||{};
+      const photos=cur.photos||[];
+      const photoRow=photos.length?`<tr><td colspan="5" style="padding:6px 8px;background:#fafbfd;border-top:none;">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          ${photos.map(p=>`<img src="${p.dataUrl}" style="width:64px;height:64px;object-fit:cover;border-radius:4px;border:1px solid #dde3ee;"/>`).join("")}
+        </div>
+      </td></tr>`:"";
       return`<tr>
-        <td class="ctr" style="width:46px;font-weight:700;">${esc(it.label||it.id)}</td>
+        <td class="ctr" style="width:40px;font-weight:700;">${esc(it.label||it.id)}</td>
         <td style="font-size:11px;white-space:pre-line;">${esc(it.criteria)}</td>
-        <td style="width:150px;">${esc(cur.data||"-")}</td>
-        <td class="ctr" style="width:100px;">${_svVerdictTag(cur.verdict)}</td>
-      </tr>`;
+        <td style="width:110px;">${esc(cur.location||"-")}</td>
+        <td style="width:120px;">${esc(cur.data||"-")}</td>
+        <td class="ctr" style="width:90px;">${_svVerdictTag(cur.verdict)}</td>
+      </tr>${photoRow}`;
     }).join("");
     return`<div class="qdoc-section-title">■ ${esc(sec.no)}. ${esc(sec.title)}</div>
     ${sec.note?`<div style="font-size:10.5px;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:4px;padding:6px 10px;margin-bottom:6px;">${esc(sec.note)}</div>`:""}
     <div class="qdoc-table-wrap" style="margin-bottom:14px;"><table class="qdoc-items-table">
-      <thead><tr><th style="width:46px;">구분</th><th>로봇 기준값 / 판정 조건</th><th style="width:150px;">현장 실측·확인 데이터</th><th style="width:100px;">적합 여부</th></tr></thead>
+      <thead><tr><th style="width:40px;">구분</th><th>로봇 기준값 / 판정 조건</th><th style="width:110px;">확인 장소</th><th style="width:120px;">현장 실측·확인 데이터</th><th style="width:90px;">적합 여부</th></tr></thead>
       <tbody>${rows}</tbody>
     </table></div>`;
   }).join("");
@@ -8422,7 +8604,7 @@ function _buildSurveyReportHTML(data){
     <div class="qdoc-meta-grid">
       <div class="qdoc-meta-col">
         <div class="qdoc-meta-row" style="background:#f0f7ff;"><span class="qdoc-meta-label" style="background:#1a73c8;color:#fff;border-right:none;">프로젝트명</span><span class="qdoc-meta-val" style="font-weight:800;font-size:13px;color:#1a3a6b;">${esc(data.projectName)||"-"}</span></div>
-        <div class="qdoc-meta-row"><span class="qdoc-meta-label">현장 주소</span><span class="qdoc-meta-val">${esc(data.siteAddress)||"-"}</span></div>
+        <div class="qdoc-meta-row"><span class="qdoc-meta-label">현장 주소</span><span class="qdoc-meta-val">${_svAddressReportHTML(data.siteAddress)}</span></div>
         <div class="qdoc-meta-row"><span class="qdoc-meta-label">방문 일자</span><span class="qdoc-meta-val">${esc(data.visitDate)||"-"}</span></div>
       </div>
       <div class="qdoc-meta-col">
@@ -8442,6 +8624,13 @@ function _buildSurveyReportHTML(data){
       <tbody><tr><td class="ctr" style="font-weight:700;">${esc(data.conclusion)||"미정"}</td><td class="ctr">${esc(data.robotCount)||"-"}</td><td class="ctr">${esc(data.wsCount)||"-"}</td></tr></tbody>
     </table></div>
     ${data.notes?`<div class="qdoc-section-title">■ 보완 필요 사항 / 특이사항</div><div style="border:1px solid #dde3ee;border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:12.5px;line-height:1.7;color:#333;white-space:pre-line;">${esc(data.notes)}</div>`:""}
+    ${data.photos&&data.photos.length?`<div class="qdoc-section-title">■ 현장 사진</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">
+      ${data.photos.map(p=>`<div style="border:1px solid #dde3ee;border-radius:6px;overflow:hidden;background:#fff;">
+        <img src="${p.dataUrl}" style="width:100%;height:150px;object-fit:cover;display:block;"/>
+        ${p.caption?`<div style="font-size:11px;color:#555;padding:5px 8px;border-top:1px solid #eee;">${esc(p.caption)}</div>`:""}
+      </div>`).join("")}
+    </div>`:""}
     <div class="qdoc-footer">
       <div class="qdoc-footer-company">
         <div><strong>${esc(COMPANY_NAME)}</strong></div>
