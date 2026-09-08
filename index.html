@@ -3378,18 +3378,18 @@ function _levenshtein(a,b){
   return dp[m][n];
 }
 
-/* 인식 후보(정규화됨)와 Inventory 등록 시리얼(정규화됨)이 같은 장비를 가리키는지 판정.
+/* 인식 후보(정규화됨)와 등록된 시리얼(정규화됨)이 같은 장비를 가리키는지 판정.
    ------------------------------------------------------------------------------
    SPARKOZ 라벨은 "모델코드 8자리 + 개체 SN 6자리"를 이어붙인 긴 바코드 번호
    (예: TN70 라벨의 61001018060025, TN10C 라벨의 61011001000272)와, 그 SN만 별도
    표기한 짧은 값(예: "SN: 060025", "000272")이 한 라벨에 함께 인쇄되어 있고,
-   Inventory에는 통상 뒤 6자리 SN만 시리얼로 등록되어 있으므로, 브랜드가
-   SPARKOZ인 재고는 "뒤 6자리 일치"만으로도 같은 장비로 인정한다.
+   Inventory·Site Master에는 통상 뒤 6자리 SN만 시리얼로 등록되어 있으므로,
+   allowLast6가 true인 항목은 "뒤 6자리 일치"만으로도 같은 장비로 인정한다.
    NEO(Avidbots)처럼 라벨의 SERIAL NUMBER를 그대로 쓰는 브랜드는 완전 일치만 인정한다. */
-function _serialMatches(candNorm,knownNorm,brand){
+function _serialMatches(candNorm,knownNorm,allowLast6){
   if(!candNorm||!knownNorm)return false;
   if(candNorm===knownNorm)return true;
-  if(brand==="SPARKOZ"&&candNorm.length>=6&&knownNorm.length>=6){
+  if(allowLast6&&candNorm.length>=6&&knownNorm.length>=6){
     return _last6(candNorm)===_last6(knownNorm);
   }
   return false;
@@ -3400,8 +3400,24 @@ function _allKnownSerials(){
   const out=[];
   (inventoryList||[]).forEach(it=>{
     if(it.serial&&String(it.serial).trim()){
-      out.push({norm:_normSerial(it.serial),raw:String(it.serial).trim(),siteName:it.siteName||"",brand:it.brand||""});
+      out.push({norm:_normSerial(it.serial),raw:String(it.serial).trim(),siteName:it.siteName||"",allowLast6:it.brand==="SPARKOZ",source:"inventory"});
     }
+  });
+  return out;
+}
+
+/* Site Master 화면에 이미 표시되어 있는 "시리얼" 값(Inventory 배정분이 콤마로
+   합산된 값) 자체에서도 대조한다 — Inventory 목록과 Site Master 화면이 어떤
+   이유로든 어긋나 있더라도, 라벨 사진의 숫자가 Site Master 화면에 이미 떠
+   있는 숫자와 같으면 그 현장을 바로 찾아 보여주기 위함 */
+function _allKnownSiteSerials(){
+  const out=[];
+  (site||[]).forEach(s=>{
+    if(!s.serial||!String(s.serial).trim())return;
+    String(s.serial).split(",").forEach(part=>{
+      part=part.trim();if(!part)return;
+      out.push({norm:_normSerial(part),raw:part,siteName:s.name||"",allowLast6:true,source:"site"});
+    });
   });
   return out;
 }
@@ -3448,15 +3464,16 @@ window._runSerialScan=async function(input){
   }
 };
 
-/* 인식된 후보 문자열들을 Inventory 시리얼과 대조 — 정확히 일치하면 바로 표를 그리고,
-   없으면 편집거리 기준 유사 후보를 제시해 사용자가 직접 고를 수 있게 한다 */
+/* 인식된 후보 문자열들을 Inventory 시리얼 + Site Master 시리얼과 대조 — 정확히
+   일치하면 바로 표를 그리고, 없으면 편집거리 기준 유사 후보를 제시해 사용자가
+   직접 고를 수 있게 한다 */
 function _resolveSerialCandidates(candidates,previewUrl,rawText){
   const resultBox=document.getElementById("serialScanResult");if(!resultBox)return;
-  const known=_allKnownSerials();
+  const known=[..._allKnownSerials(),..._allKnownSiteSerials()];
   let matched=[];
   candidates.forEach(c=>{
     const norm=_normSerial(c);if(!norm)return;
-    matched.push(...known.filter(k=>_serialMatches(norm,k.norm,k.brand)));
+    matched.push(...known.filter(k=>_serialMatches(norm,k.norm,k.allowLast6)));
   });
   matched=[...new Map(matched.map(m=>[m.norm+"|"+m.siteName,m])).values()];
   if(matched.length){_renderSerialScanTable(matched.map(m=>m.raw),previewUrl);return;}
@@ -3465,8 +3482,8 @@ function _resolveSerialCandidates(candidates,previewUrl,rawText){
   candidates.forEach(c=>{
     const norm=_normSerial(c);if(norm.length<4)return;
     known.forEach(k=>{
-      // SPARKOZ는 뒤 6자리 기준으로, 그 외 브랜드는 전체 문자열 기준으로 오탈자 거리를 계산
-      const useLast6=k.brand==="SPARKOZ"&&norm.length>=6&&k.norm.length>=6;
+      // 뒤 6자리 매칭이 허용되는 항목(SPARKOZ 계열 등)은 뒤 6자리끼리, 그 외는 전체 문자열끼리 오탈자 거리를 계산
+      const useLast6=k.allowLast6&&norm.length>=6&&k.norm.length>=6;
       const d=useLast6?_levenshtein(_last6(norm),_last6(k.norm)):_levenshtein(norm,k.norm);
       if(d>0&&d<=2)suggestions.push({...k,dist:d});
     });
@@ -3496,12 +3513,21 @@ window._pickSerialSuggestion=function(raw){
   _renderSerialScanTable([raw],previewImg?previewImg.src:null);
 };
 
-/* 확정된 시리얼(들)로 Inventory→배정 현장을 찾아 Site Master 표를 렌더링 */
+/* 확정된 시리얼(들)로 현장을 찾아 Site Master 표를 렌더링.
+   1) Inventory에 이 시리얼이 배정된 현장을 찾고,
+   2) 혹시 Inventory 연결이 안 되어 있어도 Site Master 화면에 이미 표시된
+      "시리얼" 값 자체에 동일한 숫자가 있으면 그 현장도 함께 찾아 합친다 */
 function _renderSerialScanTable(serials,previewUrl){
   const resultBox=document.getElementById("serialScanResult");if(!resultBox)return;
   const norms=serials.map(_normSerial);
   const matchedInv=(inventoryList||[]).filter(it=>it.serial&&norms.includes(_normSerial(it.serial)));
-  const siteNames=[...new Set(matchedInv.map(it=>it.siteName).filter(Boolean))];
+  const siteNamesFromInv=matchedInv.map(it=>it.siteName).filter(Boolean);
+  const siteNamesFromField=(site||[]).filter(s=>{
+    if(!s.serial)return false;
+    const parts=String(s.serial).split(",").map(x=>_normSerial(x.trim())).filter(Boolean);
+    return parts.some(p=>norms.includes(p));
+  }).map(s=>s.name);
+  const siteNames=[...new Set([...siteNamesFromInv,...siteNamesFromField])];
   const matchedSites=(site||[]).filter(s=>siteNames.includes(s.name));
   const previewHtml=previewUrl?`<img src="${previewUrl}" class="serial-scan-preview"/>`:"";
 
