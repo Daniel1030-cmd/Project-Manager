@@ -3364,6 +3364,9 @@ function _loadTesseract(){
 /* 비교용 정규화: 대문자화 + 영문·숫자만 남김(하이픈/공백/특수문자 무시) */
 function _normSerial(s){return String(s||"").toUpperCase().replace(/[^A-Z0-9]/g,"");}
 
+/* 정규화된 문자열의 뒤 6자리(짧으면 그대로) — SPARKOZ 라벨 매칭용 */
+function _last6(s){s=String(s||"");return s.length<=6?s:s.slice(-6);}
+
 /* 간단한 편집거리(오탈자 보정용) */
 function _levenshtein(a,b){
   const m=a.length,n=b.length;
@@ -3375,12 +3378,29 @@ function _levenshtein(a,b){
   return dp[m][n];
 }
 
-/* Inventory에 등록된 모든 시리얼 목록(정규화값 포함) — 매칭 기준 데이터 */
+/* 인식 후보(정규화됨)와 Inventory 등록 시리얼(정규화됨)이 같은 장비를 가리키는지 판정.
+   ------------------------------------------------------------------------------
+   SPARKOZ 라벨은 "모델코드 8자리 + 개체 SN 6자리"를 이어붙인 긴 바코드 번호
+   (예: TN70 라벨의 61001018060025, TN10C 라벨의 61011001000272)와, 그 SN만 별도
+   표기한 짧은 값(예: "SN: 060025", "000272")이 한 라벨에 함께 인쇄되어 있고,
+   Inventory에는 통상 뒤 6자리 SN만 시리얼로 등록되어 있으므로, 브랜드가
+   SPARKOZ인 재고는 "뒤 6자리 일치"만으로도 같은 장비로 인정한다.
+   NEO(Avidbots)처럼 라벨의 SERIAL NUMBER를 그대로 쓰는 브랜드는 완전 일치만 인정한다. */
+function _serialMatches(candNorm,knownNorm,brand){
+  if(!candNorm||!knownNorm)return false;
+  if(candNorm===knownNorm)return true;
+  if(brand==="SPARKOZ"&&candNorm.length>=6&&knownNorm.length>=6){
+    return _last6(candNorm)===_last6(knownNorm);
+  }
+  return false;
+}
+
+/* Inventory에 등록된 모든 시리얼 목록(정규화값·브랜드 포함) — 매칭 기준 데이터 */
 function _allKnownSerials(){
   const out=[];
   (inventoryList||[]).forEach(it=>{
     if(it.serial&&String(it.serial).trim()){
-      out.push({norm:_normSerial(it.serial),raw:String(it.serial).trim(),siteName:it.siteName||""});
+      out.push({norm:_normSerial(it.serial),raw:String(it.serial).trim(),siteName:it.siteName||"",brand:it.brand||""});
     }
   });
   return out;
@@ -3401,7 +3421,7 @@ window._openSerialScan=function(){
       <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.add('hidden')"><svg class='ic'><use href='#i-x'/></svg></button>
     </div>
     <div class="modal-body">
-      <div class="as-hint"><span class="as-hint-icon"><svg class='ic'><use href='#i-bulb'/></svg></span><span>장비에 부착된 시리얼 라벨이 화면에 크고 선명하게 나오도록 촬영해주세요. 인식된 시리얼과 일치하는 재고가 배정된 현장의 Site Master 정보가 아래에 표로 표시됩니다.</span></div>
+      <div class="as-hint"><span class="as-hint-icon"><svg class='ic'><use href='#i-bulb'/></svg></span><span>장비에 부착된 시리얼 라벨이 화면에 크고 선명하게 나오도록 촬영해주세요. 인식된 시리얼과 일치하는 재고가 배정된 현장의 Site Master 정보가 아래에 표로 표시됩니다. (SPARKOZ 제품은 라벨의 바코드 전체 번호 또는 "SN:" 뒤 6자리로 자동 조회됩니다)</span></div>
       <input type="file" id="serialScanInput" accept="image/*" capture="environment" style="display:none;" onchange="window._runSerialScan(this)"/>
       <button type="button" class="btn btn-primary" onclick="document.getElementById('serialScanInput').click()"><svg class='ic'><use href='#i-camera'/></svg> 사진 촬영 / 선택</button>
       <div id="serialScanResult" style="margin-top:16px;"></div>
@@ -3436,7 +3456,7 @@ function _resolveSerialCandidates(candidates,previewUrl,rawText){
   let matched=[];
   candidates.forEach(c=>{
     const norm=_normSerial(c);if(!norm)return;
-    matched.push(...known.filter(k=>k.norm===norm));
+    matched.push(...known.filter(k=>_serialMatches(norm,k.norm,k.brand)));
   });
   matched=[...new Map(matched.map(m=>[m.norm+"|"+m.siteName,m])).values()];
   if(matched.length){_renderSerialScanTable(matched.map(m=>m.raw),previewUrl);return;}
@@ -3444,7 +3464,12 @@ function _resolveSerialCandidates(candidates,previewUrl,rawText){
   const suggestions=[];
   candidates.forEach(c=>{
     const norm=_normSerial(c);if(norm.length<4)return;
-    known.forEach(k=>{const d=_levenshtein(norm,k.norm);if(d>0&&d<=2)suggestions.push({...k,dist:d});});
+    known.forEach(k=>{
+      // SPARKOZ는 뒤 6자리 기준으로, 그 외 브랜드는 전체 문자열 기준으로 오탈자 거리를 계산
+      const useLast6=k.brand==="SPARKOZ"&&norm.length>=6&&k.norm.length>=6;
+      const d=useLast6?_levenshtein(_last6(norm),_last6(k.norm)):_levenshtein(norm,k.norm);
+      if(d>0&&d<=2)suggestions.push({...k,dist:d});
+    });
   });
   suggestions.sort((a,b)=>a.dist-b.dist);
   const uniqSug=[...new Map(suggestions.map(s=>[s.raw,s])).values()].slice(0,5);
