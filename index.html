@@ -332,6 +332,11 @@ input,select,textarea{font-family:inherit;}
 .serial-scan-summary{font-size:12.5px;color:var(--ink-4);margin-bottom:10px;}
 .serial-scan-summary strong{font-family:monospace;color:var(--ink-2);}
 .serial-scan-rawtext{font-size:11px;color:var(--ink-5);margin-top:10px;word-break:break-all;}
+.serial-scan-manual{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);}
+.serial-scan-manual-label{font-size:12px;color:var(--ink-4);margin-bottom:8px;}
+.serial-scan-manual-row{display:flex;gap:8px;}
+.serial-scan-manual-row input{flex:1;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r);font-size:14px;color:var(--ink);background:var(--surface);-webkit-appearance:none;appearance:none;}
+.serial-scan-manual-row input:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,148,136,.12);}
 .sign-pad-wrap{position:relative;border:1.5px dashed var(--line);border-radius:var(--r);background:#fff;touch-action:none;}
 .sign-pad-canvas{display:block;width:100%;height:160px;cursor:crosshair;border-radius:var(--r);}
 .sign-pad-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--ink-5);font-size:13px;pointer-events:none;}
@@ -3342,10 +3347,23 @@ const SITE_FIELDS=[
    브라우저 안에서 곧바로 OCR(Tesseract.js, 최초 사용 시 CDN에서 지연
    로드)로 문자열을 인식하고, 인식된 문자열을 Inventory(재고)에 등록된
    시리얼과 대조하여 일치하는 재고가 배정된 현장의 Site Master 정보를
-   표로 보여준다. 별도 서버·API 키 없이 전적으로 브라우저에서 동작한다.
-   (참고: 추후 사내 보안 프록시로 Claude Vision 등의 API를 연동하면
-   손상되거나 반사가 심한 라벨도 더 정확히 인식시킬 수 있음 — 그 경우
-   아래 _runSerialScan의 OCR 호출부만 교체하면 된다)
+   요약 카드로 보여준다. 별도 서버·API 키 없이 전적으로 브라우저에서 동작한다.
+
+   인식률 개선(각도가 기울거나 반사·저조도로 글자가 뭉개진 라벨 대응):
+   1) 촬영 원본을 그대로 넘기지 않고, 캔버스로 (a) 긴 변을 최소 1400px까지
+      업스케일하고 (b) 그레이스케일 + 대비 강화(간이 히스토그램 스트레칭)한
+      이미지를 만들어 OCR에 넘긴다 (_prepareSerialScanImage).
+   2) 라벨은 대개 문장이 아니라 흩어진 짧은 텍스트 블록이므로, 문서용
+      기본 모드(PSM 6, 균일 블록) 뿐 아니라 흩어진 텍스트에 강한 SPARSE_TEXT
+      (PSM 11) 모드로도 한 번 더 인식해 두 결과를 합쳐서 후보를 뽑는다
+      (_ocrPass). 문자 화이트리스트(영문·숫자·공백·:-.)를 적용해 배경 잡음이
+      의미 없는 글자로 오인식되는 것도 줄인다.
+   3) 그래도 사진만으로는 100% 인식을 보장할 수 없으므로, 사진 인식 결과
+      화면 어디에서든 시리얼을 직접 타이핑해 즉시 조회할 수 있는 "직접 입력"
+      란을 항상 함께 보여준다(_serialManualHtml / _searchSerialManual) —
+      OCR이 실패해도 조회 자체가 막히지 않도록 하는 최종 안전장치.
+   (참고: 추후 사내 보안 프록시로 Claude Vision 등의 API를 연동하면 더 정확한
+   인식이 가능함 — 그 경우 아래 _ocrPass의 Tesseract 호출부만 교체하면 된다)
 ════════════════════════════════════════════════════════════ */
 let _tesseractLoadPromise=null;
 function _loadTesseract(){
@@ -3359,6 +3377,78 @@ function _loadTesseract(){
     document.head.appendChild(s);
   });
   return _tesseractLoadPromise;
+}
+
+/* 촬영 원본 이미지를 OCR에 유리한 형태로 가공한 캔버스를 반환한다.
+   - 긴 변이 1400px 미만이면 1400px까지 업스케일(라벨 글자가 화면에서 작게 찍힌 경우 대응)
+   - 그레이스케일 변환 + 간이 히스토그램 스트레칭으로 대비를 강화해
+     저조도·반사로 흐릿하게 찍힌 글자의 윤곽을 또렷하게 만든다 */
+function _prepareSerialScanImage(file){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    const loadUrl=URL.createObjectURL(file);
+    img.onload=()=>{
+      try{
+        const longSide=Math.max(img.naturalWidth,img.naturalHeight)||1;
+        const scale=Math.min(3,Math.max(1,1400/longSide));
+        const w=Math.round(img.naturalWidth*scale),h=Math.round(img.naturalHeight*scale);
+        const canvas=document.createElement("canvas");
+        canvas.width=w;canvas.height=h;
+        const ctx=canvas.getContext("2d");
+        ctx.drawImage(img,0,0,w,h);
+        const imgData=ctx.getImageData(0,0,w,h);
+        const d=imgData.data;
+        // 1차: 그레이스케일 변환 + 최소/최대 밝기 파악
+        let lo=255,hi=0;
+        const gray=new Uint8ClampedArray(w*h);
+        for(let i=0,p=0;i<d.length;i+=4,p++){
+          const g=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
+          gray[p]=g;if(g<lo)lo=g;if(g>hi)hi=g;
+        }
+        // 2차: 히스토그램 스트레칭(대비 강화)으로 되쓰기
+        const range=Math.max(1,hi-lo);
+        for(let i=0,p=0;i<d.length;i+=4,p++){
+          const v=Math.round((gray[p]-lo)/range*255);
+          d[i]=d[i+1]=d[i+2]=v;
+        }
+        ctx.putImageData(imgData,0,0);
+        resolve(canvas);
+      }catch(e){resolve(null);}
+      finally{URL.revokeObjectURL(loadUrl);}
+    };
+    img.onerror=()=>{URL.revokeObjectURL(loadUrl);reject(new Error("이미지를 불러오지 못했습니다"));};
+    img.src=loadUrl;
+  });
+}
+
+/* Tesseract 워커로 1회 인식을 수행한다. 라벨 텍스트는 문장이 아니라 흩어진
+   짧은 블록이 많으므로 PSM(페이지 분할 모드)을 인자로 받아 상황에 맞게 재시도할
+   수 있게 하고, 배경 잡음이 의미 없는 문자로 잘못 인식되는 것을 줄이기 위해
+   문자 화이트리스트(영문 대소문자·숫자·공백·구두점 일부)를 적용한다. */
+async function _ocrPass(source,psm){
+  const worker=await window.Tesseract.createWorker("eng");
+  try{
+    await worker.setParameters({
+      tessedit_pageseg_mode:psm,
+      tessedit_char_whitelist:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789:.-# ",
+    });
+    const{data}=await worker.recognize(source);
+    return(data&&data.text)||"";
+  }finally{
+    await worker.terminate();
+  }
+}
+
+/* 전처리된 이미지에 대해 균일 블록(PSM 6)·흩어진 텍스트(PSM 11) 두 모드로
+   각각 인식을 시도해 결과 텍스트를 합친다 — 라벨의 각도·레이아웃이 달라도
+   "SERIAL NUMBER 2059640"류의 라인과 바코드 하단 긴 숫자열을 놓치지 않기 위함 */
+async function _recognizeSerialLabel(canvas,fallbackFile){
+  const source=canvas||fallbackFile;
+  const texts=[];
+  try{texts.push(await _ocrPass(source,"6"));}catch(e){console.error(e);}
+  try{texts.push(await _ocrPass(source,"11"));}catch(e){console.error(e);}
+  if(!texts.length)throw new Error("OCR 인식에 실패했습니다");
+  return texts.join("\n");
 }
 
 /* 비교용 정규화: 대문자화 + 영문·숫자만 남김(하이픈/공백/특수문자 무시) */
@@ -3471,30 +3561,57 @@ window._openSerialScan=function(){
       <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.add('hidden')"><svg class='ic'><use href='#i-x'/></svg></button>
     </div>
     <div class="modal-body">
-      <div class="as-hint"><span class="as-hint-icon"><svg class='ic'><use href='#i-bulb'/></svg></span><span>장비에 부착된 시리얼 라벨이 화면에 크고 선명하게 나오도록 촬영해주세요. 인식된 시리얼과 일치하는 재고가 배정된 현장의 Site Master 핵심 정보가 아래에 요약 카드로 표시됩니다. (Avidbots는 라벨의 "SERIAL NUMBER" 우측 7자리, SPARKOZ는 하단 바코드 번호 14자리 중 뒤 6자리로 자동 조회됩니다)</span></div>
+      <div class="as-hint"><span class="as-hint-icon"><svg class='ic'><use href='#i-bulb'/></svg></span><span>장비에 부착된 시리얼 라벨이 화면에 크고 선명하게 나오도록 촬영해주세요. 인식된 시리얼과 일치하는 재고가 배정된 현장의 Site Master 핵심 정보가 아래에 요약 카드로 표시됩니다. (Avidbots는 라벨의 "SERIAL NUMBER" 우측 7자리, SPARKOZ는 하단 바코드 번호 14자리 중 뒤 6자리로 자동 조회됩니다). 사진 인식이 잘 안 되면 아래 직접 입력란에 시리얼을 타이핑해서 바로 조회할 수도 있습니다.</span></div>
       <input type="file" id="serialScanInput" accept="image/*" capture="environment" style="display:none;" onchange="window._runSerialScan(this)"/>
       <button type="button" class="btn btn-primary" onclick="document.getElementById('serialScanInput').click()"><svg class='ic'><use href='#i-camera'/></svg> 사진 촬영 / 선택</button>
+      ${_serialManualHtml()}
       <div id="serialScanResult" style="margin-top:16px;"></div>
     </div>`;
+};
+
+/* 사진 인식이 실패하거나 부정확해도 조회 자체가 막히지 않도록, 시리얼을 직접
+   타이핑해서 즉시 조회할 수 있는 입력란(항상 노출) — OCR 결과 화면 어디서든
+   재사용할 수 있게 별도 함수로 분리해두었다 */
+function _serialManualHtml(){
+  return`<div class="serial-scan-manual">
+    <div class="serial-scan-manual-label">사진 인식이 어렵다면 라벨의 시리얼을 직접 입력해 조회하세요 (예: Avidbots 2059640 / SPARKOZ 060025)</div>
+    <div class="serial-scan-manual-row">
+      <input type="text" placeholder="시리얼번호 입력" onkeydown="if(event.key==='Enter'){event.preventDefault();window._searchSerialManual(this);}"/>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="window._searchSerialManual(this)">조회</button>
+    </div>
+  </div>`;
+}
+
+/* 직접 입력란의 값으로 기존 OCR 후보 매칭·제안 로직(_resolveSerialCandidates)을
+   그대로 재사용해 조회한다 — 사진 유무와 무관하게 동일한 조회 품질을 보장 */
+window._searchSerialManual=function(el){
+  const wrap=el.closest(".serial-scan-manual");
+  const input=wrap?wrap.querySelector("input"):null;
+  const val=input?input.value.trim():"";
+  if(!val){input&&input.focus();return;}
+  const resultBox=document.getElementById("serialScanResult");if(!resultBox)return;
+  resultBox.innerHTML=`<div style="font-size:12.5px;color:var(--ink-4);display:flex;align-items:center;gap:8px;"><span class="serial-scan-spinner"></span> 입력하신 시리얼로 조회 중입니다...</div>`;
+  _resolveSerialCandidates([{value:val,brand:null}],null,val);
 };
 
 window._runSerialScan=async function(input){
   const file=input.files&&input.files[0];if(!file)return;
   const resultBox=document.getElementById("serialScanResult");if(!resultBox)return;
-  const previewUrl=URL.createObjectURL(file);
+  let previewUrl=URL.createObjectURL(file);
   resultBox.innerHTML=`
     <img src="${previewUrl}" class="serial-scan-preview"/>
     <div style="font-size:12.5px;color:var(--ink-4);display:flex;align-items:center;gap:8px;"><span class="serial-scan-spinner"></span> 이미지에서 시리얼을 인식하는 중입니다...</div>`;
   try{
     await _loadTesseract();
-    const{data}=await window.Tesseract.recognize(file,"eng");
-    const text=(data&&data.text)||"";
+    const canvas=await _prepareSerialScanImage(file);
+    const text=await _recognizeSerialLabel(canvas,file);
     const candidates=_extractSerialCandidates(text);
     _resolveSerialCandidates(candidates,previewUrl,text);
   }catch(e){
     console.error(e);
     resultBox.innerHTML=`<img src="${previewUrl}" class="serial-scan-preview"/>
-      <div class="serial-scan-fail-note">OCR 인식에 실패했습니다. 조명을 밝게 하고 시리얼 라벨이 화면에 크게 나오도록 다시 촬영해주세요.${e&&e.message?`(${esc(e.message)})`:""}</div>`;
+      <div class="serial-scan-fail-note">OCR 인식에 실패했습니다. 조명을 밝게 하고 시리얼 라벨이 화면에 크게 나오도록 다시 촬영해주세요.${e&&e.message?`(${esc(e.message)})`:""}</div>
+      ${_serialManualHtml()}`;
   }
 };
 
@@ -3528,18 +3645,20 @@ function _resolveSerialCandidates(candidates,previewUrl,rawText){
 
   if(uniqSug.length){
     resultBox.innerHTML=`
-      <img src="${previewUrl}" class="serial-scan-preview"/>
+      ${previewUrl?`<img src="${previewUrl}" class="serial-scan-preview"/>`:""}
       <div class="serial-scan-suggest-note">정확히 일치하는 시리얼을 찾지 못했습니다. 인식 결과와 비슷한 등록 시리얼 중 하나를 선택해주세요.</div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;">
         ${uniqSug.map(s=>`<button type="button" class="btn btn-secondary btn-sm" onclick='window._pickSerialSuggestion(${JSON.stringify(s.raw)})'>${esc(s.raw)}</button>`).join("")}
       </div>
-      <div class="serial-scan-rawtext">인식된 텍스트: ${rawTextShort}</div>`;
+      <div class="serial-scan-rawtext">인식된 텍스트: ${rawTextShort}</div>
+      ${_serialManualHtml()}`;
     return;
   }
   resultBox.innerHTML=`
-    <img src="${previewUrl}" class="serial-scan-preview"/>
+    ${previewUrl?`<img src="${previewUrl}" class="serial-scan-preview"/>`:""}
     <div class="serial-scan-fail-note">등록된 재고 시리얼과 일치하는 항목을 찾지 못했습니다. 시리얼 라벨이 선명하게 나오도록 다시 촬영하거나, Inventory에 해당 시리얼이 등록되어 있는지 확인해주세요.</div>
-    <div class="serial-scan-rawtext">인식된 텍스트: ${rawTextShort}</div>`;
+    <div class="serial-scan-rawtext">인식된 텍스트: ${rawTextShort}</div>
+    ${_serialManualHtml()}`;
 }
 
 window._pickSerialSuggestion=function(raw){
@@ -3563,7 +3682,8 @@ function _renderSerialScanTable(serials,previewUrl){
     resultBox.innerHTML=`${previewHtml}
       <div class="serial-scan-summary">인식된 시리얼: <strong>${serials.map(esc).join(", ")}</strong></div>
       <div class="serial-scan-fail-note">${matchedInv.length?"이 시리얼이 배정된 현장(Site Master)을 찾지 못했습니다. Inventory에서 배정 현장을 지정해주세요.":"Inventory(재고)에 이 시리얼이 등록되어 있지 않습니다. 먼저 Inventory에 등록해주세요."}</div>
-      <div style="margin-top:14px;">${retakeBtn}</div>`;
+      <div style="margin-top:14px;">${retakeBtn}</div>
+      ${_serialManualHtml()}`;
     return;
   }
   const cards=matchedSites.map(s=>`
@@ -3587,7 +3707,8 @@ function _renderSerialScanTable(serials,previewUrl){
   resultBox.innerHTML=`${previewHtml}
     <div class="serial-scan-summary">인식된 시리얼: <strong>${serials.map(esc).join(", ")}</strong> · 일치하는 현장 <strong>${matchedSites.length}건</strong></div>
     ${cards}
-    <div style="margin-top:4px;">${retakeBtn}</div>`;
+    <div style="margin-top:4px;">${retakeBtn}</div>
+    ${_serialManualHtml()}`;
 }
 
 /* ════════════════════════════════════
