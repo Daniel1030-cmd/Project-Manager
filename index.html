@@ -3367,6 +3367,14 @@ function _normSerial(s){return String(s||"").toUpperCase().replace(/[^A-Z0-9]/g,
 /* 정규화된 문자열의 뒤 6자리(짧으면 그대로) — SPARKOZ 라벨 매칭용 */
 function _last6(s){s=String(s||"");return s.length<=6?s:s.slice(-6);}
 
+/* 브랜드별 라벨 고정 조회 규칙(사용자 확정 사양)
+   - Avidbots(NEO): 라벨의 "SERIAL NUMBER" 문구 우측에 인쇄된 숫자 7자리(6~8자리까지 허용)
+   - SPARKOZ     : 라벨 하단 바코드 아래 인쇄된 13~14자리 연속 숫자(모델코드8자리+개체SN6자리) 중
+                    뒤 6자리(= "SN:" 옆에 별도 표기되는 개체 시리얼과 동일)
+   위 두 브랜드는 라벨 위치가 항상 고정되어 있으므로, 해당 위치의 값만 "브랜드가 확정된 우선 후보"로
+   추출하고, 그 외 문자열은 브랜드 미확정 상태의 보조(후순위) 후보로만 사용한다. */
+const SERIAL_SCAN_BRAND={AVIDBOTS:"NEO",SPARKOZ:"SPARKOZ"};
+
 /* 간단한 편집거리(오탈자 보정용) */
 function _levenshtein(a,b){
   const m=a.length,n=b.length;
@@ -3378,18 +3386,22 @@ function _levenshtein(a,b){
   return dp[m][n];
 }
 
-/* 인식 후보(정규화됨)와 등록된 시리얼(정규화됨)이 같은 장비를 가리키는지 판정.
+/* 인식 후보(정규화됨)와 Inventory 등록 시리얼(정규화됨)이 같은 장비를 가리키는지 판정.
    ------------------------------------------------------------------------------
+   candBrand(후보 자체의 확정 브랜드, 라벨 위치 기반 추출 시 부여됨)가 있으면 Inventory
+   재고의 브랜드와 먼저 대조해 다른 브랜드끼리는 아예 매칭시키지 않는다(오매칭 방지).
    SPARKOZ 라벨은 "모델코드 8자리 + 개체 SN 6자리"를 이어붙인 긴 바코드 번호
    (예: TN70 라벨의 61001018060025, TN10C 라벨의 61011001000272)와, 그 SN만 별도
    표기한 짧은 값(예: "SN: 060025", "000272")이 한 라벨에 함께 인쇄되어 있고,
-   Inventory·Site Master에는 통상 뒤 6자리 SN만 시리얼로 등록되어 있으므로,
-   allowLast6가 true인 항목은 "뒤 6자리 일치"만으로도 같은 장비로 인정한다.
+   Inventory에는 통상 뒤 6자리 SN만 시리얼로 등록되어 있으므로, 브랜드가
+   SPARKOZ인 경우는 "뒤 6자리 일치"만으로도 같은 장비로 인정한다.
    NEO(Avidbots)처럼 라벨의 SERIAL NUMBER를 그대로 쓰는 브랜드는 완전 일치만 인정한다. */
-function _serialMatches(candNorm,knownNorm,allowLast6){
+function _serialMatches(candNorm,knownNorm,knownBrand,candBrand){
   if(!candNorm||!knownNorm)return false;
+  if(candBrand&&knownBrand&&candBrand!==knownBrand)return false;
   if(candNorm===knownNorm)return true;
-  if(allowLast6&&candNorm.length>=6&&knownNorm.length>=6){
+  const brand=candBrand||knownBrand;
+  if(brand==="SPARKOZ"&&candNorm.length>=6&&knownNorm.length>=6){
     return _last6(candNorm)===_last6(knownNorm);
   }
   return false;
@@ -3400,36 +3412,58 @@ function _allKnownSerials(){
   const out=[];
   (inventoryList||[]).forEach(it=>{
     if(it.serial&&String(it.serial).trim()){
-      out.push({norm:_normSerial(it.serial),raw:String(it.serial).trim(),siteName:it.siteName||"",allowLast6:it.brand==="SPARKOZ",source:"inventory"});
+      out.push({norm:_normSerial(it.serial),raw:String(it.serial).trim(),siteName:it.siteName||"",brand:it.brand||""});
     }
   });
   return out;
 }
 
-/* Site Master 화면에 이미 표시되어 있는 "시리얼" 값(Inventory 배정분이 콤마로
-   합산된 값) 자체에서도 대조한다 — Inventory 목록과 Site Master 화면이 어떤
-   이유로든 어긋나 있더라도, 라벨 사진의 숫자가 Site Master 화면에 이미 떠
-   있는 숫자와 같으면 그 현장을 바로 찾아 보여주기 위함 */
-function _allKnownSiteSerials(){
+/* OCR 인식 텍스트에서 시리얼 후보를 추출한다.
+   ------------------------------------------------------------------------------
+   1) 브랜드별로 라벨상 위치가 고정된 값을 "브랜드 확정" 우선 후보로 먼저 추출한다.
+      - Avidbots(NEO) : "SERIAL NUMBER" 문구 우측의 숫자 7자리(6~8자리까지 허용,
+        OCR이 줄바꿈·공백을 다르게 잡는 경우까지 대응)
+      - SPARKOZ       : 라벨 하단 바코드 밑에 인쇄된 13~14자리 연속 숫자에서
+        뒤 6자리(개체 SN), 그리고 혹시 라벨의 "SN:" 표기가 별도로 읽힌 경우도 보조로 포함
+   2) 위 규칙으로 못 찾을 경우를 대비해, 기존 범용 토큰(영문+숫자 4자 이상) 추출도
+      브랜드 미확정 후순위 후보로 함께 반환한다.
+   반환 형식: [{value:"2059640", brand:"NEO"|"SPARKOZ"|null}, ...] (우선순위 순서 유지) */
+function _extractSerialCandidates(text){
+  const t=String(text||"");
   const out=[];
-  (site||[]).forEach(s=>{
-    if(!s.serial||!String(s.serial).trim())return;
-    String(s.serial).split(",").forEach(part=>{
-      part=part.trim();if(!part)return;
-      out.push({norm:_normSerial(part),raw:part,siteName:s.name||"",allowLast6:true,source:"site"});
-    });
-  });
+  const seen=new Set();
+  const push=(value,brand)=>{
+    value=String(value||"").trim();if(!value)return;
+    const k=value+"|"+(brand||"");
+    if(seen.has(k))return;
+    seen.add(k);out.push({value,brand:brand||null});
+  };
+
+  // ① Avidbots: "SERIAL NUMBER" 우측 숫자 6~8자리(통상 7자리)
+  const avidRe=/SERIAL\s*NUMBER[^0-9]{0,15}(\d{6,8})/gi;
+  let m;
+  while((m=avidRe.exec(t)))push(m[1],SERIAL_SCAN_BRAND.AVIDBOTS);
+
+  // ② SPARKOZ: 바코드 하단 13~14자리 연속 숫자 → 뒤 6자리(개체 SN)를 우선 후보로,
+  //    참고용으로 14자리 전체 값도 함께 후보에 포함
+  const barcodeRe=/\b(\d{13,14})\b/g;
+  while((m=barcodeRe.exec(t))){
+    push(m[1].slice(-6),SERIAL_SCAN_BRAND.SPARKOZ);
+    push(m[1],SERIAL_SCAN_BRAND.SPARKOZ);
+  }
+  // SPARKOZ 라벨의 "SN: 060025" 별도 표기 보조 인식
+  const snRe=/\bSN[:\s]{1,3}(\d{4,8})\b/gi;
+  while((m=snRe.exec(t)))push(m[1],SERIAL_SCAN_BRAND.SPARKOZ);
+
+  // ③ 그 외 범용 토큰(브랜드 미확정) — 위 규칙으로 못 찾았을 때를 대비한 후순위 후보
+  const generic=t.match(/[A-Za-z0-9][A-Za-z0-9\-]{3,}/g)||[];
+  generic.forEach(g=>push(g,null));
+
   return out;
 }
 
-/* OCR 인식 텍스트에서 시리얼로 추정되는 토큰(영문+숫자 4자 이상, 하이픈 허용) 추출 */
-function _extractSerialCandidates(text){
-  const matches=String(text||"").match(/[A-Za-z0-9][A-Za-z0-9\-]{3,}/g)||[];
-  return[...new Set(matches.map(m=>m.trim()).filter(Boolean))];
-}
-
 window._openSerialScan=function(){
-  $modal.className="modal modal-wide";
+  $modal.className="modal";
   $overlay.classList.remove("hidden");
   $modal.innerHTML=`
     <div class="modal-header">
@@ -3437,7 +3471,7 @@ window._openSerialScan=function(){
       <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.add('hidden')"><svg class='ic'><use href='#i-x'/></svg></button>
     </div>
     <div class="modal-body">
-      <div class="as-hint"><span class="as-hint-icon"><svg class='ic'><use href='#i-bulb'/></svg></span><span>장비에 부착된 시리얼 라벨이 화면에 크고 선명하게 나오도록 촬영해주세요. 인식된 시리얼과 일치하는 재고가 배정된 현장의 Site Master 정보가 아래에 표로 표시됩니다. (SPARKOZ 제품은 라벨의 바코드 전체 번호 또는 "SN:" 뒤 6자리로 자동 조회됩니다)</span></div>
+      <div class="as-hint"><span class="as-hint-icon"><svg class='ic'><use href='#i-bulb'/></svg></span><span>장비에 부착된 시리얼 라벨이 화면에 크고 선명하게 나오도록 촬영해주세요. 인식된 시리얼과 일치하는 재고가 배정된 현장의 Site Master 핵심 정보가 아래에 요약 카드로 표시됩니다. (Avidbots는 라벨의 "SERIAL NUMBER" 우측 7자리, SPARKOZ는 하단 바코드 번호 14자리 중 뒤 6자리로 자동 조회됩니다)</span></div>
       <input type="file" id="serialScanInput" accept="image/*" capture="environment" style="display:none;" onchange="window._runSerialScan(this)"/>
       <button type="button" class="btn btn-primary" onclick="document.getElementById('serialScanInput').click()"><svg class='ic'><use href='#i-camera'/></svg> 사진 촬영 / 선택</button>
       <div id="serialScanResult" style="margin-top:16px;"></div>
@@ -3464,26 +3498,26 @@ window._runSerialScan=async function(input){
   }
 };
 
-/* 인식된 후보 문자열들을 Inventory 시리얼 + Site Master 시리얼과 대조 — 정확히
-   일치하면 바로 표를 그리고, 없으면 편집거리 기준 유사 후보를 제시해 사용자가
-   직접 고를 수 있게 한다 */
+/* 인식된 후보 문자열들을 Inventory 시리얼과 대조 — 정확히 일치하면 바로 표를 그리고,
+   없으면 편집거리 기준 유사 후보를 제시해 사용자가 직접 고를 수 있게 한다 */
 function _resolveSerialCandidates(candidates,previewUrl,rawText){
   const resultBox=document.getElementById("serialScanResult");if(!resultBox)return;
-  const known=[..._allKnownSerials(),..._allKnownSiteSerials()];
+  const known=_allKnownSerials();
   let matched=[];
   candidates.forEach(c=>{
-    const norm=_normSerial(c);if(!norm)return;
-    matched.push(...known.filter(k=>_serialMatches(norm,k.norm,k.allowLast6)));
+    const norm=_normSerial(c.value);if(!norm)return;
+    matched.push(...known.filter(k=>_serialMatches(norm,k.norm,k.brand,c.brand)));
   });
   matched=[...new Map(matched.map(m=>[m.norm+"|"+m.siteName,m])).values()];
   if(matched.length){_renderSerialScanTable(matched.map(m=>m.raw),previewUrl);return;}
 
   const suggestions=[];
   candidates.forEach(c=>{
-    const norm=_normSerial(c);if(norm.length<4)return;
+    const norm=_normSerial(c.value);if(norm.length<4)return;
     known.forEach(k=>{
-      // 뒤 6자리 매칭이 허용되는 항목(SPARKOZ 계열 등)은 뒤 6자리끼리, 그 외는 전체 문자열끼리 오탈자 거리를 계산
-      const useLast6=k.allowLast6&&norm.length>=6&&k.norm.length>=6;
+      if(c.brand&&k.brand&&c.brand!==k.brand)return; // 후보 브랜드가 확정된 경우 다른 브랜드는 후보 제안에서도 제외
+      // SPARKOZ는 뒤 6자리 기준으로, 그 외 브랜드는 전체 문자열 기준으로 오탈자 거리를 계산
+      const useLast6=(c.brand||k.brand)==="SPARKOZ"&&norm.length>=6&&k.norm.length>=6;
       const d=useLast6?_levenshtein(_last6(norm),_last6(k.norm)):_levenshtein(norm,k.norm);
       if(d>0&&d<=2)suggestions.push({...k,dist:d});
     });
@@ -3513,55 +3547,47 @@ window._pickSerialSuggestion=function(raw){
   _renderSerialScanTable([raw],previewImg?previewImg.src:null);
 };
 
-/* 확정된 시리얼(들)로 현장을 찾아 Site Master 표를 렌더링.
-   1) Inventory에 이 시리얼이 배정된 현장을 찾고,
-   2) 혹시 Inventory 연결이 안 되어 있어도 Site Master 화면에 이미 표시된
-      "시리얼" 값 자체에 동일한 숫자가 있으면 그 현장도 함께 찾아 합친다 */
+/* 확정된 시리얼(들)로 Inventory→배정 현장을 찾아 Site Master 핵심 정보를
+   "간단한 요약 카드" 형태로 렌더링한다(넓은 다열 표 대신, 촬영 직후 한눈에
+   확인 가능한 핵심 항목만 카드로 정리 — 상세 수정은 버튼으로 이동해서 처리). */
 function _renderSerialScanTable(serials,previewUrl){
   const resultBox=document.getElementById("serialScanResult");if(!resultBox)return;
   const norms=serials.map(_normSerial);
   const matchedInv=(inventoryList||[]).filter(it=>it.serial&&norms.includes(_normSerial(it.serial)));
-  const siteNamesFromInv=matchedInv.map(it=>it.siteName).filter(Boolean);
-  const siteNamesFromField=(site||[]).filter(s=>{
-    if(!s.serial)return false;
-    const parts=String(s.serial).split(",").map(x=>_normSerial(x.trim())).filter(Boolean);
-    return parts.some(p=>norms.includes(p));
-  }).map(s=>s.name);
-  const siteNames=[...new Set([...siteNamesFromInv,...siteNamesFromField])];
+  const siteNames=[...new Set(matchedInv.map(it=>it.siteName).filter(Boolean))];
   const matchedSites=(site||[]).filter(s=>siteNames.includes(s.name));
   const previewHtml=previewUrl?`<img src="${previewUrl}" class="serial-scan-preview"/>`:"";
+  const retakeBtn=`<button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('serialScanInput').click()"><svg class='ic'><use href='#i-camera'/></svg> 다시 촬영</button>`;
 
   if(!matchedSites.length){
     resultBox.innerHTML=`${previewHtml}
       <div class="serial-scan-summary">인식된 시리얼: <strong>${serials.map(esc).join(", ")}</strong></div>
-      <div class="serial-scan-fail-note">${matchedInv.length?"이 시리얼이 배정된 현장(Site Master)을 찾지 못했습니다. Inventory에서 배정 현장을 지정해주세요.":"Inventory(재고)에 이 시리얼이 등록되어 있지 않습니다. 먼저 Inventory에 등록해주세요."}</div>`;
+      <div class="serial-scan-fail-note">${matchedInv.length?"이 시리얼이 배정된 현장(Site Master)을 찾지 못했습니다. Inventory에서 배정 현장을 지정해주세요.":"Inventory(재고)에 이 시리얼이 등록되어 있지 않습니다. 먼저 Inventory에 등록해주세요."}</div>
+      <div style="margin-top:14px;">${retakeBtn}</div>`;
     return;
   }
-  const rows=matchedSites.map(s=>`
-    <tr>
-      <td style="font-weight:700;">${esc(s.name)}</td>
-      <td>${esc(s.client)||"-"}</td>
-      <td style="font-family:monospace;">${esc(s.serial)||"-"}</td>
-      <td>${esc(s.equipment)||"-"}</td>
-      <td>${esc(s.siteManager)||"-"}</td>
-      <td>${esc(s.siteManagerPhone)||"-"}</td>
-      <td>${esc(s.contractType)||"-"}</td>
-      <td>${esc(s.contractStart)||"-"}</td>
-      <td>${esc(s.contractEnd)||"-"}</td>
-      <td>${esc(s.maintenancePeriod)||"-"}</td>
-      <td>${bAS(s.contractStart,s.maintenancePeriod)}</td>
-      <td>${esc(s.pm)||"-"}</td>
-      <td><div class="td-actions"><button class="btn-icon edit" onclick="document.getElementById('modalOverlay').classList.add('hidden');_openEditSite('${s.id}')"><svg class='ic'><use href='#i-edit'/></svg></button></div></td>
-    </tr>`).join("");
+  const cards=matchedSites.map(s=>`
+    <div class="mc" style="margin-bottom:10px;box-shadow:none;">
+      <div class="mc-head" style="cursor:default;">
+        <div class="mc-title"><div class="mc-name">${esc(s.name)}</div><div class="mc-sub">${esc(s.client)||"고객사 미입력"} · ${esc(s.equipment)||"장비 미입력"}</div></div>
+        <div class="mc-badges">${bAS(s.contractStart,s.maintenancePeriod)}</div>
+      </div>
+      <div class="mc-fields">
+        <div class="mc-field"><span class="mc-label">시리얼</span><span class="mc-val" style="font-family:monospace;">${esc(s.serial)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">현장담당자</span><span class="mc-val">${esc(s.siteManager)||"-"}${s.siteManagerPhone?`<br/>${esc(s.siteManagerPhone)}`:""}</span></div>
+        <div class="mc-field"><span class="mc-label">계약방식</span><span class="mc-val">${esc(s.contractType)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">계약기간</span><span class="mc-val">${esc(s.contractStart)||"-"} ~ ${esc(s.contractEnd)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">유지보수기간</span><span class="mc-val">${esc(s.maintenancePeriod)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">담당PM</span><span class="mc-val">${esc(s.pm)||"-"}</span></div>
+      </div>
+      <div class="mc-actions">
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('modalOverlay').classList.add('hidden');_openEditSite('${s.id}')"><svg class='ic'><use href='#i-edit'/></svg> 현장 상세/수정 열기</button>
+      </div>
+    </div>`).join("");
   resultBox.innerHTML=`${previewHtml}
     <div class="serial-scan-summary">인식된 시리얼: <strong>${serials.map(esc).join(", ")}</strong> · 일치하는 현장 <strong>${matchedSites.length}건</strong></div>
-    <div class="tbl-wrap"><table class="tbl">
-      <thead><tr><th>현장명</th><th>고객사</th><th>시리얼</th><th>장비</th><th>현장담당자</th><th>연락처</th><th>계약방식</th><th>계약시작</th><th>계약종료</th><th>유지보수기간</th><th>AS구분</th><th>담당PM</th><th>관리</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table></div>
-    <div style="margin-top:14px;">
-      <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('serialScanInput').click()"><svg class='ic'><use href='#i-camera'/></svg> 다시 촬영</button>
-    </div>`;
+    ${cards}
+    <div style="margin-top:4px;">${retakeBtn}</div>`;
 }
 
 /* ════════════════════════════════════
