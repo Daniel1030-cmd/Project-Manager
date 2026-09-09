@@ -3336,8 +3336,12 @@ const SITE_FIELDS=[
   {key:"contractEnd",label:"계약 종료",type:"date",pair:true},
   {key:"maintenancePeriod",label:"유지보수 기간",ph:"예: 12개월, 2년, 1년6개월",pair:true},
   {key:"deposit",label:"보증금(원)",type:"number",ph:"예: 10000000",hint:"입력하면 위 이익율 계산 시 매출에 포함됩니다"},
-  {key:"contractFile",label:"계약서 첨부(PDF)",type:"filedoc",hint:"계약서 PDF 파일을 업로드하세요 (800KB 이하). 다운로드는 지원하지 않으며 시스템 내에서 열람만 가능합니다. 용량이 크거나 PDF가 아니면 아래 외부 링크(URL)를 이용해주세요."},
-  {key:"contractFileUrl",label:"계약서 외부 링크(URL)",ph:"https://... (구글드라이브·사내 NAS 등 계약서 원본 보관 링크)"},
+  {key:"contractFile",label:"계약서 첨부 1(PDF)",type:"filedoc",hint:"계약서 PDF 파일을 업로드하세요 (800KB 이하). 다운로드는 지원하지 않으며 시스템 내에서 열람만 가능합니다. 계약서가 여러 건이면 아래 2·3번 항목에 추가로 첨부할 수 있습니다(최대 3건). 용량이 크거나 PDF가 아니면 외부 링크(URL)를 이용해주세요."},
+  {key:"contractFileUrl",label:"계약서 외부 링크 1(URL)",ph:"https://... (구글드라이브·사내 NAS 등 계약서 원본 보관 링크)"},
+  {key:"contractFile2",label:"계약서 첨부 2(PDF)",type:"filedoc",hint:"두 번째 계약서(예: 유지보수 계약서, 부속 합의서 등)가 있는 경우 첨부하세요."},
+  {key:"contractFileUrl2",label:"계약서 외부 링크 2(URL)",ph:"https://..."},
+  {key:"contractFile3",label:"계약서 첨부 3(PDF)",type:"filedoc",hint:"세 번째 계약서가 있는 경우 첨부하세요."},
+  {key:"contractFileUrl3",label:"계약서 외부 링크 3(URL)",ph:"https://..."},
   {key:"accessMethod",label:"출입 등록 방법",type:"textarea",ph:"출입증 발급 절차, 방문 사전 등록, 보안 게이트 통과 방법 등을 입력하세요"},
   {key:"photo",label:"현장 사진",type:"file",hint:"현장 사진을 업로드하세요 (이미지 파일, 2MB 이하)"},
   {key:"pm",label:"담당 PM",req:true},
@@ -3970,24 +3974,39 @@ window._viewSitePhoto=id=>{
     </div>
     <div class="modal-body"><img src="${s.photo}" class="site-photo-view" alt="현장 사진"/></div>`;
 };
-/* 현장(Site Master)에 첨부된 계약서(PDF) 열람 — 매뉴얼과 동일한 내장 뷰어(_viewPdfDataUrl)를 재사용,
-   다운로드는 지원하지 않고 시스템 내에서만 열람 가능하다. 외부 링크(contractFileUrl)로 등록된
-   경우는 새 탭으로 바로 연다(용량이 크거나 PDF가 아닌 계약서는 외부 링크로 등록하도록 안내). */
-window._viewSiteContract=id=>{
+/* 현장(Site Master)에 첨부된 계약서(PDF, 최대 3건) 열람 — 매뉴얼과 동일한 내장 뷰어(_viewPdfDataUrl)를 재사용,
+   다운로드는 지원하지 않고 시스템 내에서만 열람 가능하다. 외부 링크(contractFileUrl*)로 등록된
+   경우는 새 탭으로 바로 연다(용량이 크거나 PDF가 아닌 계약서는 외부 링크로 등록하도록 안내).
+   ※ 기존 단일 계약서 필드(contractFile/contractFileUrl)를 1번 슬롯으로 그대로 사용해
+   이전에 저장된 데이터와 호환되며, 2·3번 슬롯이 추가로 제공된다. */
+const SITE_CONTRACT_SLOTS=[
+  {file:"contractFile",url:"contractFileUrl"},
+  {file:"contractFile2",url:"contractFileUrl2"},
+  {file:"contractFile3",url:"contractFileUrl3"},
+];
+window._viewSiteContract=(id,slotIdx)=>{
   const s=site.find(x=>x.id===id);if(!s)return;
-  const meta=_manualFileMeta(s.contractFile);
+  const slot=SITE_CONTRACT_SLOTS[slotIdx||0];if(!slot)return;
+  const meta=_manualFileMeta(s[slot.file]);
   if(!meta){toast("등록된 계약서 첨부파일이 없습니다","error");return;}
-  _viewPdfDataUrl(s.contractFile,`${s.name||"현장"} · 계약서`);
+  _viewPdfDataUrl(s[slot.file],`${s.name||"현장"} · 계약서${SITE_CONTRACT_SLOTS.length>1?(slotIdx||0)+1:""}`);
 };
 /* Site Master 표/카드에서 공용으로 쓰는 "계약서" 열람·링크 버튼 묶음.
-   업로드된 PDF가 있으면 열람 버튼을, 외부 링크가 등록돼 있으면 링크 버튼을 보여주고,
-   둘 다 없으면 "미첨부"로 표시한다. */
+   최대 3개 슬롯을 순회하며, 업로드된 PDF가 있는 슬롯은 열람 버튼을, 외부 링크가
+   등록된 슬롯은 링크 버튼을 보여준다. 첨부된 것이 하나도 없으면 "미첨부"로 표시한다. */
 function _siteContractActionsHtml(s){
-  const meta=_manualFileMeta(s.contractFile);
-  const view=meta?`<button type="button" class="btn btn-primary btn-sm" onclick="_viewSiteContract('${s.id}')"><svg class='ic'><use href='#i-eye'/></svg> 열람</button>`:"";
-  const link=s.contractFileUrl?`<a class="btn btn-secondary btn-sm" href="${esc(s.contractFileUrl)}" target="_blank" rel="noopener noreferrer"><svg class='ic'><use href='#i-link'/></svg> 링크 열기</a>`:"";
-  if(!view&&!link)return`<span style="color:var(--ink-5);font-size:12px;">미첨부</span>`;
-  return`<div style="display:flex;gap:6px;flex-wrap:wrap;">${view}${link}</div>`;
+  const parts=[];
+  SITE_CONTRACT_SLOTS.forEach((slot,i)=>{
+    const meta=_manualFileMeta(s[slot.file]);
+    const url=s[slot.url];
+    if(!meta&&!url)return;
+    const num=i+1;
+    const view=meta?`<button type="button" class="btn btn-primary btn-sm" onclick="_viewSiteContract('${s.id}',${i})"><svg class='ic'><use href='#i-eye'/></svg> 계약서${num} 열람</button>`:"";
+    const link=url?`<a class="btn btn-secondary btn-sm" href="${esc(url)}" target="_blank" rel="noopener noreferrer"><svg class='ic'><use href='#i-link'/></svg> 계약서${num} 링크</a>`:"";
+    parts.push(view+link);
+  });
+  if(!parts.length)return`<span style="color:var(--ink-5);font-size:12px;">미첨부</span>`;
+  return`<div style="display:flex;gap:6px;flex-wrap:wrap;">${parts.join("")}</div>`;
 }
 function renderSiteResults(){
   const q=sq.site;let list=site.filter(s=>match(q,[s.name,s.client,s.equipment,s.serial,s.pm,s.contractType,s.siteManager,s.siteManagerPhone,_locationsSearchText(s.installLocation)]));
