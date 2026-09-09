@@ -3336,6 +3336,8 @@ const SITE_FIELDS=[
   {key:"contractEnd",label:"계약 종료",type:"date",pair:true},
   {key:"maintenancePeriod",label:"유지보수 기간",ph:"예: 12개월, 2년, 1년6개월",pair:true},
   {key:"deposit",label:"보증금(원)",type:"number",ph:"예: 10000000",hint:"입력하면 위 이익율 계산 시 매출에 포함됩니다"},
+  {key:"contractFile",label:"계약서 첨부(PDF)",type:"filedoc",hint:"계약서 PDF 파일을 업로드하세요 (800KB 이하). 다운로드는 지원하지 않으며 시스템 내에서 열람만 가능합니다. 용량이 크거나 PDF가 아니면 아래 외부 링크(URL)를 이용해주세요."},
+  {key:"contractFileUrl",label:"계약서 외부 링크(URL)",ph:"https://... (구글드라이브·사내 NAS 등 계약서 원본 보관 링크)"},
   {key:"accessMethod",label:"출입 등록 방법",type:"textarea",ph:"출입증 발급 절차, 방문 사전 등록, 보안 게이트 통과 방법 등을 입력하세요"},
   {key:"photo",label:"현장 사진",type:"file",hint:"현장 사진을 업로드하세요 (이미지 파일, 2MB 이하)"},
   {key:"pm",label:"담당 PM",req:true},
@@ -3816,6 +3818,7 @@ function _renderSerialScanTable(serials,previewUrl){
         <div class="mc-field"><span class="mc-label">계약기간</span><span class="mc-val">${esc(s.contractStart)||"-"} ~ ${esc(s.contractEnd)||"-"}</span></div>
         <div class="mc-field"><span class="mc-label">유지보수기간</span><span class="mc-val">${esc(s.maintenancePeriod)||"-"}</span></div>
         <div class="mc-field"><span class="mc-label">담당PM</span><span class="mc-val">${esc(s.pm)||"-"}</span></div>
+        <div class="mc-field"><span class="mc-label">계약서</span><span class="mc-val">${_siteContractActionsHtml(s)}</span></div>
       </div>
       ${_serialScanRepairHistoryHtml(siteInvItems)}
       <div class="mc-actions">
@@ -3967,6 +3970,25 @@ window._viewSitePhoto=id=>{
     </div>
     <div class="modal-body"><img src="${s.photo}" class="site-photo-view" alt="현장 사진"/></div>`;
 };
+/* 현장(Site Master)에 첨부된 계약서(PDF) 열람 — 매뉴얼과 동일한 내장 뷰어(_viewPdfDataUrl)를 재사용,
+   다운로드는 지원하지 않고 시스템 내에서만 열람 가능하다. 외부 링크(contractFileUrl)로 등록된
+   경우는 새 탭으로 바로 연다(용량이 크거나 PDF가 아닌 계약서는 외부 링크로 등록하도록 안내). */
+window._viewSiteContract=id=>{
+  const s=site.find(x=>x.id===id);if(!s)return;
+  const meta=_manualFileMeta(s.contractFile);
+  if(!meta){toast("등록된 계약서 첨부파일이 없습니다","error");return;}
+  _viewPdfDataUrl(s.contractFile,`${s.name||"현장"} · 계약서`);
+};
+/* Site Master 표/카드에서 공용으로 쓰는 "계약서" 열람·링크 버튼 묶음.
+   업로드된 PDF가 있으면 열람 버튼을, 외부 링크가 등록돼 있으면 링크 버튼을 보여주고,
+   둘 다 없으면 "미첨부"로 표시한다. */
+function _siteContractActionsHtml(s){
+  const meta=_manualFileMeta(s.contractFile);
+  const view=meta?`<button type="button" class="btn btn-primary btn-sm" onclick="_viewSiteContract('${s.id}')"><svg class='ic'><use href='#i-eye'/></svg> 열람</button>`:"";
+  const link=s.contractFileUrl?`<a class="btn btn-secondary btn-sm" href="${esc(s.contractFileUrl)}" target="_blank" rel="noopener noreferrer"><svg class='ic'><use href='#i-link'/></svg> 링크 열기</a>`:"";
+  if(!view&&!link)return`<span style="color:var(--ink-5);font-size:12px;">미첨부</span>`;
+  return`<div style="display:flex;gap:6px;flex-wrap:wrap;">${view}${link}</div>`;
+}
 function renderSiteResults(){
   const q=sq.site;let list=site.filter(s=>match(q,[s.name,s.client,s.equipment,s.serial,s.pm,s.contractType,s.siteManager,s.siteManagerPhone,_locationsSearchText(s.installLocation)]));
   const ra=document.getElementById("siteRA");const ma=document.getElementById("sm_site");
@@ -3997,6 +4019,7 @@ function renderSiteResults(){
     <td>${esc(s.pm)||"-"}</td><td>${bSite(s.status)}</td>
     <td>${bAS(s.contractStart,s.maintenancePeriod)}</td>
     <td>${siteThumb(s)}</td>
+    <td>${_siteContractActionsHtml(s)}</td>
     <td><div class="td-actions">
       <button class="btn-icon edit" onclick="_openEditSite('${s.id}')"><svg class='ic'><use href='#i-edit'/></svg></button>
       <button class="btn btn-sm btn-secondary" onclick="_updateSiteStatus('${s.id}','진행')">진행</button>
@@ -4025,6 +4048,7 @@ function renderSiteResults(){
         <div class="mc-field"><span class="mc-label">출입 등록 방법</span><span class="mc-val" style="text-align:left;white-space:pre-wrap;">${esc(s.accessMethod)||"-"}</span></div>
         <div class="mc-field"><span class="mc-label">AS 구분</span><span class="mc-val">${bAS(s.contractStart,s.maintenancePeriod)}</span></div>
         <div class="mc-field"><span class="mc-label">현장 사진</span><span class="mc-val">${siteThumb(s)}</span></div>
+        <div class="mc-field"><span class="mc-label">계약서</span><span class="mc-val">${_siteContractActionsHtml(s)}</span></div>
       </div>
       <div class="mc-actions">
         <button class="btn btn-secondary btn-sm" onclick="_openEditSite('${s.id}')"><svg class='ic'><use href='#i-edit'/></svg> 수정</button>
@@ -4037,7 +4061,7 @@ function renderSiteResults(){
     ${thSort("name","현장명")}${thSort("client","고객사")}${thSort("siteManager","현장 담당자")}${thSort("siteManagerPhone","연락처")}<th>설치 위치(후보)</th>${thSort("equipment","장비")}${thSort("quantity","수량")}${thSort("contractType","계약방식")}
     ${thSort("contractAmount","계약금액(매출)","text-align:right;")}${thSort("contractCost","원가","text-align:right;")}${thSort("profitMargin","이익율","text-align:right;")}${thSort("deposit","보증금","text-align:right;")}
     ${thSort("contractStart","계약시작")}${thSort("contractEnd","계약종료")}<th>유지보수기간</th>${thSort("pm","PM")}
-    ${thSort("status","상태")}<th style="color:var(--teal-dk);">AS 구분</th><th>사진</th><th>관리</th>
+    ${thSort("status","상태")}<th style="color:var(--teal-dk);">AS 구분</th><th>사진</th><th>계약서</th><th>관리</th>
   </tr></thead><tbody>${tBody}</tbody></table></div>
   <div class="mc-list">${mCards}</div>`;
 }
@@ -5112,20 +5136,24 @@ window._deleteManual=async id=>{
   catch(e){console.error(e);toast("삭제 실패","error");}
 };
 
-/* 매뉴얼 열람 전용 뷰어 — 다운로드 링크를 제공하지 않고 내장 뷰어로만 PDF를 표시합니다 */
-window._viewManualFile=id=>{
-  const m=manuals.find(x=>x.id===id);if(!m)return;
-  const meta=_manualFileMeta(m.fileData);
+/* 문서(PDF) 열람 전용 뷰어 — 다운로드 링크를 제공하지 않고 내장 뷰어로만 PDF를 표시합니다.
+   매뉴얼뿐 아니라 현장 계약서 등 filedoc 타입으로 저장된 모든 PDF에서 공용으로 사용한다. */
+function _viewPdfDataUrl(dataUrl,title){
+  const meta=_manualFileMeta(dataUrl);
   const overlay=document.getElementById("manualViewOverlay");
   const content=document.getElementById("manualViewContent");
   const titleEl=document.getElementById("manualViewTitle");
-  if(titleEl)titleEl.textContent=m.title||"매뉴얼 열람";
+  if(titleEl)titleEl.textContent=title||"문서 열람";
   if(meta&&meta.mime==="application/pdf"){
-    content.innerHTML=`<iframe src="${m.fileData}#toolbar=0&navpanes=0&scrollbar=1" title="${esc(m.title||"매뉴얼")}"></iframe>`;
+    content.innerHTML=`<iframe src="${dataUrl}#toolbar=0&navpanes=0&scrollbar=1" title="${esc(title||"문서")}"></iframe>`;
   }else{
     content.innerHTML=`<div class="manual-view-unsupported"><svg class='ic'><use href='#i-file'/></svg><div>이 파일 형식은 시스템 내에서 바로 열람할 수 없습니다.<br/>담당자에게 문의해주세요.</div></div>`;
   }
   overlay.classList.add("active");
+}
+window._viewManualFile=id=>{
+  const m=manuals.find(x=>x.id===id);if(!m)return;
+  _viewPdfDataUrl(m.fileData,m.title||"매뉴얼 열람");
 };
 window._closeManualView=()=>{
   document.getElementById("manualViewOverlay").classList.remove("active");
