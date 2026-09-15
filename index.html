@@ -1027,6 +1027,7 @@ img,svg{-webkit-user-drag:none;user-drag:none;pointer-events:auto;}
         <li class="nav-item" data-page="dashboard"><span class="nav-ic"><svg class='ic'><use href='#i-home'/></svg></span>Dashboard</li>
         <li class="sidebar-section">관리</li>
         <li class="nav-item" data-page="site"><span class="nav-ic"><svg class='ic'><use href='#i-building'/></svg></span>Site Master</li>
+        <li class="nav-item" data-page="sitemargin"><span class="nav-ic"><svg class='ic'><use href='#i-dollar'/></svg></span>현장별 마진율</li>
         <li class="nav-item" data-page="project"><span class="nav-ic"><svg class='ic'><use href='#i-tool'/></svg></span>Project</li>
         <li class="nav-item" data-page="survey"><span class="nav-ic"><svg class='ic'><use href='#i-clipboard'/></svg></span>현장 답사 체크리스트</li>
         <li class="nav-item" data-page="inventory"><span class="nav-ic"><svg class='ic'><use href='#i-package'/></svg></span>Inventory</li>
@@ -1073,6 +1074,7 @@ img,svg{-webkit-user-drag:none;user-drag:none;pointer-events:auto;}
   <ul class="m-tabbar">
     <li class="m-tab" data-page="dashboard"><span class="m-tab-ic"><svg class='ic'><use href='#i-home'/></svg></span>Home</li>
     <li class="m-tab" data-page="site"><span class="m-tab-ic"><svg class='ic'><use href='#i-building'/></svg></span>Site</li>
+    <li class="m-tab" data-page="sitemargin"><span class="m-tab-ic"><svg class='ic'><use href='#i-dollar'/></svg></span>마진율</li>
     <li class="m-tab" data-page="project"><span class="m-tab-ic"><svg class='ic'><use href='#i-tool'/></svg></span>Project</li>
     <li class="m-tab" data-page="survey"><span class="m-tab-ic"><svg class='ic'><use href='#i-clipboard'/></svg></span>답사</li>
     <li class="m-tab" data-page="inventory"><span class="m-tab-ic"><svg class='ic'><use href='#i-package'/></svg></span>Stock</li>
@@ -1147,7 +1149,7 @@ const COL={site:"site",tasks:"tasks",issues:"issues",inventory:"inventory",weekl
 
 let site=[],tasks=[],issues=[],inventoryList=[],weeklyReports=[],errorCodes=[],employees=[],payrollRecords=[],supportSites=[],manuals=[],productInfo=[],siteSurveys=[];
 let curPage="dashboard";
-let sq={site:"",project:"",issue:"",inventory:"",errorcode:"",supportSite:"",supportManual:"",productInfo:""};
+let sq={site:"",sitemargin:"",project:"",issue:"",inventory:"",errorcode:"",supportSite:"",supportManual:"",productInfo:""};
 let projSort={col:"receiptDate",dir:"desc"};
 let siteSort={col:"name",dir:"asc"};
 let invSort={col:"model",dir:"asc"};
@@ -1768,6 +1770,82 @@ function _locationsTableCell(raw){
   </span>`;
 }
 
+/* ════════════════════════════════════
+   추가 비용 항목(복수) 입력 필드 — "costitems" 타입
+   출장비·부품비·인건비 등, Inventory 원가에는 잡히지 않는 현장별
+   추가 비용을 카테고리별로 여러 건 등록하고 합계를 이익율 계산에
+   반영할 수 있도록 지원한다. 구조는 multilocation과 동일한 패턴.
+════════════════════════════════════ */
+const COST_ITEM_CATEGORIES=["출장비","부품비","인건비","기타"];
+let _costItemsState={}; // 모달이 열려 있는 동안에만 사용하는 임시 편집 상태 { [fieldKey]: [{id,category,amount,note}] }
+function _parseCostItems(raw){
+  if(raw==null||raw==="")return[];
+  if(Array.isArray(raw))return raw.map(r=>({id:r.id||_uid(),category:COST_ITEM_CATEGORIES.includes(r.category)?r.category:"기타",amount:Number(r.amount)||0,note:r.note||"",date:r.date||""}));
+  const s=String(raw).trim();if(!s)return[];
+  try{
+    const p=JSON.parse(s);
+    if(Array.isArray(p))return p.map(r=>({id:r.id||_uid(),category:COST_ITEM_CATEGORIES.includes(r.category)?r.category:"기타",amount:Number(r.amount)||0,note:r.note||"",date:r.date||""}));
+  }catch(e){/* JSON이 아니면(구버전 데이터 없음) 빈 목록으로 처리 */}
+  return[];
+}
+/* 등록된 추가 비용 항목들의 합계(원) — 이익율 계산 시 원가에 더해진다 */
+function _costItemsTotal(raw){return _parseCostItems(raw).reduce((a,r)=>a+(Number(r.amount)||0),0);}
+function _costItemRowHTML(key,r,idx){
+  return`<div class="multiloc-row" data-id="${r.id}">
+    <div class="multiloc-row-top">
+      <span class="multiloc-row-idx">${idx+1}</span>
+      <select class="multiloc-status" onchange="_updateCostItemRow('${key}','${r.id}','category',this.value)">
+        ${COST_ITEM_CATEGORIES.map(c=>`<option value="${c}"${r.category===c?" selected":""}>${c}</option>`).join("")}
+      </select>
+      <input type="number" class="multiloc-name" placeholder="금액(원)" value="${r.amount||""}" oninput="_updateCostItemRow('${key}','${r.id}','amount',this.value)"/>
+      <button type="button" class="multiloc-remove" onclick="_removeCostItemRow('${key}','${r.id}')" title="이 비용 항목 삭제"><svg class='ic'><use href='#i-trash'/></svg></button>
+    </div>
+    <input type="text" class="multiloc-note" placeholder="비고(선택) — 예: 지방 출장 2회, OO 부품 교체 등" value="${esc(r.note)}" oninput="_updateCostItemRow('${key}','${r.id}','note',this.value)"/>
+  </div>`;
+}
+function _renderCostItemRows(key){
+  const arr=_costItemsState[key]||[];
+  const list=document.getElementById("f_"+key+"_list");
+  if(!list)return;
+  list.innerHTML=arr.length?arr.map((r,i)=>_costItemRowHTML(key,r,i)).join(""):`<div class="multiloc-empty">등록된 추가 비용이 없습니다. 아래 '비용 항목 추가' 버튼으로 출장비·부품비 등을 등록하세요.</div>`;
+  const totalEl=document.getElementById("f_"+key+"_total");
+  if(totalEl)totalEl.textContent=arr.reduce((a,r)=>a+(Number(r.amount)||0),0).toLocaleString("ko-KR")+"원";
+}
+function _syncCostItemsHidden(key){
+  const el=document.getElementById("f_"+key);
+  if(el)el.value=JSON.stringify(_costItemsState[key]||[]);
+}
+window._addCostItemRow=function(key){
+  if(!_costItemsState[key])_costItemsState[key]=[];
+  _costItemsState[key].push({id:_uid(),category:"출장비",amount:0,note:""});
+  _renderCostItemRows(key);_syncCostItemsHidden(key);
+  const list=document.getElementById("f_"+key+"_list");
+  list?.querySelector(".multiloc-row:last-child .multiloc-name")?.focus();
+};
+window._removeCostItemRow=function(key,id){
+  _costItemsState[key]=(_costItemsState[key]||[]).filter(r=>r.id!==id);
+  _renderCostItemRows(key);_syncCostItemsHidden(key);
+};
+window._updateCostItemRow=function(key,id,field,value){
+  const row=(_costItemsState[key]||[]).find(r=>r.id===id);if(!row)return;
+  row[field]=field==="amount"?(Number(value)||0):value;
+  _syncCostItemsHidden(key);
+  const totalEl=document.getElementById("f_"+key+"_total");
+  if(totalEl)totalEl.textContent=(_costItemsState[key]||[]).reduce((a,r)=>a+(Number(r.amount)||0),0).toLocaleString("ko-KR")+"원";
+};
+/* 카드/상세 화면용 — 등록된 추가 비용 항목 전체를 카테고리·금액과 함께 나열하는 패널(읽기 전용) */
+function _costItemsPanelHTML(raw){
+  const arr=_parseCostItems(raw);
+  if(!arr.length)return`<div class="loc-panel-empty"><svg class='ic'><use href='#i-pin'/></svg> 등록된 추가 비용이 없습니다</div>`;
+  const sorted=arr.slice().sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  const total=arr.reduce((a,r)=>a+(Number(r.amount)||0),0);
+  const rows=sorted.map(r=>`<div class="loc-panel-item">
+      <span class="badge b-ready loc-panel-badge">${esc(r.category)}</span>
+      <span class="loc-panel-name" title="${esc(r.note)||""}">${r.date?`${esc(r.date)} · `:""}${(Number(r.amount)||0).toLocaleString("ko-KR")}원${r.note?` · ${esc(r.note)}`:""}</span>
+    </div>`).join("");
+  return`<div class="loc-panel"><div class="loc-panel-head"><svg class='ic'><use href='#i-pin'/></svg><span>총 ${arr.length}건 · 합계 ${total.toLocaleString("ko-KR")}원</span></div><div class="loc-panel-list">${rows}</div></div>`;
+}
+
 function openModal({title,fields,values={},onSave,hint="",wide=false}){
   $modal.className="modal"+(wide?" modal-wide":"");
   $modal.innerHTML=`
@@ -1798,6 +1876,15 @@ function openModal({title,fields,values={},onSave,hint="",wide=false}){
         // 이름이 비어있는 빈 후보 행은 저장 시 정리한다
         let arr=[];try{arr=JSON.parse(el.value||"[]");}catch(e){arr=[];}
         arr=arr.filter(r=>r&&String(r.name||"").trim());
+        if(f.req&&!arr.length){wrap?.classList.add("invalid");ok=false;}
+        else wrap?.classList.remove("invalid");
+        data[f.key]=JSON.stringify(arr);
+        return;
+      }
+      if(f.type==="costitems"){
+        // 금액이 입력되지 않은(0원) 빈 항목은 저장 시 정리한다
+        let arr=[];try{arr=JSON.parse(el.value||"[]");}catch(e){arr=[];}
+        arr=arr.filter(r=>r&&(Number(r.amount)||0)>0);
         if(f.req&&!arr.length){wrap?.classList.add("invalid");ok=false;}
         else wrap?.classList.remove("invalid");
         data[f.key]=JSON.stringify(arr);
@@ -1868,6 +1955,21 @@ function fld(f,vals){
       <input type="hidden" id="f_${f.key}" name="${f.key}" value='${esc(JSON.stringify(arr))}'/>
       <div class="multiloc-list" id="f_${f.key}_list">${arr.length?arr.map((r,i)=>_locationRowHTML(f.key,r,i)).join(""):`<div class="multiloc-empty">등록된 후보 장소가 없습니다. 아래 '후보 장소 추가' 버튼으로 검토할 장소를 등록하세요.</div>`}</div>
       <button type="button" class="btn btn-secondary btn-sm multiloc-add" onclick="_addLocationRow('${f.key}')"><svg class='ic'><use href='#i-plus'/></svg> 후보 장소 추가</button>
+      ${f.hint?`<div class="field-hint">${f.hint}</div>`:""}
+      <div class="ferr">${esc(f.err||"필수 입력")}</div>
+    </div>`;
+  }else if(f.type==="costitems"){
+    const arr=_parseCostItems(vals[f.key]);
+    _costItemsState[f.key]=arr;
+    const total=arr.reduce((a,r)=>a+(Number(r.amount)||0),0);
+    return`<div class="field multiloc-field">
+      <label for="f_${f.key}">${esc(f.label)}${f.req?` <span style='color:var(--rose)'>*</span>`:""}</label>
+      <input type="hidden" id="f_${f.key}" name="${f.key}" value='${esc(JSON.stringify(arr))}'/>
+      <div class="multiloc-list" id="f_${f.key}_list">${arr.length?arr.map((r,i)=>_costItemRowHTML(f.key,r,i)).join(""):`<div class="multiloc-empty">등록된 추가 비용이 없습니다. 아래 '비용 항목 추가' 버튼으로 출장비·부품비 등을 등록하세요.</div>`}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;">
+        <button type="button" class="btn btn-secondary btn-sm multiloc-add" style="margin-top:0;" onclick="_addCostItemRow('${f.key}')"><svg class='ic'><use href='#i-plus'/></svg> 비용 항목 추가</button>
+        <span style="font-size:12.5px;font-weight:700;color:var(--ink-3);">합계 <span id="f_${f.key}_total">${total.toLocaleString("ko-KR")}원</span></span>
+      </div>
       ${f.hint?`<div class="field-hint">${f.hint}</div>`:""}
       <div class="ferr">${esc(f.err||"필수 입력")}</div>
     </div>`;
@@ -3317,8 +3419,10 @@ const SITE_FIELDS=[
     if(months<=0)return"유지보수 기간 입력 필요";
     return(monthly*months).toLocaleString("ko-KR")+"원 ("+monthly.toLocaleString("ko-KR")+"원 × "+months+"개월)";
   }},
-  {key:"contractCost",label:"원가 · 매입/설치비(원)",readOnly:true,hint:"Inventory에 이 현장으로 배정된 재고들의 원가를 자동으로 합산한 금액입니다",pair:true,compute:vals=>{const c=_siteInventoryAgg(vals.name).totalCost;return c>0?c.toLocaleString("ko-KR"):"0";}},
-  {key:"profitMargin",label:"이익율(%)",readOnly:true,hint:"매출([렌탈: 계약금액×유지보수기간으로 산출한 금액 / 그 외: 계약금액] + 보증금) 대비 원가 기준으로 자동 계산됩니다. 보증금이 있으면 매출에 포함됩니다",compute:vals=>{
+  {key:"contractCost",label:"재고 원가 · 매입/설치비(원)",readOnly:true,hint:"Inventory에 이 현장으로 배정된 재고들의 원가를 자동으로 합산한 금액입니다. 출장비·부품비·인건비 등 추가 비용은 왼쪽 메뉴의 '현장별 마진율'에서 등록·관리합니다.",pair:true,compute:vals=>{const c=_siteInventoryAgg(vals.name).totalCost;return c>0?c.toLocaleString("ko-KR"):"0";}},
+  {key:"extraCostsTotal",label:"추가 비용 합계(원, 참고용)",readOnly:true,hint:"'현장별 마진율' 메뉴에서 등록한 출장비·부품비·인건비 등 추가 비용의 합계입니다. 이 화면에서는 조회만 가능하며, 등록·수정은 '현장별 마진율' 메뉴에서 해주세요.",pair:true,compute:vals=>_costItemsTotal(vals.extraCosts).toLocaleString("ko-KR")},
+  {key:"projectQuoteTotal",label:"Project 견적서 금액 합계(원, 참고용)",readOnly:true,hint:"Project(접수관리) 메뉴에서 이 현장 앞으로 작성된 견적서 건별 금액(수량×단가)의 합계입니다. 견적서 발행 건은 입금(청구)으로 이어지는 매출이므로 아래 이익율 계산 시 매출에 자동으로 +반영되어 이익율이 상승하는 방향으로 작용합니다. 여러 건이 동시에 등록될 수 있으며 모두 합산됩니다. 등록·수정은 Project 메뉴의 견적서 작성 화면에서 해주세요.",pair:true,compute:vals=>_siteProjectQuoteTotal(vals.name).toLocaleString("ko-KR")},
+  {key:"profitMargin",label:"이익율(%)",readOnly:true,hint:"매출([렌탈: 계약금액×유지보수기간으로 산출한 금액 / 그 외: 계약금액] + 보증금 + Project에서 작성된 이 현장의 견적서 금액 합계 — 입금으로 이어지는 매출이므로 이익율이 상승합니다) 대비, 원가(재고 원가 + 추가 비용(출장비·부품비·인건비 등, '현장별 마진율' 메뉴에서 등록))를 기준으로 자동 계산됩니다",compute:vals=>{
     let revenue;
     if(vals.contractType==="렌탈"){
       const monthly=Number(vals.contractAmount)||0;
@@ -3328,8 +3432,9 @@ const SITE_FIELDS=[
       revenue=Number(vals.contractAmount)||0;
     }
     revenue+=Number(vals.deposit)||0;
-    if(revenue<=0)return"계약금액(렌탈은 유지보수기간도) 또는 보증금 입력 필요";
-    const cost=_siteInventoryAgg(vals.name).totalCost;
+    revenue+=_siteProjectQuoteTotal(vals.name);
+    if(revenue<=0)return"계약금액(렌탈은 유지보수기간도) · 보증금 · 견적서 금액 중 입력 필요";
+    const cost=_siteInventoryAgg(vals.name).totalCost+_costItemsTotal(vals.extraCosts);
     return(((revenue-cost)/revenue)*100).toFixed(1)+"%";
   }},
   {key:"contractStart",label:"계약 시작",type:"date",pair:true},
@@ -3939,7 +4044,7 @@ window._applyContractAmountImport=async function(){
   }catch(e){console.error(e);toast("반영 중 오류가 발생했습니다","error");}
 };
 
-window._openAddSite=()=>openModal({title:"신규 현장 등록",fields:SITE_FIELDS,hint:"계약 시작일과 유지보수 기간 입력 시 AS 구분이 자동 산출됩니다. 시리얼·원가는 Inventory에서 이 현장으로 배정한 재고를 기준으로 자동 합산되며, 현장을 먼저 등록한 뒤 Inventory에서 재고를 배정해주세요. 계약방식이 렌탈인 경우 계약금액(월 이용료) × 유지보수 기간(개월수)으로 산출 금액이 자동 계산되고, 이 산출 금액을 기준으로 이익율이 자동 계산됩니다.",
+window._openAddSite=()=>openModal({title:"신규 현장 등록",fields:SITE_FIELDS,hint:"계약 시작일과 유지보수 기간 입력 시 AS 구분이 자동 산출됩니다. 시리얼·재고 원가는 Inventory에서 이 현장으로 배정한 재고를 기준으로 자동 합산되며, 현장을 먼저 등록한 뒤 Inventory에서 재고를 배정해주세요. 계약방식이 렌탈인 경우 계약금액(월 이용료) × 유지보수 기간(개월수)으로 산출 금액이 자동 계산되고, 이 산출 금액을 기준으로 이익율이 자동 계산됩니다. 출장비·부품비·인건비 등 재고 원가에 잡히지 않는 추가 비용은 '추가 비용' 항목에 등록하면 원가에 반영되어 이익율 계산에 함께 반영되며, Project에서 이 현장 앞으로 작성한 견적서 금액(입금으로 이어지는 매출, 여러 건 가능)은 별도 등록 없이 매출에 자동으로 +반영되어 이익율이 상승합니다.",
   onSave:async d=>{await addDoc(collection(db,COL.site),{...d,status:"준비",createdAt:serverTimestamp()});toast("현장이 등록되었습니다","success");}});
 window._openEditSite=id=>{
   const s=site.find(x=>x.id===id);if(!s)return;
@@ -4060,6 +4165,7 @@ function renderSiteResults(){
         <div class="mc-field"><span class="mc-label">장비</span><span class="mc-val">${esc(s.equipment)||"-"}</span></div>
         <div class="mc-field"><span class="mc-label">계약금액(매출)</span><span class="mc-val">${_siteContractAmountCell(s)}</span></div>
         <div class="mc-field"><span class="mc-label">원가</span><span class="mc-val">${_siteCostCell(s)}</span></div>
+        <div class="mc-field" style="flex-direction:column;align-items:stretch;gap:6px;"><span class="mc-label">추가 비용(출장비·부품비 등)</span>${_costItemsPanelHTML(s.extraCosts)}</div>
         <div class="mc-field"><span class="mc-label">이익율</span><span class="mc-val">${_siteMarginCell(s)}</span></div>
         <div class="mc-field"><span class="mc-label">보증금</span><span class="mc-val">${s.deposit?Number(s.deposit).toLocaleString("ko-KR")+"원":"-"}</span></div>
         <div class="mc-field"><span class="mc-label">계약기간</span><span class="mc-val">${esc(s.contractStart)||"-"} ~ ${esc(s.contractEnd)||"-"}</span></div>
@@ -4085,6 +4191,259 @@ function renderSiteResults(){
   <div class="mc-list">${mCards}</div>`;
 }
 _renderers.site=renderSiteResults;
+
+/* ════════════════════════════════════
+   현장별 마진율 — 왼쪽 메뉴의 별도 카테고리
+   ------------------------------------------------------------------
+   Site Master에 입력된 계약금액(매출)·재고 원가·추가 비용(출장비·부품비 등)을
+   그대로 활용해 현장별 이익율만 모아서 한눈에 확인·정렬·검색할 수 있는 전용
+   화면이다. 계산 로직은 Site Master와 완전히 동일한 함수(_siteMarginRevenue,
+   _siteDisplayCost, _siteMargin, _costItemsTotal 등)를 재사용하므로 두 화면의
+   수치는 항상 일치하며, 값 수정(계약금액·추가 비용 등록 등)은 "Site Master에서
+   수정" 버튼으로 기존 현장 수정 모달을 그대로 열어서 처리한다(이중 관리 방지).
+════════════════════════════════════ */
+let siteMarginSort={col:"margin",dir:"desc"};
+window._siteMarginSortBy=function(col){
+  if(siteMarginSort.col===col)siteMarginSort.dir=siteMarginSort.dir==="asc"?"desc":"asc";
+  else{siteMarginSort.col=col;siteMarginSort.dir="desc";}
+  renderSiteMarginResults();
+};
+function siteMarginSortIcon(col){
+  if(siteMarginSort.col!==col)return`<span style="opacity:.3;font-size:10px;margin-left:3px;">↕</span>`;
+  return siteMarginSort.dir==="asc"?`<span style="color:var(--teal);font-size:10px;margin-left:3px;">↑</span>`:`<span style="color:var(--teal);font-size:10px;margin-left:3px;">↓</span>`;
+}
+function renderSiteMargin(){
+  $content.innerHTML=`
+    <div class="page-head">
+      <div><div class="page-title">현장별 마진율</div><div class="page-subtitle">Site Master의 계약금액에 Project에서 작성된 이 현장의 견적서 금액(입금·청구로 이어지는 매출, 여러 건 가능)을 더한 매출과, 재고 원가에 출장비·부품비·인건비 등 추가 비용을 더한 원가를 반영한 현장별 이익율을 모아서 관리합니다. '추가 비용 관리' 버튼으로 이 화면에서 바로 출장비·부품비·인건비를 등록할 수 있고, 계약금액 등 그 외 항목은 'Site Master에서 수정' 버튼으로 이동해서 처리합니다. Project에서 작성한 견적서 금액은 별도 등록 없이 매출에 자동으로 +반영되어 이익율이 상승합니다.</div></div>
+    </div>
+    <div class="kpi-grid" id="siteMarginKpi"></div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">현장별 이익율</div></div>
+      <div class="card-body">${searchBox("sitemargin","현장명, 고객사, 계약방식, PM으로 검색")}<div id="siteMarginRA"></div></div>
+    </div>`;
+  renderSiteMarginResults();
+}
+function renderSiteMarginResults(){
+  const q=sq.sitemargin;
+  const list0=site.filter(s=>match(q,[s.name,s.client,s.contractType,s.pm]));
+  const ra=document.getElementById("siteMarginRA");const ma=document.getElementById("sm_sitemargin");
+  if(!ra)return;if(ma)ma.textContent=q?`${list0.length}건 검색됨`:"";
+
+  /* KPI는 검색어와 무관하게 항상 전체 현장 기준으로 계산한다(전사 현황 파악용) */
+  const allMargins=site.map(s=>_siteMargin(s)).filter(m=>m!==null);
+  const avgMargin=allMargins.length?(allMargins.reduce((a,b)=>a+b,0)/allMargins.length):null;
+  const lossCnt=allMargins.filter(m=>m<0).length;
+  const unknownCnt=site.length-allMargins.length;
+  const kpiEl=document.getElementById("siteMarginKpi");
+  if(kpiEl){
+    kpiEl.innerHTML=`
+      ${kpiHtml(site.length,"전체 현장","c-teal")}
+      ${kpiHtml(avgMargin!==null?avgMargin.toFixed(1)+"%":"-","평균 이익율","c-blue")}
+      ${kpiHtml(lossCnt,"적자 현장(이익율 0% 미만)","c-rose")}
+      ${kpiHtml(unknownCnt,"계산 불가(계약금액 미입력 등)","c-amber")}`;
+  }
+
+  if(!list0.length){ra.innerHTML=noResults(q);return;}
+  const list=list0.slice().sort((a,b)=>{
+    const col=siteMarginSort.col;let va,vb;
+    if(col==="revenue"){va=_siteMarginRevenue(a);vb=_siteMarginRevenue(b);}
+    else if(col==="cost"){va=_siteDisplayCost(a);vb=_siteDisplayCost(b);}
+    else if(col==="extra"){va=_costItemsTotal(a.extraCosts);vb=_costItemsTotal(b.extraCosts);}
+    else if(col==="quote"){va=_siteProjectQuoteTotal(a.name);vb=_siteProjectQuoteTotal(b.name);}
+    else if(col==="margin"){va=_siteMargin(a);va=va===null?-Infinity:va;vb=_siteMargin(b);vb=vb===null?-Infinity:vb;}
+    else{va=(a[col]||"").toString();vb=(b[col]||"").toString();}
+    const cmp=va<vb?-1:va>vb?1:0;return siteMarginSort.dir==="asc"?cmp:-cmp;
+  });
+  const thSort=(col,label,style="")=>`<th style="cursor:pointer;user-select:none;white-space:nowrap;${style}" onclick="_siteMarginSortBy('${col}')">${label}${siteMarginSortIcon(col)}</th>`;
+  const tBody=list.map(s=>{
+    const extra=_costItemsTotal(s.extraCosts);
+    const quotes=_siteProjectQuotes(s.name);
+    const quote=quotes.reduce((a,r)=>a+r.amount,0);
+    const quoteTip=quotes.length?quotes.map(r=>`${r.quoteNo||"견적서"} ${r.date||""} ${r.amount.toLocaleString("ko-KR")}원`).join("\n"):"";
+    return`<tr>
+      <td style="font-weight:600;">${esc(s.name)}</td><td>${esc(s.client)||"-"}</td><td>${bContract(s.contractType)}</td>
+      <td style="text-align:right;">${_siteContractAmountCell(s)}</td>
+      <td style="text-align:right;color:var(--ink-5);">${_siteCostCell(s)}</td>
+      <td style="text-align:right;color:var(--amber);">${extra?extra.toLocaleString("ko-KR")+"원":"-"}</td>
+      <td style="text-align:right;color:var(--teal-dk);"${quoteTip?` title="${esc(quoteTip)}"`:""}>${quote?`+${quote.toLocaleString("ko-KR")}원${quotes.length>1?` (${quotes.length}건)`:""}`:"-"}</td>
+      <td style="text-align:right;">${_siteMarginCell(s)}</td>
+      <td><div class="td-actions">
+        <button class="btn btn-primary btn-sm" onclick="_openSiteExtraCosts('${s.id}')"><svg class='ic'><use href='#i-plus'/></svg> 추가 비용 관리</button>
+        <button class="btn btn-secondary btn-sm" onclick="_openEditSite('${s.id}')"><svg class='ic'><use href='#i-edit'/></svg> Site Master에서 수정</button>
+      </div></td>
+    </tr>`;
+  }).join("");
+  const mCards=list.map(s=>{
+    return`<div class="mc">
+    <div class="mc-head" onclick="_toggleMC('sm${s.id}')">
+      <div class="mc-title"><div class="mc-name">${esc(s.name)}</div><div class="mc-sub">${esc(s.client)||"-"}</div></div>
+      <div class="mc-badges">${bContract(s.contractType)}</div>
+      <span class="mc-chevron" id="mcc_sm${s.id}">▼</span>
+    </div>
+    <div class="mc-body" id="mcb_sm${s.id}">
+      <hr class="mc-divider"/>
+      <div class="mc-fields">
+        <div class="mc-field"><span class="mc-label">계약금액</span><span class="mc-val">${_siteContractAmountCell(s)}</span></div>
+        <div class="mc-field"><span class="mc-label">재고 원가</span><span class="mc-val">${_siteCostCell(s)}</span></div>
+        <div class="mc-field" style="flex-direction:column;align-items:stretch;gap:6px;"><span class="mc-label">추가 비용(출장비·부품비·인건비 등)</span>${_costItemsPanelHTML(s.extraCosts)}</div>
+        <div class="mc-field" style="flex-direction:column;align-items:stretch;gap:6px;"><span class="mc-label">Project 견적서 내역(매출 자동 +반영)</span>${_siteQuotesPanelHTML(s.name)}</div>
+        <div class="mc-field"><span class="mc-label">매출(이익율 계산 기준)</span><span class="mc-val">${_siteMarginRevenue(s).toLocaleString("ko-KR")}원</span></div>
+        <div class="mc-field"><span class="mc-label">이익율</span><span class="mc-val">${_siteMarginCell(s)}</span></div>
+      </div>
+      <div class="mc-actions">
+        <button class="btn btn-primary btn-sm" onclick="_openSiteExtraCosts('${s.id}')"><svg class='ic'><use href='#i-plus'/></svg> 추가 비용 관리</button>
+        <button class="btn btn-secondary btn-sm" onclick="_openEditSite('${s.id}')"><svg class='ic'><use href='#i-edit'/></svg> Site Master에서 수정</button>
+      </div>
+    </div>
+  </div>`;}).join("");
+  ra.innerHTML=`<div class="tbl-wrap"><table class="tbl"><thead><tr>
+    ${thSort("name","현장명")}${thSort("client","고객사")}<th>계약방식</th>
+    ${thSort("revenue","매출","text-align:right;")}${thSort("cost","재고 원가","text-align:right;")}${thSort("extra","추가 비용","text-align:right;")}${thSort("quote","견적서 매출(+)","text-align:right;")}${thSort("margin","이익율","text-align:right;")}
+    <th>관리</th>
+  </tr></thead><tbody>${tBody}</tbody></table></div>
+  <div class="mc-list">${mCards}</div>`;
+}
+_renderers.sitemargin=renderSiteMarginResults;
+/* ════════════════════════════════════════════════════════════
+   현장별 마진율 화면 전용 — "추가 비용 관리" 전문 편집기
+   ------------------------------------------------------------------
+   Site Master의 범용 입력 폼(costitems 필드)을 그대로 쓰는 대신, 추가
+   비용 관리에 특화된 전용 모달을 직접 구성한다. 제공 기능:
+   - 항목별 발생일(date) 입력 — 언제 발생한 비용인지 기록
+   - 카테고리별 합계 배지(출장비/부품비/인건비/기타) — 지출 구조를 한눈에 파악
+   - 실시간 "저장 시 예상 이익율" 미리보기 — 항목을 추가/삭제/수정할 때마다
+     현재 매출·재고원가를 기준으로 즉시 재계산되어, 저장 전에 영향을 확인 가능
+   - 금액/비고 입력 중에는 목록 전체를 다시 그리지 않고 요약·미리보기만
+     갱신하여 입력 포커스가 끊기지 않도록 함(항목 추가/삭제 시에만 목록 재구성)
+   저장 시 해당 현장 문서의 extraCosts 필드만 갱신하며, 계약금액 등 다른
+   항목은 Site Master에서 별도로 수정한다.
+════════════════════════════════════════════════════════════ */
+let _extraCostEditState={site:null,items:[]};
+/* 카테고리별 소계 배지 + "저장 시 예상 이익율" 미리보기만 갱신(목록 DOM은 건드리지 않음) */
+function _refreshExtraCostSummary(){
+  const st=_extraCostEditState;if(!st||!st.site)return;
+  const items=st.items;
+  const byCat={};COST_ITEM_CATEGORIES.forEach(c=>byCat[c]=0);
+  items.forEach(r=>{byCat[r.category]=(byCat[r.category]||0)+(Number(r.amount)||0);});
+  const total=items.reduce((a,r)=>a+(Number(r.amount)||0),0);
+  const sumEl=document.getElementById("extraCostSummary");
+  if(sumEl){
+    sumEl.innerHTML=COST_ITEM_CATEGORIES.map(c=>`<span class="badge b-ready" style="margin-right:6px;margin-bottom:6px;">${esc(c)} <strong style="margin-left:4px;">${(byCat[c]||0).toLocaleString("ko-KR")}원</strong></span>`).join("")
+      +`<span class="badge b-done" style="margin-bottom:6px;">전체 합계 <strong style="margin-left:4px;">${total.toLocaleString("ko-KR")}원</strong></span>`;
+  }
+  const prevEl=document.getElementById("extraCostMarginPreview");
+  if(prevEl){
+    const s=st.site;
+    const revenue=_siteMarginRevenue(s);
+    if(revenue<=0){
+      prevEl.innerHTML=`<span style="color:var(--ink-5);font-size:12.5px;">매출(계약금액)이 입력되지 않아 이익율을 계산할 수 없습니다</span>`;
+    }else{
+      const baseCost=_siteBaseCost(s);
+      const margin=((revenue-(baseCost+total))/revenue)*100;
+      const oldMargin=_siteMargin(s);
+      const color=margin>=0?"var(--teal-dk)":"var(--rose)";
+      const diffText=oldMargin!==null?`<span style="font-size:11.5px;color:var(--ink-5);margin-left:8px;">기존 ${oldMargin.toFixed(1)}% → 저장 시 ${margin.toFixed(1)}%</span>`:"";
+      prevEl.innerHTML=`<span style="font-weight:700;color:${color};font-size:16px;">${margin.toFixed(1)}%</span>${diffText}`;
+    }
+  }
+}
+/* 항목 개수가 바뀌는 경우(추가/삭제)에만 목록 전체를 다시 그린다 */
+function _renderExtraCostList(){
+  const st=_extraCostEditState;if(!st)return;
+  const listEl=document.getElementById("extraCostList");
+  if(listEl){
+    listEl.innerHTML=st.items.length?st.items.map((r,i)=>_extraCostRowHTML(r,i)).join(""):`<div class="multiloc-empty">등록된 추가 비용이 없습니다. 아래 '비용 항목 추가' 버튼으로 출장비·부품비 등을 등록하세요.</div>`;
+  }
+  _refreshExtraCostSummary();
+}
+function _extraCostRowHTML(r,idx){
+  return`<div class="multiloc-row" data-id="${r.id}">
+    <div class="multiloc-row-top">
+      <span class="multiloc-row-idx">${idx+1}</span>
+      <input type="date" class="multiloc-status" style="max-width:150px;" value="${esc(r.date||"")}" onchange="_updateExtraCostRow('${r.id}','date',this.value)"/>
+      <select class="multiloc-status" onchange="_updateExtraCostRow('${r.id}','category',this.value)">
+        ${COST_ITEM_CATEGORIES.map(c=>`<option value="${c}"${r.category===c?" selected":""}>${c}</option>`).join("")}
+      </select>
+      <input type="number" class="multiloc-name" placeholder="금액(원)" value="${r.amount||""}" oninput="_updateExtraCostRow('${r.id}','amount',this.value)"/>
+      <button type="button" class="multiloc-remove" onclick="_removeExtraCostRow('${r.id}')" title="이 비용 항목 삭제"><svg class='ic'><use href='#i-trash'/></svg></button>
+    </div>
+    <input type="text" class="multiloc-note" placeholder="비고(선택) — 예: 지방 출장 2회, OO 부품 교체 등" value="${esc(r.note)}" oninput="_updateExtraCostRow('${r.id}','note',this.value)"/>
+  </div>`;
+}
+window._addExtraCostRow=()=>{
+  if(!_extraCostEditState.items)_extraCostEditState.items=[];
+  _extraCostEditState.items.push({id:_uid(),category:"출장비",amount:0,note:"",date:new Date().toISOString().slice(0,10)});
+  _renderExtraCostList();
+  document.querySelector("#extraCostList .multiloc-row:last-child input[type='number']")?.focus();
+};
+window._removeExtraCostRow=id=>{
+  _extraCostEditState.items=(_extraCostEditState.items||[]).filter(r=>r.id!==id);
+  _renderExtraCostList();
+};
+window._updateExtraCostRow=(id,field,value)=>{
+  const row=(_extraCostEditState.items||[]).find(r=>r.id===id);if(!row)return;
+  row[field]=field==="amount"?(Number(value)||0):value;
+  _refreshExtraCostSummary(); // 목록은 다시 그리지 않아 입력 포커스가 끊기지 않는다
+};
+window._openSiteExtraCosts=id=>{
+  const s=site.find(x=>x.id===id);if(!s)return;
+  _extraCostEditState={site:s,items:_parseCostItems(s.extraCosts)};
+  const baseCost=_siteBaseCost(s);
+  const revenue=_siteMarginRevenue(s);
+  const quotes=_siteProjectQuotes(s.name);
+  const quoteTotal=quotes.reduce((a,r)=>a+r.amount,0);
+  $modal.className="modal modal-wide";
+  $overlay.classList.remove("hidden");
+  $modal.innerHTML=`
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">${esc(s.name)} · 추가 비용 관리</div>
+        <div style="font-size:12px;color:var(--ink-5);margin-top:2px;">${esc(s.client)||"고객사 미입력"} · ${bContract(s.contractType)}</div>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.add('hidden')"><svg class='ic'><use href='#i-x'/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="as-hint" style="margin-bottom:14px;">
+        <span class="as-hint-icon"><svg class='ic'><use href='#i-bulb'/></svg></span>
+        <span>출장비·부품비·인건비 등 <strong>Inventory 재고 원가에는 포함되지 않는</strong> 이 현장의 추가 비용을 발생일·카테고리별로 등록합니다. 저장하면 이 현장의 이익율 계산에 즉시 반영됩니다. Project에서 작성한 이 현장의 견적서 금액은 입금(청구)으로 이어지는 매출이므로 원가가 아니라 <strong>매출에 자동으로 +합산</strong>되어 이익율이 상승합니다(여러 건이면 모두 합산). 계약금액·재고 원가 등 다른 항목은 Site Master에서 수정해주세요.</span>
+      </div>
+      <div class="mc-fields" style="margin-bottom:10px;">
+        <div class="mc-field"><span class="mc-label">매출(이익율 계산 기준)</span><span class="mc-val">${revenue>0?revenue.toLocaleString("ko-KR")+"원":"미입력"}</span></div>
+        <div class="mc-field"><span class="mc-label">재고 원가</span><span class="mc-val">${baseCost.toLocaleString("ko-KR")}원</span></div>
+        <div class="mc-field"><span class="mc-label">Project 견적서 매출(자동 +반영)</span><span class="mc-val" style="color:var(--teal-dk);">${quoteTotal>0?`+${quoteTotal.toLocaleString("ko-KR")}원${quotes.length>1?` (${quotes.length}건)`:""}`:"0원"}</span></div>
+      </div>
+      <div style="margin-bottom:16px;">${_siteQuotesPanelHTML(s.name)}</div>
+      <div style="font-size:12px;font-weight:700;color:var(--ink-3);margin-bottom:8px;">카테고리별 합계</div>
+      <div id="extraCostSummary" style="margin-bottom:14px;"></div>
+      <div style="font-size:12px;font-weight:700;color:var(--ink-3);margin-bottom:8px;">비용 항목</div>
+      <div id="extraCostList" class="multiloc-list"></div>
+      <button type="button" class="btn btn-secondary btn-sm multiloc-add" onclick="_addExtraCostRow()"><svg class='ic'><use href='#i-plus'/></svg> 비용 항목 추가</button>
+      <div style="margin-top:18px;padding:12px 14px;border-radius:var(--r);background:var(--bg-2);border:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <span style="font-size:12.5px;color:var(--ink-4);font-weight:600;">저장 시 예상 이익율</span>
+        <span id="extraCostMarginPreview"></span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="document.getElementById('modalOverlay').classList.add('hidden')">취소</button>
+      <button class="btn btn-primary" id="extraCostSaveBtn" onclick="_saveSiteExtraCosts('${id}')">저장</button>
+    </div>`;
+  _renderExtraCostList();
+};
+window._saveSiteExtraCosts=async id=>{
+  const items=(_extraCostEditState.items||[]).filter(r=>(Number(r.amount)||0)>0);
+  const btn=document.getElementById("extraCostSaveBtn");
+  if(btn){btn.disabled=true;btn.textContent="저장 중…";}
+  try{
+    await updateDoc(doc(db,COL.site,id),{extraCosts:JSON.stringify(items)});
+    toast("추가 비용이 저장되었습니다","success");
+    document.getElementById("modalOverlay").classList.add("hidden");
+  }catch(e){
+    console.error(e);
+    toast("저장 실패","error");
+    if(btn){btn.disabled=false;btn.textContent="저장";}
+  }
+};
 function renderSite(){
   const total=site.length;const progress=site.filter(s=>s.status==="진행").length;const expired=site.filter(s=>s.status==="만료").length;
   const asStats=site.reduce((acc,s)=>{
@@ -4486,19 +4845,63 @@ function _siteInventoryAgg(siteName){
    값이 아직 동기화되지 않았거나 오래된 경우에도 화면에는 항상 최신 합산 금액이
    표시되도록, 저장값에 의존하지 않고 매번 Inventory 데이터를 기준으로 재계산한다.
    배정된 재고가 하나도 없는 현장은 예외적으로 저장된 원가(수동 입력값)를 사용한다. */
-function _siteDisplayCost(s){
+function _siteBaseCost(s){
   const agg=_siteInventoryAgg(s.name);
   return agg.count>0?agg.totalCost:(Number(s.contractCost)||0);
 }
-/* 현장 목록에 원가를 렌더링 — 배정된 재고가 2대 이상이면 합산 금액임을 함께 표기 */
+/* Project(접수관리)에서 작성된 견적서(quoteItems) 내역 — 해당 현장(siteName)에 연결된
+   접수 건들 중 견적서가 작성된 건을 건별로(견적번호·일자·제목·금액) 반환한다. 견적서
+   발행 건은 실제 입금(매출)으로 이어지는 금액이므로 원가가 아니라 매출에 +반영한다.
+   여러 건이 동시에 발생할 수 있으므로 합계뿐 아니라 건별 내역도 함께 제공한다. */
+function _siteProjectQuotes(siteName){
+  if(!siteName)return[];
+  return(typeof tasks!=="undefined"?tasks:[])
+    .filter(t=>t.siteName===siteName&&Array.isArray(t.quoteItems)&&t.quoteItems.length>0)
+    .map(t=>{
+      const amount=t.quoteItems.reduce((s,it)=>s+((parseInt(it.qty)||0)*(parseInt(it.unitPrice)||0)),0);
+      return{id:t.id,quoteNo:t.quoteNo||"",date:t.quoteDate||t.receiptDate||"",title:t.quoteTitle||t.symptom||"",amount};
+    })
+    .filter(q=>q.amount>0);
+}
+/* Project에서 작성된 이 현장의 견적서 금액 합계(건별 내역 합산) — 매출(_siteMarginRevenue)에 +반영된다. */
+function _siteProjectQuoteTotal(siteName){
+  return _siteProjectQuotes(siteName).reduce((a,q)=>a+q.amount,0);
+}
+/* 카드/상세 화면용 — 이 현장 앞으로 작성된 견적서 건들을 견적번호·일자·금액과 함께
+   나열하는 패널(읽기 전용, 여러 건인 경우 전부 표시). 등록·수정은 Project 메뉴에서만 가능하다. */
+function _siteQuotesPanelHTML(siteName){
+  const arr=_siteProjectQuotes(siteName);
+  if(!arr.length)return`<div class="loc-panel-empty"><svg class='ic'><use href='#i-pin'/></svg> Project에서 작성된 견적서가 없습니다</div>`;
+  const sorted=arr.slice().sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  const total=arr.reduce((a,r)=>a+r.amount,0);
+  const rows=sorted.map(r=>`<div class="loc-panel-item">
+      <span class="badge b-done loc-panel-badge">${esc(r.quoteNo)||"견적서"}</span>
+      <span class="loc-panel-name" title="${esc(r.title)||""}">${r.date?`${esc(r.date)} · `:""}${r.amount.toLocaleString("ko-KR")}원${r.title?` · ${esc(r.title)}`:""}</span>
+    </div>`).join("");
+  return`<div class="loc-panel"><div class="loc-panel-head"><svg class='ic'><use href='#i-pin'/></svg><span>총 ${arr.length}건 · 합계 ${total.toLocaleString("ko-KR")}원(매출 자동 반영)</span></div><div class="loc-panel-list">${rows}</div></div>`;
+}
+/* 현장에 표시할 총 원가 = 재고 원가(_siteBaseCost) + 현장별로 등록한 "추가 비용"
+   (출장비·부품비·인건비 등, extraCosts — '현장별 마진율' 메뉴에서 관리)의 합계.
+   Project 견적서 금액은 입금(매출)이므로 여기(원가)에는 포함하지 않고 매출 쪽에 반영한다.
+   이익율 계산(_siteMargin)에 사용된다. */
+function _siteDisplayCost(s){
+  return _siteBaseCost(s)+_costItemsTotal(s.extraCosts);
+}
+/* 현장 목록에 원가를 렌더링 — 배정된 재고가 2대 이상이면 합산 금액임을,
+   추가 비용(출장비·부품비 등)이 등록되어 있으면 그 합계가 포함되었음을 함께 표기 */
 function _siteCostCell(s){
   const agg=_siteInventoryAgg(s.name);
-  const cost=agg.count>0?agg.totalCost:(Number(s.contractCost)||0);
+  const invCost=_siteBaseCost(s);
+  const extra=_costItemsTotal(s.extraCosts);
+  const cost=invCost+extra;
   if(!cost)return"-";
   const text=`${cost.toLocaleString("ko-KR")}원`;
-  if(agg.count>1)return`${text}<div style="font-size:10.5px;color:var(--ink-5);font-weight:400;">(재고 ${agg.count}대 합산)</div>`;
-  return text;
+  const subParts=[];
+  if(agg.count>1)subParts.push(`재고 ${agg.count}대 합산`);
+  if(extra>0)subParts.push(`추가비용 ${extra.toLocaleString("ko-KR")}원 포함`);
+  return subParts.length?`${text}<div style="font-size:10.5px;color:var(--ink-5);font-weight:400;">(${subParts.join(" · ")})</div>`:text;
 }
+
 /* 재고(Inventory)에 배정 현장(siteName)이 지정된 경우 Site Master의
    시리얼·원가 필드에 자동 반영한다. 같은 현장에 여러 대의 재고가
    배정된 경우, 시리얼은 콤마로 나열하고 원가는 합산하여 반영한다.
@@ -6053,10 +6456,12 @@ function rentalContractTotal(s){
   return monthly*months;
 }
 /* 이익율 계산에 사용할 매출 — 렌탈은 rentalContractTotal()(계약금액×유지보수기간)을,
-   그 외 계약방식은 계약금액을 그대로 매출로 사용한다. */
+   그 외 계약방식은 계약금액을 그대로 매출로 사용한다. 보증금과, Project(접수관리)에서
+   이 현장 앞으로 발행된 견적서 금액(_siteProjectQuoteTotal — 입금(청구)으로 이어지는
+   금액이므로 원가가 아니라 매출에 +반영)도 함께 더한다. */
 function _siteMarginRevenue(s){
   const base=s.contractType==="렌탈"?rentalContractTotal(s):(Number(s.contractAmount)||0);
-  return base+(Number(s.deposit)||0); // 보증금이 있으면 이익율 계산 시 매출에 포함
+  return base+(Number(s.deposit)||0)+_siteProjectQuoteTotal(s.name); // 보증금·견적서 매출이 있으면 이익율 계산 시 매출에 포함
 }
 /* 계약금액(매출) 표시 셀 — 렌탈은 입력한 월 이용료 옆에 "산출 금액"(월 이용료 ×
    유지보수기간)을 함께 표시한다. 유지보수 기간이 없으면 산출 금액은 표시하지 않는다. */
@@ -6079,11 +6484,13 @@ function siteAccruedRevenue(s){
   return amt;
 }
 /* 현장 이익율(%) — (매출-원가)/매출×100. 매출은 [렌탈: 계약금액(월 이용료)×유지보수기간으로
-   산출한 "렌탈 계약 총액", 그 외: 계약금액] + 보증금(deposit, 있는 경우)으로 계산한다.
-   보증금은 계약 종료 시 반환되는 예치금이지만, 계약 기간 동안 실제로 입금되어 자금으로
-   운용되는 금액이므로 이익율 산정 시 매출에 포함한다. 원가는 Inventory 연동 원가
-   (_siteDisplayCost)를 사용한다. 매출이 0이면(계약금액·보증금 모두 미입력, 렌탈인데
-   유지보수기간 미입력 등) 계산할 수 없으므로 null을 반환한다. */
+   산출한 "렌탈 계약 총액", 그 외: 계약금액] + 보증금(deposit, 있는 경우) + Project에서
+   작성된 이 현장의 견적서 금액(_siteProjectQuoteTotal, 입금·청구로 이어지는 매출이므로
+   이익율이 상승하는 방향으로 반영)으로 계산한다. 보증금은 계약 종료 시 반환되는
+   예치금이지만, 계약 기간 동안 실제로 입금되어 자금으로 운용되는 금액이므로 이익율
+   산정 시 매출에 포함한다. 원가는 Inventory 연동 원가(_siteDisplayCost, 재고 원가 +
+   출장비·부품비·인건비 등 추가 비용)를 사용한다. 매출이 0이면(계약금액·보증금·견적서
+   매출 모두 미입력, 렌탈인데 유지보수기간 미입력 등) 계산할 수 없으므로 null을 반환한다. */
 function _siteMargin(s){
   const revenue=_siteMarginRevenue(s);
   if(revenue<=0)return null;
@@ -9217,6 +9624,7 @@ window._svPrint=async function(dataArg){
 const PAGES={
   dashboard:{fn:renderDashboard,label:"Dashboard"},
   site:{fn:renderSite,label:"Site Master"},
+  sitemargin:{fn:renderSiteMargin,label:"현장별 마진율"},
   project:{fn:renderProject,label:"Project"},
   survey:{fn:renderSurvey,label:"현장 답사 체크리스트"},
   inventory:{fn:renderInventory,label:"Inventory"},
