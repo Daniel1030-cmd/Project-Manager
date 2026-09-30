@@ -5364,7 +5364,10 @@ function renderInventory(){
   $content.innerHTML=`
     <div class="page-head">
       <div><div class="page-title">재고 현황</div><div class="page-subtitle">브랜드(NEO/SPARKOZ)별 재고와 시리얼별 사용 이력을 관리합니다</div></div>
-      <div class="page-actions"><button class="btn btn-primary" onclick="_openAddInventory()">+ 재고 등록</button></div>
+      <div class="page-actions">
+        <button class="btn btn-secondary" id="invExportBtn" onclick="window._exportInventoryExcel()"><svg class='ic'><use href='#i-download'/></svg> 엑셀 다운로드</button>
+        <button class="btn btn-primary" onclick="_openAddInventory()">+ 재고 등록</button>
+      </div>
     </div>
     <div class="kpi-grid">
       ${kpiHtml(total,"전체 재고","c-teal")}${kpiHtml(diskCount,"디스크","c-blue")}
@@ -5392,6 +5395,108 @@ function renderInventory(){
     </div>`}`;
   renderInventoryResults();
 }
+
+/* ════════════════════════════════════
+   재고 현황 엑셀(.xlsx) 다운로드
+════════════════════════════════════ */
+window._exportInventoryExcel=function(){
+  if(typeof XLSX==="undefined"){toast("엑셀 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인해주세요","error");return;}
+  const btn=document.getElementById("invExportBtn");
+  if(btn){btn.disabled=true;btn.textContent="생성 중…";}
+  try{
+    const todayStr=new Date().toLocaleDateString("ko-KR",{year:"numeric",month:"2-digit",day:"2-digit"});
+    const warrantyField=INVENTORY_FIELDS.find(f=>f.key==="warrantyStatus");
+    const wb=XLSX.utils.book_new();
+
+    /* ── Sheet 1: 재고 목록(전체) ── */
+    const s1=[
+      ["재고 목록(전체)"],
+      [`생성일: ${todayStr}`],
+      [],
+      ["브랜드","모델","시리얼","타입","현황","상태","현위치","배정현장","원가(원)","감가상각 반영","장부가(원)","구매일","내용연수(년)","잔존가치(원)","보증시작일","누적사용시간(h)","연장보증","보증상태","비고"],
+      ...(inventoryList.length?inventoryList.map(x=>{
+        const dep=x.depreciationActive?_computeDepreciation(x):null;
+        return[
+          x.brand||"",x.model||"",x.serial||"",x.type||"",x.status||"",x.condition||"",x.location||"",x.siteName||"",
+          Number(x.cost)||0,x.depreciationActive?"Y":"N",dep?dep.bookValue:(Number(x.cost)||0),
+          x.purchaseDate||"",x.usefulLifeYears||"",x.salvageValue||0,x.warrantyStartDate||"",x.usageHours||0,
+          x.extendedWarranty||"N",warrantyField?warrantyField.compute(x):"",x.note||""
+        ];
+      }):[["데이터 없음","","","","","","","","","","","","","","","","","",""]])
+    ];
+    const ws1=XLSX.utils.aoa_to_sheet(s1);
+    ws1["!cols"]=[{wch:10},{wch:14},{wch:16},{wch:8},{wch:8},{wch:8},{wch:14},{wch:16},{wch:14},{wch:10},{wch:14},{wch:12},{wch:10},{wch:12},{wch:12},{wch:16},{wch:10},{wch:44},{wch:24}];
+    XLSX.utils.book_append_sheet(wb,ws1,"재고목록");
+
+    /* ── Sheet 2: 브랜드별 현황 ── */
+    const brandStats={};
+    INV_BRANDS.forEach(b=>{brandStats[b]={total:0};INV_STATUS_LIST.forEach(s=>brandStats[b][s]=0);});
+    let unassigned=0;
+    inventoryList.forEach(x=>{
+      if(INV_BRANDS.includes(x.brand)){brandStats[x.brand].total++;if(INV_STATUS_LIST.includes(x.status))brandStats[x.brand][x.status]++;}
+      else unassigned++;
+    });
+    const s2=[
+      ["브랜드별 재고 현황"],
+      [`생성일: ${todayStr}`],
+      [],
+      ["브랜드","전체",...INV_STATUS_LIST],
+      ...INV_BRANDS.map(b=>[b,brandStats[b].total,...INV_STATUS_LIST.map(st=>brandStats[b][st])]),
+      ["브랜드 미지정",unassigned,...INV_STATUS_LIST.map(()=>"")]
+    ];
+    const ws2=XLSX.utils.aoa_to_sheet(s2);
+    ws2["!cols"]=[{wch:14},{wch:8},...INV_STATUS_LIST.map(()=>({wch:8}))];
+    XLSX.utils.book_append_sheet(wb,ws2,"브랜드별현황");
+
+    /* ── Sheet 3: 수리 이력(전체 재고 대상, 완료+진행중 모두 포함) ── */
+    const repairRows=[];
+    inventoryList.forEach(x=>{
+      (x.repairs||[]).forEach(r=>{
+        repairRows.push([
+          x.brand||"",x.model||"",x.serial||"",r.status||"",r.openDate||"",r.closeDate||"",
+          (r.status==="완료"&&r.openDate&&r.closeDate)?_repairDuration(r.openDate,r.closeDate):"",
+          r.technician||"",r.causeType||"",r.issue||"",r.result||"",Number(r.cost)||0
+        ]);
+      });
+    });
+    const s3=[
+      ["재고 수리 이력(전체)"],
+      [`생성일: ${todayStr}`],
+      [],
+      ["브랜드","모델","시리얼","상태","접수일","완료일","소요일","담당자","원인구분","증상","조치","수리비용(원)"],
+      ...(repairRows.length?repairRows:[["데이터 없음","","","","","","","","","","",""]])
+    ];
+    const ws3=XLSX.utils.aoa_to_sheet(s3);
+    ws3["!cols"]=[{wch:10},{wch:14},{wch:16},{wch:8},{wch:12},{wch:12},{wch:8},{wch:10},{wch:12},{wch:30},{wch:30},{wch:14}];
+    XLSX.utils.book_append_sheet(wb,ws3,"수리이력");
+
+    /* ── Sheet 4: 감가상각 현황(반영중인 재고만) ── */
+    const depItems=inventoryList.filter(x=>x.depreciationActive);
+    const s4=[
+      ["감가상각 현황(정액법, 반영중인 재고만)"],
+      [`생성일: ${todayStr}`],
+      [],
+      ["브랜드","모델","시리얼","취득원가(원)","구매일","내용연수(년)","잔존가치(원)","경과개월","총상각개월","감가상각누계(원)","장부가(원)","상각률(%)","상각완료여부"],
+      ...(depItems.length?depItems.map(x=>{
+        const d=_computeDepreciation(x);
+        if(!d)return[x.brand||"",x.model||"",x.serial||"","계산불가(원가/구매일 확인 필요)","","","","","","","","",""];
+        return[x.brand||"",x.model||"",x.serial||"",d.cost,x.purchaseDate||"",d.life,d.salvage,d.months,d.totalMonths,d.accDep,d.bookValue,Number(d.rate),d.isFullyDepreciated?"완료":"진행중"];
+      }):[["데이터 없음","","","","","","","","","","","",""]])
+    ];
+    const ws4=XLSX.utils.aoa_to_sheet(s4);
+    ws4["!cols"]=[{wch:10},{wch:14},{wch:16},{wch:14},{wch:12},{wch:10},{wch:12},{wch:10},{wch:10},{wch:16},{wch:14},{wch:10},{wch:10}];
+    XLSX.utils.book_append_sheet(wb,ws4,"감가상각현황");
+
+    const fileDate=new Date().toISOString().slice(0,10).replace(/-/g,"");
+    XLSX.writeFile(wb,`PMO_재고현황_${fileDate}.xlsx`);
+    toast("엑셀 파일이 다운로드되었습니다","success");
+  }catch(e){
+    console.error(e);
+    toast("엑셀 생성 중 오류가 발생했습니다","error");
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent="<svg class='ic'><use href='#i-download'/></svg> 엑셀 다운로드";}
+  }
+};
 
 /* ════════════════════════════════════
    오류코드 가이드 (NEO / SPARKOZ)
@@ -7901,6 +8006,154 @@ function renderStatCostStructureSection(){
 }
 
 /* ════════════════════════════════════
+   수익성 분석 엑셀(.xlsx) 다운로드 — "수익성 분석" 페이지에 표시되는
+   내용만 담은 전용 워크북. 원인분석·오류코드·품질지표 등 "통계" 페이지의
+   나머지 항목은 포함하지 않으며, 계산 로직은 화면 렌더링과 완전히 동일한
+   함수(computeContractTypeProfit 등)를 그대로 재사용해 수치가 일치한다.
+════════════════════════════════════ */
+window._exportProfitabilityExcel=function(){
+  if(typeof XLSX==="undefined"){toast("엑셀 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인해주세요","error");return;}
+  const btn=document.getElementById("profitExportBtn");
+  if(btn){btn.disabled=true;btn.textContent="생성 중…";}
+  try{
+    const periodStats=computePeriodStats();
+    const contractTypeProfit=computeContractTypeProfit();
+    const customerProfit=computeCustomerProfit();
+    const costStructure=computeASCostStructure(periodStats.data);
+    const periodLabel=periodStats.periodLabel;
+    const todayStr=new Date().toLocaleDateString("ko-KR",{year:"numeric",month:"2-digit",day:"2-digit"});
+
+    const wb=XLSX.utils.book_new();
+
+    /* ── Sheet 1: 계약 유형별 수익성 ── */
+    const s1=[
+      ["계약 유형별 수익성(판매·렌탈·유지보수, 전체 누적)"],
+      [`생성일: ${todayStr}`],
+      [],
+      ["계약 유형","건수","매출(원)","원가(원)","이익(원)","이익률(%)"],
+      ...(contractTypeProfit.length?contractTypeProfit.map(r=>[r.type,r.count,r.revenue,r.cost,r.profit,Number(r.margin)]):[["데이터 없음","","","","",""]])
+    ];
+    const ws1=XLSX.utils.aoa_to_sheet(s1);
+    ws1["!cols"]=[{wch:14},{wch:8},{wch:16},{wch:16},{wch:16},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,ws1,"계약유형별수익성");
+
+    /* ── Sheet 2: 렌탈 현장별 누적 매출 상세 ── */
+    const rentalDetail=computeRentalAccrualDetail();
+    const s2=[
+      ["렌탈 현장별 누적 매출 상세(월 이용료 × 청구 개월 수)"],
+      [`생성일: ${todayStr}`],
+      [],
+      ["현장명","고객사","월 이용료(원)","계약시작","계약종료","청구 개월 수","누적 매출(원)","보증금(원)"],
+      ...(rentalDetail.length?rentalDetail.map(r=>[r.name,r.client,r.monthly,r.contractStart,r.contractEnd||"(진행중)",r.months,r.accrued,r.deposit]):[["데이터 없음","","","","","","",""]])
+    ];
+    const ws2=XLSX.utils.aoa_to_sheet(s2);
+    ws2["!cols"]=[{wch:20},{wch:16},{wch:14},{wch:12},{wch:12},{wch:12},{wch:16},{wch:14}];
+    XLSX.utils.book_append_sheet(wb,ws2,"렌탈누적매출상세");
+
+    /* ── Sheet 3: 연도별 수익성 추이 ── */
+    const yearlyProfit=computePeriodProfitability("year");
+    const s3=[
+      ["연도별 수익성 추이"],
+      [`생성일: ${todayStr}`],
+      ["※ AS 이력카드에 건별로 입력하는 AS 원가(부품비·물류비·출장비·인건비)는 이 표의 총 원가 계산에서 제외했습니다. AS 원가 상세는 \"AS원가구조분석\" 시트를 참고하세요."],
+      [],
+      ["연도","렌탈 누적매출(원)","판매·기타 매출(원)","AS 매출(원)","총 매출(원)","직원 인건비(원)","제품 원가(원)","총 원가(원)","이익(원)","이익률(%)"],
+      ...(yearlyProfit.length?yearlyProfit.map(r=>[r.key,r.rentalRevenue,r.contractRevenue,r.asRevenue,r.revenue,r.staffLaborCost,r.contractCost,r.cost,r.profit,Number(r.margin)]):[["데이터 없음","","","","","","","","",""]])
+    ];
+    const ws3=XLSX.utils.aoa_to_sheet(s3);
+    ws3["!cols"]=[{wch:10},{wch:16},{wch:16},{wch:14},{wch:16},{wch:14},{wch:14},{wch:16},{wch:16},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,ws3,"연도별수익성");
+
+    /* ── Sheet 4: 월별 수익성 추이 ── */
+    const monthlyProfit=computePeriodProfitability("month");
+    const s4=[
+      ["월별 수익성 추이"],
+      [`생성일: ${todayStr}`],
+      ["※ AS 이력카드에 건별로 입력하는 AS 원가(부품비·물류비·출장비·인건비)는 이 표의 총 원가 계산에서 제외했습니다. AS 원가 상세는 \"AS원가구조분석\" 시트를 참고하세요."],
+      [],
+      ["연-월","렌탈 누적매출(원)","판매·기타 매출(원)","AS 매출(원)","총 매출(원)","직원 인건비(원)","제품 원가(원)","총 원가(원)","이익(원)","이익률(%)"],
+      ...(monthlyProfit.length?monthlyProfit.map(r=>[r.key,r.rentalRevenue,r.contractRevenue,r.asRevenue,r.revenue,r.staffLaborCost,r.contractCost,r.cost,r.profit,Number(r.margin)]):[["데이터 없음","","","","","","","","",""]])
+    ];
+    const ws4=XLSX.utils.aoa_to_sheet(s4);
+    ws4["!cols"]=[{wch:10},{wch:16},{wch:16},{wch:14},{wch:16},{wch:14},{wch:14},{wch:16},{wch:16},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,ws4,"월별수익성");
+
+    /* ── Sheet 5: 직원 인건비 명단(등록 정보) ── */
+    const s5=[
+      ["직원 인건비 명단"],
+      [`생성일: ${todayStr}`],
+      ["※ 퇴직금은 자동으로 계산·반영되지 않습니다. 필요 시 별도 회계/급여대장에서 관리하세요."],
+      ["※ 월 급여를 모르고 총 인건비 총액만 아는 직원은 「환산 월 인건비」= 총 인건비 총액 ÷ 재직 개월 수로 자동 계산됩니다."],
+      [],
+      ["이름","직급","입력한 월 급여(원)","총 인건비 총액(원)","환산 월 인건비(원)","입사일","퇴사일","재직상태","비고"],
+      ...(employees.length?employees.map(e=>[e.name||"",e.position||"",Number(e.monthlySalary)||0,Number(e.totalPayAmount)||0,employeeMonthlyEstimate(e),e.startDate||"",e.endDate||"",empIsActive(e)?"재직중":"퇴사",e.note||""]):[["데이터 없음","","","","","","","",""]])
+    ];
+    const ws5=XLSX.utils.aoa_to_sheet(s5);
+    ws5["!cols"]=[{wch:14},{wch:10},{wch:14},{wch:14},{wch:14},{wch:12},{wch:12},{wch:10},{wch:24}];
+    XLSX.utils.book_append_sheet(wb,ws5,"직원인건비명단");
+
+    /* ── Sheet 6: 직원 월별 실 지급 내역 ── */
+    const paySorted=payrollRecords.slice().sort((a,b)=>(a.year-b.year)||(a.month-b.month)||String(a.name).localeCompare(String(b.name),"ko"));
+    const s6=[
+      ["직원 월별 실 지급 내역"],
+      [`생성일: ${todayStr}`],
+      [],
+      ["연도","월","성명","기본급(원)","상여금(원)","합계(원)","비고"],
+      ...(paySorted.length?paySorted.map(p=>[p.year,p.month,p.name||"",Number(p.baseSalary)||0,Number(p.bonus)||0,(Number(p.baseSalary)||0)+(Number(p.bonus)||0),p.note||""]):[["데이터 없음","","","","","",""]])
+    ];
+    const ws6=XLSX.utils.aoa_to_sheet(s6);
+    ws6["!cols"]=[{wch:8},{wch:6},{wch:12},{wch:14},{wch:14},{wch:14},{wch:28}];
+    XLSX.utils.book_append_sheet(wb,ws6,"직원월별실지급내역");
+
+    /* ── Sheet 7: 고객사별 손익 분석 ── */
+    const s7=[
+      ["고객사별 손익 분석(전체 누적)"],
+      [`생성일: ${todayStr}`],
+      [],
+      ["고객사","현장수","AS건수","계약매출(원)","AS청구매출(원)","매출합계(원)","AS비용(원)","순이익(원)","이익률(%)"],
+      ...(customerProfit.length?customerProfit.map(r=>[r.client,r.siteCount,r.asCount,r.contractRevenue,r.asRevenue,r.revenue,r.asCost,r.profit,Number(r.margin)]):[["데이터 없음","","","","","","","",""]])
+    ];
+    const ws7=XLSX.utils.aoa_to_sheet(s7);
+    ws7["!cols"]=[{wch:18},{wch:8},{wch:8},{wch:16},{wch:16},{wch:16},{wch:14},{wch:16},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,ws7,"고객사별손익");
+
+    /* ── Sheet 8: AS 원가 구조 분석(현재 선택된 기간 탭 기준) ── */
+    const s8=[
+      ["AS 원가 구조 분석"],
+      [`기준 기간: ${periodLabel}`,`생성일: ${todayStr}`],
+      [],
+      ["원가 항목","금액(원)","비중(%)"],
+      ["인건비",costStructure.totals.labor,Number(costStructure.pct(costStructure.totals.labor))],
+      ["출장비",costStructure.totals.travel,Number(costStructure.pct(costStructure.totals.travel))],
+      ["부품비",costStructure.totals.parts,Number(costStructure.pct(costStructure.totals.parts))],
+      ["물류비",costStructure.totals.logistics,Number(costStructure.pct(costStructure.totals.logistics))],
+      ["총계",costStructure.grandTotal,100],
+      [],
+      ["건당 평균 원가(원)",Number(costStructure.avgCostPerCase)],
+      ["AS 매출 대비 원가율(%)",Number(costStructure.costRatio)],
+      [],
+      ["현장별 원가 TOP5","누적원가(원)"],
+      ...(costStructure.topSites.length?costStructure.topSites.map(([n,v])=>[n,v]):[["데이터 없음",""]]),
+      [],
+      ["원인유형별 원가 TOP5","누적원가(원)"],
+      ...(costStructure.topCauses.length?costStructure.topCauses.map(([n,v])=>[n,v]):[["데이터 없음",""]]),
+    ];
+    const ws8=XLSX.utils.aoa_to_sheet(s8);
+    ws8["!cols"]=[{wch:22},{wch:16},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,ws8,"AS원가구조분석");
+
+    const fileDate=new Date().toISOString().slice(0,10).replace(/-/g,"");
+    XLSX.writeFile(wb,`PMO_수익성분석_${fileDate}.xlsx`);
+    toast("엑셀 파일이 다운로드되었습니다","success");
+  }catch(e){
+    console.error(e);
+    toast("엑셀 생성 중 오류가 발생했습니다","error");
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent="<svg class='ic'><use href='#i-download'/></svg> 엑셀 다운로드";}
+  }
+};
+
+/* ════════════════════════════════════
    통계 엑셀(.xlsx) 다운로드
 ════════════════════════════════════ */
 window._exportStatisticsExcel=function(){
@@ -8299,7 +8552,7 @@ function renderProfitability(){
   $content.innerHTML=`
     <div class="page-head">
       <div><div class="page-title">수익성 분석</div><div class="page-subtitle">Site Master 계약금액·원가, AS 이력카드 원가(건별 인건비 포함), 직원 인건비(월 급여) 입력을 기반으로 기간별·계약유형별·고객사별 수익성과 AS 원가 구조를 종합 분석합니다 (특별한 언급이 없는 한 전체 누적 데이터 기준)</div></div>
-      <div class="page-actions"><button class="btn btn-secondary" id="statExportBtn" onclick="window._exportStatisticsExcel()"><svg class='ic'><use href='#i-download'/></svg> 엑셀 다운로드</button></div>
+      <div class="page-actions"><button class="btn btn-secondary" id="profitExportBtn" onclick="window._exportProfitabilityExcel()"><svg class='ic'><use href='#i-download'/></svg> 엑셀 다운로드</button></div>
     </div>
     <div class="as-hint" style="margin-bottom:16px;">
       <span class="as-hint-icon"><svg class='ic'><use href='#i-bulb'/></svg></span>
