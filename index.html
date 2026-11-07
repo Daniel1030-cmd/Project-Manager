@@ -9873,7 +9873,155 @@ window._svPrint=async function(dataArg){
   pa.style.cssText="display:block;";pa.innerHTML=_buildSurveyReportHTML(data);
   setTimeout(()=>{window.print();setTimeout(()=>{pa.style.display="none";},800);},200);
 };
+const LG_HTML_CSS=`
+.lg{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;color:#111;background:#fff;font-size:11px;padding:18px 20px;}
+.lg *{box-sizing:border-box}
+.lg-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #0f2942;padding-bottom:10px;margin-bottom:10px;gap:12px}
+.lg-title{font-size:22px;font-weight:800;color:#0f2942;letter-spacing:3px}
+.lg-sub{font-size:10px;color:#64748b;margin-top:5px;line-height:1.7}
+.lg-appr{border-collapse:collapse;font-size:10px;flex-shrink:0}
+.lg-appr th{background:#0f2942;color:#fff;padding:3px 0;width:62px;border:1px solid #0f2942;font-weight:700}
+.lg-appr td{height:44px;border:1px solid #94a3b8}
+.lg-kpi{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:10px}
+.lg-kpi div{border:1px solid #cbd5e1;border-radius:4px;padding:6px 8px;text-align:center}
+.lg-kpi b{display:block;font-size:15px;color:#0d9488}
+.lg-kpi span{font-size:9.5px;color:#64748b}
+.lg-tbl{width:100%;border-collapse:collapse;font-size:9.5px}
+.lg-tbl th{background:#0f2942;color:#fff;border:1px solid #0f2942;padding:5px 4px;white-space:nowrap}
+.lg-tbl td{border:1px solid #cbd5e1;padding:4px 5px;vertical-align:top;word-break:break-word}
+.lg-tbl tbody tr:nth-child(even) td{background:#f8fafc}
+.lg-tbl thead{display:table-header-group}
+.lg-tbl tr{break-inside:avoid;page-break-inside:avoid}
+.lg-tbl tfoot td{background:#e2e8f0;font-weight:800;color:#0f2942}
+.lg-c{text-align:center}.lg-r{text-align:right}.lg-s{display:block;color:#94a3b8;font-size:8.5px}
+.lg-b{display:inline-block;padding:1px 6px;border-radius:10px;font-weight:700;font-size:9px;white-space:nowrap}
+.lg-foot{margin-top:12px;padding-top:8px;border-top:2px solid #0f2942;display:flex;justify-content:space-between;font-size:10px;color:#475569}
+`;
+const _lgBadge=(txt,bg,fc)=>`<span class="lg-b" style="background:${bg};color:${fc};">${esc(txt)}</span>`;
+function _lgStatusBadge(s){
+  if(s==="완료")return _lgBadge(s,"#dcfce7","#166534");
+  if(s==="진행 중")return _lgBadge(s,"#dbeafe","#1d4ed8");
+  return _lgBadge(s,"#fef3c7","#b45309");
+}
+function _lgFilterRows(opt){
+  return _ledgerRowsAll().filter(d=>{
+    if(opt.from&&d.rk<opt.from)return false;
+    if(opt.to&&d.rk>opt.to)return false;
+    if(opt.status==="미결"&&d.status==="완료")return false;
+    if(opt.status!=="all"&&opt.status!=="미결"&&d.status!==opt.status)return false;
+    if(opt.pm!=="all"&&d.pm!==opt.pm)return false;
+    return true;
+  });
+}
+function _lgBuildBody(rows,opt){
+  const now=new Date(),pad=n=>String(n).padStart(2,"0");
+  const docNo=`PMO-ASL-${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}`;
+  const printedAt=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const total=rows.length,done=rows.filter(d=>d.status==="완료").length;
+  const ok=rows.filter(d=>d.sla==="준수").length,bad=rows.filter(d=>d.sla==="위반").length;
+  const leads=rows.filter(d=>d.lead!==null).map(d=>d.lead);
+  const leadAvg=leads.length?(leads.reduce((a,b)=>a+b,0)/leads.length).toFixed(1):"-";
+  const sumQ=rows.reduce((a,d)=>a+d.quoteTotal,0);
+  const cond=`접수일 ${opt.from||"전체"} ~ ${opt.to||"전체"} · 상태 ${opt.status==="all"?"전체":opt.status} · 담당PM ${opt.pm==="all"?"전체":opt.pm}`;
+  const trs=rows.map((d,i)=>{
+    const agingHtml=d.aging===""?"-":_lgBadge(d.aging+"일",d.aging>=15?"#fca5a5":d.aging>=8?"#fed7aa":d.aging>=4?"#fef9c3":"#f1f5f9",d.aging>=15?"#7f1d1d":d.aging>=8?"#9a3412":"#475569");
+    const slaHtml=d.lead===null?"-":`${d.lead}h ${d.sla==="위반"?_lgBadge("위반","#fee2e2","#b91c1c"):_lgBadge("준수","#dcfce7","#166534")}`;
+    return`<tr>
+      <td class="lg-c">${i+1}</td>
+      <td class="lg-c" style="white-space:nowrap;">${esc(d.mgmtNo)}</td>
+      <td class="lg-c" style="white-space:nowrap;">${esc(d.rk)||"-"}</td>
+      <td><b>${esc(d.siteName)||"-"}</b><span class="lg-s">${esc(d.client)}</span></td>
+      <td class="lg-c">${_lgStatusBadge(d.status)}</td>
+      <td class="lg-c">${agingHtml}</td>
+      <td class="lg-c">${esc(d.asType)}</td>
+      <td>${esc(d.symptom)||"-"}</td>
+      <td class="lg-c">${esc(d.pm)}</td>
+      <td>${esc(d.brand)} ${esc(d.model)}<span class="lg-s">${esc(d.serial)}</span></td>
+      <td>${esc(d.causeType)}${d.errorCode?`<span class="lg-s">${esc(d.errorCode)}</span>`:""}</td>
+      <td>${esc(d.actionResult)||"-"}${d.actionType?`<span class="lg-s">[${esc(d.actionType)}]</span>`:""}</td>
+      <td class="lg-c" style="white-space:nowrap;">${d.complete?esc(ymd(new Date(d.complete.getUTCFullYear(),d.complete.getUTCMonth(),d.complete.getUTCDate()))):"-"}</td>
+      <td class="lg-c" style="white-space:nowrap;">${slaHtml}</td>
+      <td class="lg-r">${d.quoteTotal?d.quoteTotal.toLocaleString("ko-KR"):"-"}</td>
+    </tr>`;
+  }).join("");
+  return{docNo,body:`<div class="lg">
+    <div class="lg-head">
+      <div style="display:flex;gap:14px;align-items:flex-start;">
+        <img src="${COMPANY_LOGO}" style="height:44px;object-fit:contain;" alt=""/>
+        <div>
+          <div class="lg-title">AS 접수 관리대장</div>
+          <div class="lg-sub">${esc(COMPANY_NAME)} ${esc(TEAM_NAME)} · 문서번호 ${esc(docNo)} · 출력 ${esc(printedAt)} · 출력자 ${esc(opt.preparer||"-")}<br/>${esc(cond)} · 총 ${total}건</div>
+        </div>
+      </div>
+      <table class="lg-appr"><tr><th>담당</th><th>검토</th><th>승인</th></tr><tr><td></td><td></td><td></td></tr></table>
+    </div>
+    <div class="lg-kpi">
+      <div><b>${total}</b><span>총 접수</span></div>
+      <div><b style="color:#d97706;">${total-done}</b><span>미결</span></div>
+      <div><b>${done}</b><span>처리 완료</span></div>
+      <div><b>${total?(done/total*100).toFixed(1):"0.0"}%</b><span>완료율</span></div>
+      <div><b>${(ok+bad)?(ok/(ok+bad)*100).toFixed(1):"-"}${(ok+bad)?"%":""}</b><span>SLA 준수율(${SLA_HOURS}h)</span></div>
+      <div><b>${leadAvg}${leads.length?"h":""}</b><span>평균 리드타임(영업일)</span></div>
+    </div>
+    <table class="lg-tbl">
+      <thead><tr><th style="width:26px;">No</th><th>관리번호</th><th>접수일</th><th>현장명/고객사</th><th>상태</th><th>미결<br/>경과</th><th>AS</th><th style="min-width:110px;">접수 증상</th><th>담당PM</th><th>모델/시리얼</th><th>원인구분/에러코드</th><th style="min-width:110px;">조치 내용</th><th>완료일</th><th>리드타임/SLA</th><th>견적금액<br/>(VAT포함)</th></tr></thead>
+      <tbody>${trs}</tbody>
+      <tfoot><tr><td colspan="14" class="lg-c">합 계 · ${total}건</td><td class="lg-r">${sumQ.toLocaleString("ko-KR")}</td></tr></tfoot>
+    </table>
+    <div class="lg-foot"><span>${esc(COMPANY_NAME)} · Tel ${esc(COMPANY_TEL)} · ${esc(COMPANY_EMAIL)}</span><span>대외비 · 무단 복제 및 배포 금지</span></div>
+  </div>`};
+}
 
+let _lgLast=null;
+window._runProjectLedgerHTML=function(mode){
+  const g=id=>document.getElementById(id)?.value.trim()||"";
+  const opt={from:g("ld_from"),to:g("ld_to"),status:g("ld_status")||"all",pm:g("ld_pm")||"all",preparer:g("ld_preparer")};
+  const rows=_lgFilterRows(opt);
+  if(!rows.length){toast("조건에 해당하는 접수 건이 없습니다","error");return;}
+  const built=_lgBuildBody(rows,opt);
+  _lgLast=built;
+  if(mode==="file"){
+    const html=`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>AS 접수 관리대장 ${built.docNo}</title><style>body{margin:0;background:#f1f5f9}@page{size:A4 landscape;margin:10mm}@media print{body{background:#fff}}${LG_HTML_CSS}.lg{max-width:1400px;margin:0 auto}</style></head><body>${built.body}</body></html>`;
+    const url=URL.createObjectURL(new Blob([html],{type:"text/html;charset=utf-8"}));
+    const a=document.createElement("a");a.href=url;a.download=`PMO_AS접수관리대장_${built.docNo.slice(8,16)}.html`;
+    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
+    toast(`HTML 파일이 저장되었습니다 (${rows.length}건)`,"success");
+    return;
+  }
+  _previewKind="ledger";
+  $overlay.classList.add("hidden");
+  if(isMobile()){
+    const ov=document.getElementById("quotePreviewOverlay");
+    document.getElementById("quotePreviewContent").innerHTML=`<style>${LG_HTML_CSS}</style><div style="overflow-x:auto;"><div style="min-width:900px;">${built.body}</div></div>`;
+    document.querySelector(".quote-preview-bar-title").innerHTML="<svg class='ic'><use href='#i-clipboard'/></svg> AS 접수 관리대장";
+    ov.classList.add("active");ov.scrollTop=0;
+  }else{
+    const pa=document.getElementById("quotePrintArea");
+    pa.style.cssText="display:block;position:fixed;inset:0;z-index:9998;background:#fff;overflow:auto;padding:20px;";
+    pa.innerHTML=`<style>${LG_HTML_CSS}</style><div style="max-width:1300px;margin:0 auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;" class="no-print">
+        <div style="font-size:15px;font-weight:700;">AS 접수 관리대장 미리보기</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary no-print" onclick="window._printLedgerHTML()"><svg class='ic'><use href='#i-printer'/></svg> 인쇄/PDF (A4 가로)</button>
+          <button class="btn btn-secondary no-print" onclick="document.getElementById('quotePrintArea').style.display='none'"><svg class='ic'><use href='#i-x'/></svg> 닫기</button>
+        </div>
+      </div>${built.body}</div>`;
+  }
+};
+window._printLedgerHTML=function(){
+  if(!_lgLast)return;
+  document.getElementById("quotePreviewOverlay").classList.remove("active");
+  const pa=document.getElementById("quotePrintArea");
+  pa.style.cssText="display:block;";
+  pa.innerHTML=`<style>${LG_HTML_CSS}</style>${_lgLast.body}`;
+  const st=document.createElement("style");
+  st.textContent="@media print{@page{size:A4 landscape;margin:10mm}}"; // 기존 @page(세로)를 이 출력에서만 가로로 덮어씀
+  document.head.appendChild(st);
+  setTimeout(()=>{window.print();setTimeout(()=>{pa.style.display="none";st.remove();},800);},200);
+};
+/* 모바일 미리보기 바의 "인쇄/PDF" 버튼(_printPreview)이 ledger 종류도 처리하도록 래핑 */
+const _origPrintPreview=window._printPreview;
+window._printPreview=function(){if(_previewKind==="ledger")return window._printLedgerHTML();return _origPrintPreview();};
 const PAGES={
   dashboard:{fn:renderDashboard,label:"Dashboard"},
   site:{fn:renderSite,label:"Site Master"},
