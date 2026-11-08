@@ -1043,7 +1043,7 @@ img,svg{-webkit-user-drag:none;user-drag:none;pointer-events:auto;}
     </nav>
     <div class="sidebar-footer">
       <div id="sidebarUserBox" class="sidebar-user"></div>
-      PMO System v3.3
+      PMO System v3.5
     </div>
   </aside>
 
@@ -9650,7 +9650,7 @@ const _agingBucket=a=>{const n=a===""?0:a;return n<=3?"정상 (0~3일)":n<=7?"�
 
 /* 전체 접수 건 → 관리대장 행 데이터. 관리번호는 "전체" 기준으로 채번하므로
    필터를 바꿔 출력해도 같은 건의 관리번호는 항상 동일하다. */
-function _ledgerRowsAll(){
+function _ledgerRowsBase(){
   const n=new Date();
   const todayU=Date.UTC(n.getFullYear(),n.getMonth(),n.getDate());
   const sorted=tasks.slice().sort((a,b)=>_recvKey(a).localeCompare(_recvKey(b))||String(a.id).localeCompare(String(b.id)));
@@ -9701,7 +9701,7 @@ window._openProjectLedgerModal=function(){
       <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.add('hidden')"><svg class='ic'><use href='#i-x'/></svg></button>
     </div>
     <div class="modal-body">
-      <div class="as-hint"><span class="as-hint-icon"><svg class='ic'><use href='#i-bulb'/></svg></span><span>접수관리대장 · 요약대시보드 · 미결·지연관리 3개 시트가 하나의 엑셀로 생성됩니다. 관리번호(AS-연도-일련번호)는 조회 조건과 관계없이 항상 동일하게 유지됩니다.</span></div>
+      <div class="as-hint"><span class="as-hint-icon"><svg class='ic'><use href='#i-bulb'/></svg></span><span>경영진요약 · 접수관리대장 · 요약대시보드 · 통계분석 · 현장·담당자성과 · 미결·지연관리 · 기준설정 7개 시트가 하나의 엑셀로 생성됩니다(차트·Pareto·SLA·재발 분석 포함). 관리번호(AS-연도-일련번호)는 조회 조건과 관계없이 항상 동일하게 유지됩니다.</span></div>
       <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
         <button type="button" class="btn btn-secondary btn-sm" onclick="_ledgerPreset('all')">전체</button>
         <button type="button" class="btn btn-secondary btn-sm" onclick="_ledgerPreset('year')">올해</button>
@@ -9774,6 +9774,7 @@ async function _exportProjectLedger(opt){
 
   const wb=new ExcelJS.Workbook();
   wb.creator=COMPANY_NAME;wb.created=now;wb.title="AS 접수 관리대장";
+  const EXS=wb.addWorksheet("경영진요약",{views:[{showGridLines:false}],properties:{tabColor:{argb:"FFE11D48"}}});
 
   /* ───────── 시트1: 접수관리대장 ───────── */
   const LS="접수관리대장";
@@ -9793,6 +9794,8 @@ async function _exportProjectLedger(opt){
     {k:"brand",h:"브랜드",g:"장비 정보",w:10,a:"center",v:d=>d.brand},
     {k:"model",h:"모델명",g:"장비 정보",w:16,wrap:1,v:d=>d.model},
     {k:"serial",h:"시리얼번호",g:"장비 정보",w:18,v:d=>d.serial},
+    {k:"repeat",h:"재접수 구분",g:"장비 정보",w:14,a:"center",v:d=>d.repeat},
+    {k:"unitSeq",h:"동일장비\n접수차수",g:"장비 정보",w:10,a:"center",f:'0"차"',v:d=>d.unitSeq},
     {k:"causeType",h:"원인 구분",g:"원인 분석·조치",w:16,v:d=>d.causeType},
     {k:"errorCode",h:"에러코드",g:"원인 분석·조치",w:13,v:d=>d.errorCode},
     {k:"faultyPart",h:"불량 부품·모듈",g:"원인 분석·조치",w:20,wrap:1,v:d=>d.faultyPart},
@@ -9817,10 +9820,13 @@ async function _exportProjectLedger(opt){
   const GROUP_COLOR={"접수 정보":LG_NAVY,"장비 정보":"FF1E3A5F","원인 분석·조치":"FF0F766E","일정·SLA":"FF4C1D95","견적·원가":"FF92400E","관리":"FF475569"};
 
   const ws=wb.addWorksheet(LS,{
-    views:[{state:"frozen",xSplit:4,ySplit:HDR,showGridLines:false}],
+    views:[{state:"frozen",xSplit:4,ySplit:HDR,showGridLines:false,zoomScale:90}],
     properties:{tabColor:{argb:LG_TEAL}},
   });
   COLS.forEach((c,i)=>{ws.getColumn(i+1).width=c.w;});
+  /* 보조 컬럼은 아웃라인(+/−)으로 묶어 한 번에 접고 펼 수 있게 함 */
+  ws.properties.outlineLevelCol=1;
+  ["client","phone","faultyPart","usedParts","visitTime","actualHour","tech","quoteNo","unitSeq"].forEach(key=>{const i=COLS.findIndex(c=>c.k===key);if(i>=0)ws.getColumn(i+1).outlineLevel=1;});
 
   /* 타이틀·메타·결재란 */
   ws.mergeCells("A1:M2");
@@ -9842,6 +9848,7 @@ async function _exportProjectLedger(opt){
     const b=ws.getCell(2,col);b.border=_lgBorder();
   });
   ws.getRow(1).height=22;ws.getRow(2).height=22;ws.getRow(3).height=18;
+  const backL=ws.getCell("N3");backL.value={text:"◀ 경영진요약",hyperlink:"#'경영진요약'!A1"};backL.font={name:LG_FONT,size:9,color:{argb:"FF2563EB"},underline:true};
 
   /* 그룹 헤더(행4) — 연속 그룹을 병합 */
   let gs=0;
@@ -9924,6 +9931,7 @@ async function _exportProjectLedger(opt){
   const cf=(argbBg,argbFont,txt)=>({type:"cellIs",operator:"equal",formulae:[`"${txt}"`],style:{fill:{type:"pattern",pattern:"solid",bgColor:{argb:argbBg}},font:{color:{argb:argbFont},bold:true}}});
   ws.addConditionalFormatting({ref:stRef,rules:[cf("FFDCFCE7","FF166534","완료"),cf("FFDBEAFE","FF1D4ED8","진행 중"),cf("FFFEF3C7","FFB45309","접수")]});
   ws.addConditionalFormatting({ref:`${L.sla}${DATA0}:${L.sla}${DATAEND}`,rules:[cf("FFFEE2E2","FFB91C1C","위반"),cf("FFDCFCE7","FF166534","준수")]});
+  ws.addConditionalFormatting({ref:`${L.repeat}${DATA0}:${L.repeat}${DATAEND}`,rules:[cf("FFFEE2E2","FFB91C1C","재발(30일內)"),cf("FFFEF3C7","FFB45309","재접수")]});
   ws.addConditionalFormatting({ref:`${L.asType}${DATA0}:${L.asType}${DATAEND}`,rules:[cf("FFFEE2E2","FFB91C1C","유상"),cf("FFCCFBF1","FF0F766E","무상")]});
   const ag=`${L.aging}${DATA0}`;
   ws.addConditionalFormatting({ref:`${L.aging}${DATA0}:${L.aging}${DATAEND}`,rules:[
@@ -10045,6 +10053,9 @@ async function _exportProjectLedger(opt){
   S.pageSetup={paperSize:9,orientation:"portrait",fitToPage:true,fitToWidth:1,fitToHeight:0};
   S.headerFooter.oddFooter=`&L&9${docNo}&C&9Page &P / &N&R&9대외비`;
 
+  /* ───────── 경영진요약 · 통계분석 · 현장·담당자성과 · 기준설정 ───────── */
+  await _lgAddStatSheets(wb,rows,all,{EXS,L,LS,DATA0,DATAEND,docNo,condText,printedAt,opt});
+
   /* ───────── 시트3: 미결·지연관리 ───────── */
   const open=rows.filter(d=>d.status!=="완료").sort((a,b)=>(b.aging===""?-1:b.aging)-(a.aging===""?-1:a.aging));
   const OP=wb.addWorksheet("미결·지연관리",{views:[{state:"frozen",ySplit:10,showGridLines:false}],properties:{tabColor:{argb:"FFE11D48"}}});
@@ -10120,36 +10131,115 @@ async function _exportProjectLedger(opt){
   return rows.length;
 }
 
-/* ═════════ [코드 블록 시작] AS 접수 관리대장 (HTML) ═════════ */
+/* ═════════ [코드 블록 시작] AS 접수 관리대장 (HTML · 인터랙티브 리포트) ═════════ */
 const LG_HTML_CSS=`
-.lg{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;color:#111;background:#fff;font-size:11px;padding:18px 20px;}
+.lg{--navy:#0f2942;--teal:#0d9488;--ink:#0f172a;--mute:#64748b;--line:#e2e8f0;--soft:#f8fafc;--red:#dc2626;--amber:#d97706;--green:#16a34a;--blue:#2563eb;
+font-family:'Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif;color:var(--ink);background:#fff;font-size:12px;line-height:1.5;font-variant-numeric:tabular-nums;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:22px 24px;border-radius:10px}
 .lg *{box-sizing:border-box}
-.lg-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #0f2942;padding-bottom:10px;margin-bottom:10px;gap:12px}
-.lg-title{font-size:22px;font-weight:800;color:#0f2942;letter-spacing:3px}
-.lg-sub{font-size:10px;color:#64748b;margin-top:5px;line-height:1.7}
-.lg-appr{border-collapse:collapse;font-size:10px;flex-shrink:0}
-.lg-appr th{background:#0f2942;color:#fff;padding:3px 0;width:62px;border:1px solid #0f2942;font-weight:700}
-.lg-appr td{height:44px;border:1px solid #94a3b8}
-.lg-kpi{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:10px}
-.lg-kpi div{border:1px solid #cbd5e1;border-radius:4px;padding:6px 8px;text-align:center}
-.lg-kpi b{display:block;font-size:15px;color:#0d9488}
-.lg-kpi span{font-size:9.5px;color:#64748b}
-.lg-tbl{width:100%;border-collapse:collapse;font-size:9.5px}
-.lg-tbl th{background:#0f2942;color:#fff;border:1px solid #0f2942;padding:5px 4px;white-space:nowrap}
-.lg-tbl td{border:1px solid #cbd5e1;padding:4px 5px;vertical-align:top;word-break:break-word}
-.lg-tbl tbody tr:nth-child(even) td{background:#f8fafc}
-.lg-tbl thead{display:table-header-group}
+.lg [hidden]{display:none!important}
+.lg button{font-family:inherit;cursor:pointer}
+.lg :focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.lg-hd{display:grid;grid-template-columns:1fr auto auto;gap:20px;align-items:stretch;padding-bottom:14px;border-bottom:3px solid var(--navy);margin-bottom:14px}
+.lg-brand{display:flex;gap:14px;align-items:center}
+.lg-brand img{height:42px;max-width:140px;object-fit:contain}
+.lg-title{font-size:23px;font-weight:800;color:var(--navy);letter-spacing:.5px;line-height:1.15}
+.lg-title small{display:block;font-size:10.5px;font-weight:500;color:var(--mute);letter-spacing:0;margin-top:5px}
+.lg-meta{display:grid;grid-template-columns:auto auto;gap:2px 12px;font-size:10.5px;align-content:center;border-left:1px solid var(--line);padding:0 0 0 18px;margin:0}
+.lg-meta dt{color:var(--mute)}.lg-meta dd{margin:0;font-weight:600;max-width:230px;overflow-wrap:anywhere}
+.lg-appr{border-collapse:collapse;font-size:10px;align-self:center}
+.lg-appr th{background:var(--navy);color:#fff;padding:3px 0;width:60px;font-weight:600;border:1px solid var(--navy)}
+.lg-appr td{height:46px;border:1px solid #94a3b8}
+.lg-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:10px}
+.lg-card{border:1px solid var(--line);border-left:4px solid #94a3b8;border-radius:8px;padding:10px 12px;background:#fff}
+.lg-card.ok{border-left-color:var(--green)}.lg-card.warn{border-left-color:var(--amber)}.lg-card.bad{border-left-color:var(--red)}
+.lg-card-lb{font-size:10.5px;color:var(--mute);font-weight:600}
+.lg-card-v{font-size:22px;font-weight:800;color:var(--navy);line-height:1.2;margin:2px 0 4px;white-space:nowrap}
+.lg-card.ok .lg-card-v{color:#166534}.lg-card.warn .lg-card-v{color:#b45309}.lg-card.bad .lg-card-v{color:#b91c1c}
+.lg-card-sub{font-size:9.5px;color:var(--mute);line-height:1.4}
+.lg-bar{position:relative;height:5px;background:#e2e8f0;border-radius:3px;margin:3px 0 5px}
+.lg-bar i{display:block;height:100%;border-radius:3px;background:var(--navy)}
+.lg-card.ok .lg-bar i{background:var(--green)}.lg-card.warn .lg-bar i{background:var(--amber)}.lg-card.bad .lg-bar i{background:var(--red)}
+.lg-bar b{position:absolute;top:-2px;width:2px;height:9px;background:#0f172a;border-radius:1px}
+.lg-legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:10px;color:var(--mute);margin:4px 0 12px;align-items:center}
+.lg-legend span{display:inline-flex;align-items:center;gap:5px}
+.lg-sw{width:10px;height:10px;border-radius:2px;display:inline-block}
+.lg-sec{border:1px solid var(--line);border-radius:8px;margin-bottom:12px;background:#fff}
+.lg-sec>summary{cursor:pointer;padding:9px 14px;font-weight:800;color:var(--navy);font-size:12.5px;list-style:none;background:var(--soft);border-radius:8px}
+.lg-sec[open]>summary{border-bottom:1px solid var(--line);border-radius:8px 8px 0 0}
+.lg-sec>summary::-webkit-details-marker{display:none}
+.lg-sec>summary::before{content:"▸ ";color:var(--teal)}.lg-sec[open]>summary::before{content:"▾ "}
+.lg-sec-b{padding:12px 14px}
+.lg-h2{font-weight:800;color:var(--navy);border-left:4px solid var(--teal);padding-left:8px;margin:12px 0 6px;font-size:12px}
+.lg-sec-b>.lg-h2:first-child{margin-top:0}
+.lg-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lg-2col svg{width:100%;height:auto;border:1px solid var(--line);border-radius:6px}
+.lg-ul{margin:0;padding-left:18px;line-height:1.8;font-size:11px}
+.lg-mini{width:100%;border-collapse:collapse;font-size:10px}
+.lg-mini th{background:#e2e8f0;border:1px solid #cbd5e1;padding:4px;font-weight:700;color:var(--navy)}
+.lg-mini td{border:1px solid #cbd5e1;padding:4px 6px}
+.lg-tb{position:sticky;top:0;z-index:6;display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;padding:8px 10px;margin-bottom:8px;background:rgba(248,250,252,.97);border:1px solid var(--line);border-radius:8px}
+.lg-tb input[type=search]{flex:1 1 220px;min-width:160px;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px;background:#fff}
+.lg-chip{border:1px solid #cbd5e1;background:#fff;border-radius:999px;padding:5px 12px;font-size:11px;font-weight:600;color:#334155}
+.lg-chip:hover{border-color:var(--navy)}
+.lg-chip[aria-pressed=true]{background:var(--navy);color:#fff;border-color:var(--navy)}
+.lg-seg{display:inline-flex;border:1px solid #cbd5e1;border-radius:6px;overflow:hidden}
+.lg-seg button{border:0;background:#fff;padding:5px 10px;font-size:11px;color:#334155}
+.lg-seg button[aria-pressed=true]{background:#e2e8f0;font-weight:700;color:var(--navy)}
+.lg-count{margin-left:auto;font-size:11px;color:var(--mute);font-weight:700}
+.lg-tbl{width:100%;min-width:1180px;border-collapse:separate;border-spacing:0;font-size:11px}
+.lg-tbl thead th{background:var(--navy);color:#fff;padding:7px 6px;font-weight:600;white-space:nowrap;border-right:1px solid rgba(255,255,255,.14)}
+.lg-tbl thead tr.lg-grp th{font-size:10px;letter-spacing:.6px;padding:5px 6px;border-bottom:1px solid rgba(255,255,255,.25)}
+.lg-tbl thead tr.lg-grp th.g1{background:#0f2942}.lg-tbl thead tr.lg-grp th.g2{background:#0f766e}.lg-tbl thead tr.lg-grp th.g3{background:#4c1d95}.lg-tbl thead tr.lg-grp th.g4{background:#92400e}
+.lg-tbl thead tr.lg-cols th{position:sticky;top:var(--tbh,50px);z-index:4}
+.lg-tbl thead th[data-sortable]{cursor:pointer;user-select:none}
+.lg-tbl thead th[data-sortable]:hover{background:#1e3a5f}
+.lg-tbl thead th[aria-sort=ascending]::after{content:" ▲";font-size:8px}
+.lg-tbl thead th[aria-sort=descending]::after{content:" ▼";font-size:8px}
+.lg-tbl td{padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top;background:#fff}
+.lg-tbl tbody tr:nth-child(even) td{background:#fafbfd}
+.lg-tbl tbody tr:hover td{background:#f0fdfa}
+.lg-row td:first-child{box-shadow:inset 4px 0 0 var(--rk,transparent)}
+.lg-row[data-risk=bad]{--rk:var(--red)}.lg-row[data-risk=warn]{--rk:var(--amber)}.lg-row[data-risk=ok]{--rk:var(--green)}
+.lg-c{text-align:center}.lg-r{text-align:right}.lg-nw{white-space:nowrap}
+.lg-id{font-family:'JetBrains Mono',Consolas,monospace;font-size:10.5px;font-weight:700;color:var(--navy);white-space:nowrap}
+.lg-s{display:block;color:var(--mute);font-size:10px;margin-top:1px}
+.lg-na{color:#cbd5e1}
+.lg-clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer;word-break:break-word;min-width:110px}
+.lg-clamp.open{display:block}
+.lg-b{display:inline-flex;align-items:center;gap:3px;padding:1px 7px;border-radius:999px;font-weight:700;font-size:10px;white-space:nowrap}
+.lg-lead{width:60px;height:4px;background:#e2e8f0;border-radius:2px;margin:4px auto 0;position:relative}
+.lg-lead i{display:block;height:100%;border-radius:2px}
+.lg-lead b{position:absolute;left:50%;top:-2px;width:1px;height:8px;background:#0f172a}
+.lg-dense .lg-tbl{font-size:10.5px}.lg-dense .lg-tbl td{padding:3px 5px}
+.lg-tbl tfoot td{background:#e2e8f0!important;font-weight:800;color:var(--navy);padding:8px 6px;border-top:2px solid var(--navy)}
+.lg-empty td{text-align:center;padding:30px;color:var(--mute)}
+.lg-ft{display:grid;grid-template-columns:1fr auto;gap:16px;margin-top:14px;padding-top:10px;border-top:2px solid var(--navy);font-size:10px;color:var(--mute);line-height:1.7}
+.lg-sign{display:flex;gap:18px;align-items:flex-end}
+.lg-sign div{width:130px;border-top:1px solid #64748b;padding-top:3px;text-align:center;color:#334155}
+@media(max-width:1240px){.lg-tw{overflow-x:auto}}
+@media(max-width:900px){.lg{padding:14px 12px}.lg-kpis{grid-template-columns:repeat(2,1fr)}.lg-hd{grid-template-columns:1fr}.lg-meta{border-left:0;padding:0}.lg-2col{grid-template-columns:1fr}}
+@media print{
+.lg{padding:0;font-size:10px;border-radius:0}
+.lg-tb,.lg-noprint{display:none!important}
+.lg-tw{overflow:visible!important}
+.lg-tbl{min-width:0;font-size:9px}
+.lg-tbl thead{display:table-header-group}.lg-tbl tfoot{display:table-row-group}
+.lg-tbl thead tr.lg-cols th{position:static}
 .lg-tbl tr{break-inside:avoid;page-break-inside:avoid}
-.lg-tbl tfoot td{background:#e2e8f0;font-weight:800;color:#0f2942}
-.lg-c{text-align:center}.lg-r{text-align:right}.lg-s{display:block;color:#94a3b8;font-size:8.5px}
-.lg-b{display:inline-block;padding:1px 6px;border-radius:10px;font-weight:700;font-size:9px;white-space:nowrap}
-.lg-foot{margin-top:12px;padding-top:8px;border-top:2px solid #0f2942;display:flex;justify-content:space-between;font-size:10px;color:#475569}
+.lg-tbl tbody tr:hover td{background:inherit}
+.lg-clamp{display:block!important;-webkit-line-clamp:unset}
+.lg-sec>summary::before{content:""}
+.lg-card,.lg-2col>div,.lg-mini tr,.lg-h2{break-inside:avoid}.lg-h2{break-after:avoid}
+.lg-stats-sec{break-after:page;page-break-after:always}
+.lg-kpis{grid-template-columns:repeat(6,1fr)}
+}
 `;
+const _lgPageCss=docNo=>`@media print{@page{size:A4 landscape;margin:13mm 10mm 14mm;@top-left{content:"AS 접수 관리대장 · ${COMPANY_NAME}";font:600 8px sans-serif;color:#64748b}@top-right{content:"대외비 · 무단 복제 및 배포 금지";font:600 8px sans-serif;color:#64748b}@bottom-left{content:"${docNo}";font:8px sans-serif;color:#64748b}@bottom-right{content:"Page " counter(page) " / " counter(pages);font:8px sans-serif;color:#64748b}}}`;
 const _lgBadge=(txt,bg,fc)=>`<span class="lg-b" style="background:${bg};color:${fc};">${esc(txt)}</span>`;
 function _lgStatusBadge(s){
-  if(s==="완료")return _lgBadge(s,"#dcfce7","#166534");
-  if(s==="진행 중")return _lgBadge(s,"#dbeafe","#1d4ed8");
-  return _lgBadge(s,"#fef3c7","#b45309");
+  if(s==="완료")return _lgBadge("● 완료","#dcfce7","#166534");
+  if(s==="진행 중")return _lgBadge("◐ 진행 중","#dbeafe","#1d4ed8");
+  return _lgBadge("○ "+s,"#fef3c7","#b45309");
 }
 function _lgFilterRows(opt){
   return _ledgerRowsAll().filter(d=>{
@@ -10161,63 +10251,186 @@ function _lgFilterRows(opt){
     return true;
   });
 }
-function _lgBuildBody(rows,opt){
+
+/* 화면 상호작용(검색·필터·정렬·밀도·펼치기). 단독 HTML 파일에도 toString()으로 그대로 내장되므로
+   외부 변수를 참조하면 안 된다(자기완결형). */
+function _lgBindUI(scope){
+  const root=(scope.querySelector?scope:document).querySelector(".lg");
+  if(!root||root._bound)return;root._bound=true;
+  const tb=root.querySelector(".lg-tbl tbody");if(!tb)return;
+  const rows=Array.from(tb.querySelectorAll("tr.lg-row"));
+  rows.forEach((r,i)=>{r.dataset.seq=i;});
+  const S={chip:"all",q:"",rep:false,late:false,sla:false};
+  const $=s=>root.querySelector(s),$$=s=>Array.from(root.querySelectorAll(s));
+  const emptyRow=$("tr.lg-empty"),cnt=$("[data-count]"),sumn=$("[data-sumn]"),sumq=$("[data-sumq]");
+  const apply=()=>{
+    let n=0,q=0;
+    rows.forEach(r=>{
+      const d=r.dataset;let ok=true;
+      if(S.chip==="open"&&d.status==="완료")ok=false;
+      else if(S.chip==="done"&&d.status!=="완료")ok=false;
+      if(ok&&S.rep&&d.repeat!=="1")ok=false;
+      if(ok&&S.late&&d.late!=="1")ok=false;
+      if(ok&&S.sla&&d.sla!=="위반")ok=false;
+      if(ok&&S.q&&d.search.indexOf(S.q)<0)ok=false;
+      r.hidden=!ok;
+      if(ok){n++;q+=Number(d.quote)||0;}
+    });
+    if(cnt)cnt.textContent=n+" / "+rows.length+"건 표시";
+    if(sumn)sumn.textContent=n;
+    if(sumq)sumq.textContent=q?q.toLocaleString("ko-KR"):"-";
+    if(emptyRow)emptyRow.hidden=n>0;
+  };
+  const setPressed=(sel,fn)=>$$(sel).forEach(b=>b.setAttribute("aria-pressed",fn(b)?"true":"false"));
+  const qi=$("[data-q]");
+  if(qi){let t;qi.addEventListener("input",()=>{clearTimeout(t);t=setTimeout(()=>{S.q=qi.value.trim().toLowerCase();apply();},120);});}
+  $$("[data-chip]").forEach(b=>b.addEventListener("click",()=>{S.chip=b.dataset.chip;setPressed("[data-chip]",x=>x.dataset.chip===S.chip);apply();}));
+  $$("[data-tg]").forEach(b=>b.addEventListener("click",()=>{const k=b.dataset.tg;S[k]=!S[k];b.setAttribute("aria-pressed",S[k]?"true":"false");apply();}));
+  $$("[data-dens]").forEach(b=>b.addEventListener("click",()=>{root.classList.toggle("lg-dense",b.dataset.dens==="dense");setPressed("[data-dens]",x=>x===b);}));
+  const reset=$("[data-reset]");
+  if(reset)reset.addEventListener("click",()=>{
+    S.chip="all";S.q="";S.rep=S.late=S.sla=false;if(qi)qi.value="";
+    setPressed("[data-chip]",x=>x.dataset.chip==="all");setPressed("[data-tg]",()=>false);
+    $$("th[data-sortable]").forEach(h=>h.removeAttribute("aria-sort"));
+    rows.slice().sort((a,b)=>a.dataset.seq-b.dataset.seq).forEach(r=>tb.insertBefore(r,emptyRow));
+    apply();
+  });
+  /* 정렬: 머리글 클릭(오름→내림→원래 순서) */
+  const heads=$$("tr.lg-cols th");
+  heads.forEach((th,ci)=>{
+    if(!th.hasAttribute("data-sortable"))return;
+    th.tabIndex=0;
+    const go=()=>{
+      const cur=th.getAttribute("aria-sort");
+      heads.forEach(h=>h.removeAttribute("aria-sort"));
+      let dir=cur==="ascending"?"descending":(cur==="descending"?null:"ascending");
+      if(dir)th.setAttribute("aria-sort",dir);
+      const key=r=>{const c=r.children[ci];const v=c?c.getAttribute("data-v"):"";const n=parseFloat(v);return(v!==""&&!isNaN(n)&&String(n)===v.trim())?n:(v||"");};
+      const sorted=rows.slice().sort((a,b)=>{
+        if(!dir)return a.dataset.seq-b.dataset.seq;
+        const x=key(a),y=key(b);
+        const c=(typeof x==="number"&&typeof y==="number")?x-y:String(x).localeCompare(String(y),"ko");
+        return dir==="ascending"?c:-c;
+      });
+      sorted.forEach(r=>tb.insertBefore(r,emptyRow));
+    };
+    th.addEventListener("click",go);
+    th.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go();}});
+  });
+  root.addEventListener("click",e=>{const c=e.target.closest(".lg-clamp");if(c)c.classList.toggle("open");});
+  const pb=$("[data-act=print]");if(pb)pb.addEventListener("click",()=>window.print());
+  document.addEventListener("keydown",e=>{if(e.key==="/"&&qi&&!/INPUT|TEXTAREA|SELECT/.test((document.activeElement||{}).tagName||"")&&root.isConnected){e.preventDefault();qi.focus();}});
+  window.addEventListener("beforeprint",()=>$$("details").forEach(d=>{d.open=true;}));
+  const tbar=$(".lg-tb");if(tbar)root.style.setProperty("--tbh",(tbar.offsetHeight||48)+"px");
+  apply();
+}
+
+function _lgBuildBody(rows,opt,flags){
+  flags=flags||{};
   const now=new Date(),pad=n=>String(n).padStart(2,"0");
   const docNo=`PMO-ASL-${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}`;
   const printedAt=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-  const total=rows.length,done=rows.filter(d=>d.status==="완료").length;
-  const ok=rows.filter(d=>d.sla==="준수").length,bad=rows.filter(d=>d.sla==="위반").length;
-  const leads=rows.filter(d=>d.lead!==null).map(d=>d.lead);
-  const leadAvg=leads.length?(leads.reduce((a,b)=>a+b,0)/leads.length).toFixed(1):"-";
-  const sumQ=rows.reduce((a,d)=>a+d.quoteTotal,0);
+  const st=_lgComputeStats(rows,_ledgerRowsAll(),opt);
+  const k=st.k,T=LG_TARGET,total=rows.length;
   const cond=`접수일 ${opt.from||"전체"} ~ ${opt.to||"전체"} · 상태 ${opt.status==="all"?"전체":opt.status} · 담당PM ${opt.pm==="all"?"전체":opt.pm}`;
+  const cls=j=>j==="● 달성"?"ok":(j==="▲ 주의"?"warn":(j==="▼ 미달"?"bad":""));
+  const card=(lb,val,sub,c,pct,tp)=>`<div class="lg-card ${c||""}"><div class="lg-card-lb">${lb}</div><div class="lg-card-v">${val}</div>${pct!==null&&pct!==undefined?`<div class="lg-bar" aria-hidden="true"><i style="width:${Math.max(0,Math.min(100,pct)).toFixed(1)}%"></i>${tp!==null&&tp!==undefined?`<b style="left:${tp}%"></b>`:""}</div>`:""}<div class="lg-card-sub">${sub}</div></div>`;
+  const jD=_lgJudge(k.doneRate,T.done,"hi"),jS=_lgJudge(k.slaRate,T.sla,"hi"),jL=_lgJudge(k.leadAvg,T.lead,"lo"),jR=_lgJudge(k.repeatRate,T.repeat,"lo");
+  const kpis=[
+    card("총 접수",total.toLocaleString("ko-KR")+"<small style='font-size:11px;font-weight:600'> 건</small>",`완료 ${k.done} · 미결 ${k.open}`,"",null),
+    card("미결",k.open+"<small style='font-size:11px;font-weight:600'> 건</small>",`장기지연(15일+) ${k.long}건 · 평균 ${_n1(k.openAgeAvg)}일`,k.long>0?"bad":(k.open?"warn":"ok"),null),
+    card("완료율",_pc(k.doneRate),`목표 ${T.done*100}% · ${jD}`,cls(jD),k.doneRate===null?null:k.doneRate*100,T.done*100),
+    card(`SLA 준수율 (${SLA_HOURS}h)`,_pc(k.slaRate),`목표 ${T.sla*100}% · 위반 ${k.slaBad}건 · ${jS}`,cls(jS),k.slaRate===null?null:k.slaRate*100,T.sla*100),
+    card("평균 리드타임",k.leadAvg===null?"-":_n1(k.leadAvg)+"<small style='font-size:11px;font-weight:600'> h</small>",`목표 ≤${T.lead}h · 중앙값 ${_n1(k.leadMed)}h · P90 ${_n1(k.leadP90)}h`,cls(jL),k.leadAvg===null?null:k.leadAvg/(T.lead*2)*100,50),
+    card("30일 내 재발률",_pc(k.repeatRate),`${k.repeat}건 · 목표 ≤${T.repeat*100}% · ${jR}`,cls(jR),k.repeatRate===null?null:k.repeatRate/(T.repeat*4)*100,25),
+  ].join("");
+
+  const na='<span class="lg-na">–</span>';
+  const iso=dt=>dt?dt.toISOString().slice(0,10):"";
   const trs=rows.map((d,i)=>{
-    const agingHtml=d.aging===""?"-":_lgBadge(d.aging+"일",d.aging>=15?"#fca5a5":d.aging>=8?"#fed7aa":d.aging>=4?"#fef9c3":"#f1f5f9",d.aging>=15?"#7f1d1d":d.aging>=8?"#9a3412":"#475569");
-    const slaHtml=d.lead===null?"-":`${d.lead}h ${d.sla==="위반"?_lgBadge("위반","#fee2e2","#b91c1c"):_lgBadge("준수","#dcfce7","#166534")}`;
-    return`<tr>
-      <td class="lg-c">${i+1}</td>
-      <td class="lg-c" style="white-space:nowrap;">${esc(d.mgmtNo)}</td>
-      <td class="lg-c" style="white-space:nowrap;">${esc(d.rk)||"-"}</td>
-      <td><b>${esc(d.siteName)||"-"}</b><span class="lg-s">${esc(d.client)}</span></td>
-      <td class="lg-c">${_lgStatusBadge(d.status)}</td>
-      <td class="lg-c">${agingHtml}</td>
-      <td class="lg-c">${esc(d.asType)}</td>
-      <td>${esc(d.symptom)||"-"}</td>
-      <td class="lg-c">${esc(d.pm)}</td>
-      <td>${esc(d.brand)} ${esc(d.model)}<span class="lg-s">${esc(d.serial)}</span></td>
-      <td>${esc(d.causeType)}${d.errorCode?`<span class="lg-s">${esc(d.errorCode)}</span>`:""}</td>
-      <td>${esc(d.actionResult)||"-"}${d.actionType?`<span class="lg-s">[${esc(d.actionType)}]</span>`:""}</td>
-      <td class="lg-c" style="white-space:nowrap;">${d.complete?esc(ymd(new Date(d.complete.getUTCFullYear(),d.complete.getUTCMonth(),d.complete.getUTCDate()))):"-"}</td>
-      <td class="lg-c" style="white-space:nowrap;">${slaHtml}</td>
-      <td class="lg-r">${d.quoteTotal?d.quoteTotal.toLocaleString("ko-KR"):"-"}</td>
+    const ag=d.aging===""?null:d.aging;
+    const bad=d.sla==="위반"||(ag!==null&&ag>=15);
+    const warn=(ag!==null&&ag>=8)||d.repeat==="재발(30일內)";
+    const risk=bad?"bad":(warn?"warn":(d.status==="완료"&&d.sla==="준수"?"ok":""));
+    const late=(ag!==null&&ag>=8)||d.sla==="위반"?"1":"0";
+    const agingHtml=ag===null?na:_lgBadge((ag>=15?"▲ ":"")+ag+"일",ag>=15?"#fecaca":(ag>=8?"#fed7aa":(ag>=4?"#fef08a":"#f1f5f9")),ag>=15?"#7f1d1d":(ag>=8?"#9a3412":(ag>=4?"#854d0e":"#475569")));
+    const slaChip=d.sla==="위반"?_lgBadge("▲ 위반","#fee2e2","#b91c1c"):(d.sla==="준수"?_lgBadge("✔ 준수","#dcfce7","#166534"):"");
+    const leadBar=d.lead===null?"":`<div class="lg-lead" aria-hidden="true"><i style="width:${Math.min(100,d.lead/(SLA_HOURS*2)*100).toFixed(0)}%;background:${d.lead>SLA_HOURS?"#dc2626":"#0d9488"}"></i><b></b></div>`;
+    const asChip=d.asType==="유상"?_lgBadge("유상","#fee2e2","#b91c1c"):(d.asType==="무상"?_lgBadge("무상","#ccfbf1","#0f766e"):_lgBadge(d.asType,"#f1f5f9","#475569"));
+    const search=[d.mgmtNo,d.siteName,d.client,d.symptom,d.serial,d.model,d.brand,d.pm,d.tech,d.causeType,d.errorCode,d.actionResult,d.faultyPart,d.status].join(" ").toLowerCase();
+    return`<tr class="lg-row" data-status="${esc(d.status)}" data-risk="${risk}" data-late="${late}" data-sla="${esc(d.sla)}" data-repeat="${d.repeat==="재발(30일內)"?1:0}" data-quote="${d.quoteTotal||0}" data-search="${esc(search)}">
+      <td class="lg-c" data-v="${i+1}">${i+1}</td>
+      <td data-v="${esc(d.mgmtNo)}"><span class="lg-id">${esc(d.mgmtNo)}</span></td>
+      <td class="lg-nw lg-c" data-v="${esc(d.rk)}">${esc(d.rk)||na}</td>
+      <td data-v="${esc(d.siteName)}"><b>${esc(d.siteName)||na}</b><span class="lg-s">${esc(d.client)}</span></td>
+      <td class="lg-c" data-v="${d.status==="완료"?3:(d.status==="진행 중"?2:1)}">${_lgStatusBadge(d.status)}</td>
+      <td class="lg-c" data-v="${ag===null?-1:ag}">${agingHtml}</td>
+      <td class="lg-c" data-v="${esc(d.asType)}">${asChip}</td>
+      <td><div class="lg-clamp" title="클릭하여 전체 보기">${esc(d.symptom)||na}</div></td>
+      <td data-v="${esc(d.brand+" "+d.model)}">${esc(d.brand)} ${esc(d.model)}<span class="lg-s">${esc(d.serial)}${d.repeat==="재발(30일內)"?" ":""}${d.repeat==="재발(30일內)"?_lgBadge("재발","#fee2e2","#b91c1c"):(d.repeat==="재접수"?_lgBadge("재접수","#fef3c7","#b45309"):"")}</span></td>
+      <td data-v="${esc(d.causeType)}">${esc(d.causeType)}${d.errorCode?`<span class="lg-s">${esc(d.errorCode)}</span>`:""}</td>
+      <td><div class="lg-clamp" title="클릭하여 전체 보기">${esc(d.actionResult)||na}</div>${d.actionType?`<span class="lg-s">[${esc(d.actionType)}]</span>`:""}</td>
+      <td class="lg-c lg-nw" data-v="${esc(d.pm)}">${esc(d.pm)}${d.tech?`<span class="lg-s">${esc(d.tech)}</span>`:""}</td>
+      <td class="lg-nw lg-c" data-v="${iso(d.complete)}">${iso(d.complete)||na}</td>
+      <td class="lg-nw lg-c" data-v="${d.lead===null?-1:d.lead}">${d.lead===null?na:`<b>${d.lead}h</b> ${slaChip}${leadBar}`}</td>
+      <td class="lg-r lg-nw" data-v="${d.quoteTotal||0}">${d.quoteTotal?d.quoteTotal.toLocaleString("ko-KR"):na}</td>
     </tr>`;
   }).join("");
-  return{docNo,body:`<div class="lg">
-    <div class="lg-head">
-      <div style="display:flex;gap:14px;align-items:flex-start;">
-        <img src="${COMPANY_LOGO}" style="height:44px;object-fit:contain;" alt=""/>
-        <div>
-          <div class="lg-title">AS 접수 관리대장</div>
-          <div class="lg-sub">${esc(COMPANY_NAME)} ${esc(TEAM_NAME)} · 문서번호 ${esc(docNo)} · 출력 ${esc(printedAt)} · 출력자 ${esc(opt.preparer||"-")}<br/>${esc(cond)} · 총 ${total}건</div>
-        </div>
+  const cLate=rows.filter(d=>(d.aging!==""&&d.aging>=8)||d.sla==="위반").length,cSla=rows.filter(d=>d.sla==="위반").length,cRep=rows.filter(d=>d.repeat==="재발(30일內)").length;
+  const sumQ=rows.reduce((a,d)=>a+d.quoteTotal,0);
+  const th=(t,sortable,extra)=>`<th scope="col"${sortable?" data-sortable":""}${extra||""}>${t}</th>`;
+  const body=`<div class="lg" role="document" aria-label="AS 접수 관리대장">
+    <style>${LG_HTML_CSS}${_lgPageCss(docNo)}</style>
+    <header class="lg-hd">
+      <div class="lg-brand">
+        <img src="${COMPANY_LOGO}" alt="${esc(COMPANY_NAME)}"/>
+        <div class="lg-title">AS 접수 관리대장<small>${esc(COMPANY_NAME)} ${esc(TEAM_NAME)} · Service Request Ledger</small></div>
       </div>
-      <table class="lg-appr"><tr><th>담당</th><th>검토</th><th>승인</th></tr><tr><td></td><td></td><td></td></tr></table>
+      <dl class="lg-meta">
+        <dt>문서번호</dt><dd>${esc(docNo)}</dd>
+        <dt>출력일시</dt><dd>${esc(printedAt)}</dd>
+        <dt>출력자</dt><dd>${esc(opt.preparer||"-")}</dd>
+        <dt>조회조건</dt><dd>${esc(cond)}</dd>
+        <dt>대상 건수</dt><dd>${total}건</dd>
+      </dl>
+      <table class="lg-appr" aria-label="결재란"><tr><th>담당</th><th>검토</th><th>승인</th></tr><tr><td></td><td></td><td></td></tr></table>
+    </header>
+    <section class="lg-kpis" aria-label="핵심 지표">${kpis}</section>
+    <div class="lg-legend" aria-label="범례">
+      <span><i class="lg-sw" style="background:#dc2626"></i>좌측 적색선: SLA 위반 또는 미결 15일+</span>
+      <span><i class="lg-sw" style="background:#d97706"></i>황색선: 미결 8일+ 또는 30일 내 재발</span>
+      <span><i class="lg-sw" style="background:#16a34a"></i>녹색선: 완료·SLA 준수</span>
+      <span>○ 접수 · ◐ 진행 중 · ● 완료</span>
+      <span>리드타임 막대의 검은 눈금 = SLA 기준(${SLA_HOURS}h)</span>
     </div>
-    <div class="lg-kpi">
-      <div><b>${total}</b><span>총 접수</span></div>
-      <div><b style="color:#d97706;">${total-done}</b><span>미결</span></div>
-      <div><b>${done}</b><span>처리 완료</span></div>
-      <div><b>${total?(done/total*100).toFixed(1):"0.0"}%</b><span>완료율</span></div>
-      <div><b>${(ok+bad)?(ok/(ok+bad)*100).toFixed(1):"-"}${(ok+bad)?"%":""}</b><span>SLA 준수율(${SLA_HOURS}h)</span></div>
-      <div><b>${leadAvg}${leads.length?"h":""}</b><span>평균 리드타임(영업일)</span></div>
+    ${_lgStatsHTML(st)}
+    <div class="lg-tb lg-noprint" role="toolbar" aria-label="대장 필터">
+      <input type="search" data-q placeholder="검색 — 현장·증상·시리얼·관리번호  ( / )" aria-label="대장 검색"/>
+      <button class="lg-chip" data-chip="all" aria-pressed="true">전체 ${total}</button>
+      <button class="lg-chip" data-chip="open" aria-pressed="false">미결 ${k.open}</button>
+      <button class="lg-chip" data-chip="done" aria-pressed="false">완료 ${k.done}</button>
+      <button class="lg-chip" data-tg="late" aria-pressed="false">지연·장기 ${cLate}</button>
+      <button class="lg-chip" data-tg="sla" aria-pressed="false">SLA 위반 ${cSla}</button>
+      <button class="lg-chip" data-tg="rep" aria-pressed="false">재발 ${cRep}</button>
+      <span class="lg-seg" role="group" aria-label="표시 밀도"><button data-dens="comfy" aria-pressed="true">기본</button><button data-dens="dense" aria-pressed="false">촘촘히</button></span>
+      <button class="lg-chip" data-reset>초기화</button>
+      ${flags.standalone?`<button class="lg-chip" data-act="print">인쇄 / PDF</button>`:""}
+      <span class="lg-count" data-count aria-live="polite"></span>
     </div>
-    <table class="lg-tbl">
-      <thead><tr><th style="width:26px;">No</th><th>관리번호</th><th>접수일</th><th>현장명/고객사</th><th>상태</th><th>미결<br/>경과</th><th>AS</th><th style="min-width:110px;">접수 증상</th><th>담당PM</th><th>모델/시리얼</th><th>원인구분/에러코드</th><th style="min-width:110px;">조치 내용</th><th>완료일</th><th>리드타임/SLA</th><th>견적금액<br/>(VAT포함)</th></tr></thead>
-      <tbody>${trs}</tbody>
-      <tfoot><tr><td colspan="14" class="lg-c">합 계 · ${total}건</td><td class="lg-r">${sumQ.toLocaleString("ko-KR")}</td></tr></tfoot>
-    </table>
-    <div class="lg-foot"><span>${esc(COMPANY_NAME)} · Tel ${esc(COMPANY_TEL)} · ${esc(COMPANY_EMAIL)}</span><span>대외비 · 무단 복제 및 배포 금지</span></div>
-  </div>`};
+    <div class="lg-tw"><table class="lg-tbl">
+      <thead>
+        <tr class="lg-grp"><th class="g1" colspan="8">접수 정보</th><th class="g2" colspan="2">장비 · 진단</th><th class="g3" colspan="4">조치 · 일정 · SLA</th><th class="g4">비용</th></tr>
+        <tr class="lg-cols">${th("No")}${th("관리번호",1)}${th("접수일",1)}${th("현장 / 고객사",1)}${th("상태",1)}${th("미결 경과",1)}${th("AS",1)}${th("접수 증상")}${th("장비 · 시리얼",1)}${th("원인 · 에러코드",1)}${th("조치 내용")}${th("담당",1)}${th("완료일",1)}${th("리드타임 · SLA",1)}${th("견적금액<br/>(VAT포함)",1)}</tr>
+      </thead>
+      <tbody>${trs}<tr class="lg-empty" hidden><td colspan="15">조건에 맞는 접수 건이 없습니다. 필터를 초기화해 보세요.</td></tr></tbody>
+      <tfoot><tr><td colspan="14" class="lg-r">합계 · 표시 <span data-sumn>${total}</span>건 / 전체 ${total}건</td><td class="lg-r lg-nw" data-sumq>${sumQ?sumQ.toLocaleString("ko-KR"):"-"}</td></tr></tfoot>
+    </table></div>
+    <footer class="lg-ft">
+      <div>${esc(COMPANY_NAME)} · Tel ${esc(COMPANY_TEL)} · ${esc(COMPANY_EMAIL)}<br/>※ KPI·통계는 조회조건 전체 기준이며, 표는 화면에서 적용한 검색·필터·정렬 상태 그대로 인쇄됩니다. 리드타임은 토·일을 제외한 영업일 기준입니다.<br/>대외비 · 무단 복제 및 배포 금지</div>
+      <div class="lg-sign"><div>작성자</div><div>확인자</div></div>
+    </footer>
+  </div>`;
+  return{docNo,body};
 }
 
 let _lgLast=null;
@@ -10226,50 +10439,485 @@ window._runProjectLedgerHTML=function(mode){
   const opt={from:g("ld_from"),to:g("ld_to"),status:g("ld_status")||"all",pm:g("ld_pm")||"all",preparer:g("ld_preparer")};
   const rows=_lgFilterRows(opt);
   if(!rows.length){toast("조건에 해당하는 접수 건이 없습니다","error");return;}
-  const built=_lgBuildBody(rows,opt);
-  _lgLast=built;
   if(mode==="file"){
-    const html=`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>AS 접수 관리대장 ${built.docNo}</title><style>body{margin:0;background:#f1f5f9}@page{size:A4 landscape;margin:10mm}@media print{body{background:#fff}}${LG_HTML_CSS}.lg{max-width:1400px;margin:0 auto}</style></head><body>${built.body}</body></html>`;
+    const built=_lgBuildBody(rows,opt,{standalone:true});
+    _lgLast=built;
+    const html=`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>AS 접수 관리대장 ${built.docNo}</title><style>body{margin:0;padding:20px;background:#eef2f7}.lg{max-width:1500px;margin:0 auto;box-shadow:0 4px 24px rgba(15,23,42,.08)}@media print{body{background:#fff;padding:0}.lg{box-shadow:none;max-width:none}}</style></head><body>${built.body}<script>${_lgBindUI.toString()};_lgBindUI(document);<\/script></body></html>`;
     const url=URL.createObjectURL(new Blob([html],{type:"text/html;charset=utf-8"}));
     const a=document.createElement("a");a.href=url;a.download=`PMO_AS접수관리대장_${built.docNo.slice(8,16)}.html`;
     document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
     toast(`HTML 파일이 저장되었습니다 (${rows.length}건)`,"success");
     return;
   }
+  const built=_lgBuildBody(rows,opt,{});
+  _lgLast=built;
   _previewKind="ledger";
   $overlay.classList.add("hidden");
   if(isMobile()){
     const ov=document.getElementById("quotePreviewOverlay");
-    document.getElementById("quotePreviewContent").innerHTML=`<style>${LG_HTML_CSS}</style><div style="overflow-x:auto;"><div style="min-width:900px;">${built.body}</div></div>`;
+    const box=document.getElementById("quotePreviewContent");
+    box.innerHTML=built.body;
     document.querySelector(".quote-preview-bar-title").innerHTML="<svg class='ic'><use href='#i-clipboard'/></svg> AS 접수 관리대장";
     ov.classList.add("active");ov.scrollTop=0;
+    _lgBindUI(box);
   }else{
     const pa=document.getElementById("quotePrintArea");
-    pa.style.cssText="display:block;position:fixed;inset:0;z-index:9998;background:#fff;overflow:auto;padding:20px;";
-    pa.innerHTML=`<style>${LG_HTML_CSS}</style><div style="max-width:1300px;margin:0 auto;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;" class="no-print">
-        <div style="font-size:15px;font-weight:700;">AS 접수 관리대장 미리보기</div>
+    pa.style.cssText="display:block;position:fixed;inset:0;z-index:9998;background:#eef2f7;overflow:auto;padding:16px 20px;";
+    pa.innerHTML=`<div style="max-width:1500px;margin:0 auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;" class="no-print">
+        <div style="font-size:15px;font-weight:700;">AS 접수 관리대장 <span style="font-weight:400;color:var(--ink-5);font-size:12px;">· 검색·필터·정렬한 상태 그대로 인쇄됩니다</span></div>
         <div style="display:flex;gap:8px;">
           <button class="btn btn-primary no-print" onclick="window._printLedgerHTML()"><svg class='ic'><use href='#i-printer'/></svg> 인쇄/PDF (A4 가로)</button>
           <button class="btn btn-secondary no-print" onclick="document.getElementById('quotePrintArea').style.display='none'"><svg class='ic'><use href='#i-x'/></svg> 닫기</button>
         </div>
       </div>${built.body}</div>`;
+    _lgBindUI(pa);
   }
 };
 window._printLedgerHTML=function(){
-  if(!_lgLast)return;
-  document.getElementById("quotePreviewOverlay").classList.remove("active");
   const pa=document.getElementById("quotePrintArea");
+  const live=document.querySelector("#quotePreviewContent .lg")||pa.querySelector(".lg");
+  if(!live)return;
+  const html=live.outerHTML; /* 화면에서 적용한 필터·정렬(hidden 속성, 행 순서)이 그대로 담긴다 */
+  document.getElementById("quotePreviewOverlay").classList.remove("active");
   pa.style.cssText="display:block;";
-  pa.innerHTML=`<style>${LG_HTML_CSS}</style>${_lgLast.body}`;
+  pa.innerHTML=html;
+  pa.querySelectorAll("details").forEach(d=>{d.open=true;});
   const st=document.createElement("style");
-  st.textContent="@media print{@page{size:A4 landscape;margin:10mm}}"; // 기존 @page(세로)를 이 출력에서만 가로로 덮어씀
+  st.textContent=_lgPageCss(_lgLast?_lgLast.docNo:"");
   document.head.appendChild(st);
   setTimeout(()=>{window.print();setTimeout(()=>{pa.style.display="none";st.remove();},800);},200);
 };
 /* 모바일 미리보기 바의 "인쇄/PDF" 버튼(_printPreview)이 ledger 종류도 처리하도록 래핑 */
 const _origPrintPreview=window._printPreview;
 window._printPreview=function(){if(_previewKind==="ledger")return window._printLedgerHTML();return _origPrintPreview();};
+
+/* ═════════ [통계 엔진 · 경영진 요약 · 고급 분석 시작] ═════════ */
+const LG_TARGET={sla:.95,done:.90,lead:48,repeat:.05,long:0};
+const _avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+const _pctl=(arr,p)=>{if(!arr.length)return null;const s=arr.slice().sort((a,b)=>a-b);const i=(s.length-1)*p,lo=Math.floor(i),hi=Math.ceil(i);return s[lo]+(s[hi]-s[lo])*(i-lo);};
+const _pc=v=>(v===null||v===undefined)?"-":(v*100).toFixed(1)+"%";
+const _n1=v=>(v===null||v===undefined)?"-":String(Math.round(v*10)/10);
+const _lgJudge=(a,t,dir,tol)=>{if(a===null||a===undefined)return"-";if(dir==="hi")return a>=t?"● 달성":(a>=t*0.9?"▲ 주의":"▼ 미달");return a<=t?"● 달성":(a<=t*1.2+(tol||0)?"▲ 주의":"▼ 미달");};
+const _LG_DOW=["일","월","화","수","목","금","토"];
+const _LG_BUCKETS=[["24시간 이내",-1,24],["24~48시간",24,48],["48~72시간",48,72],["72~120시간",72,120],["120시간 초과",120,1e9]];
+
+/* 재접수·재발 판정: 동일 장비(시리얼, 없으면 현장+모델) 기준. 직전 접수와 30일 이내면 "재발(30일內)" */
+function _ledgerRowsAll(){
+  const base=_ledgerRowsBase();
+  const seen={};
+  base.forEach(d=>{
+    const key=d.serial?("sn:"+String(d.serial).trim().toLowerCase()):(d.model?("sm:"+d.siteName+"|"+d.model):"");
+    d.unitKey=key;d.repeat="최초";d.unitSeq=key?1:"";
+    if(key){
+      const prev=seen[key]||[];
+      d.unitSeq=prev.length+1;
+      if(prev.length){
+        const last=prev[prev.length-1];
+        const diff=(d.receipt&&last.receipt)?(d.receipt-last.receipt)/86400000:null;
+        d.repeat=(diff!==null&&diff<=30)?"재발(30일內)":"재접수";
+      }
+      prev.push(d);seen[key]=prev;
+    }
+  });
+  return base;
+}
+
+function _lgKpi(list){
+  const total=list.length,done=list.filter(d=>d.status==="완료").length;
+  const leads=list.filter(d=>d.lead!==null).map(d=>d.lead);
+  const ok=list.filter(d=>d.sla==="준수").length,bad=list.filter(d=>d.sla==="위반").length;
+  const rep=list.filter(d=>d.repeat==="재발(30일內)").length;
+  const openAg=list.filter(d=>d.aging!=="").map(d=>d.aging);
+  return{total,done,open:total-done,doneRate:total?done/total:null,
+    leadAvg:_avg(leads),leadMed:_pctl(leads,.5),leadP90:_pctl(leads,.9),leadMax:leads.length?Math.max(...leads):null,leadN:leads.length,
+    slaRate:(ok+bad)?ok/(ok+bad):null,slaBad:bad,slaOk:ok,
+    repeat:rep,repeatRate:total?rep/total:null,
+    long:list.filter(d=>d.aging!==""&&d.aging>=15).length,openAgeAvg:_avg(openAg),
+    cost:list.reduce((a,d)=>a+d.asCost,0),costCases:list.filter(d=>d.asCost>0).length,quote:list.reduce((a,d)=>a+d.quoteTotal,0),
+    paid:list.filter(d=>d.asType==="유상").length};
+}
+function _lgPareto(list,key,limit){
+  const m={};
+  list.forEach(d=>{const n=d[key];if(!n)return;m[n]=(m[n]||0)+1;});
+  const tot=Object.values(m).reduce((a,b)=>a+b,0);
+  let cum=0;
+  return Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,limit||10).map(([name,count])=>{
+    const before=tot?cum/tot:0;cum+=count;
+    return{name,count,share:tot?count/tot:0,cum:tot?cum/tot:0,grade:before<0.8?"A":(before<0.95?"B":"C")};
+  });
+}
+function _lgGroup(list,keyFn){const m={};list.forEach(d=>{const k=keyFn(d)||"미지정";(m[k]=m[k]||[]).push(d);});return m;}
+
+function _lgComputeStats(rows,allRows,opt){
+  const k=_lgKpi(rows);
+  let prior=null;
+  if(opt&&opt.from&&opt.to){
+    const f=new Date(opt.from+"T00:00:00Z"),t=new Date(opt.to+"T00:00:00Z");
+    const days=Math.round((t-f)/86400000)+1;
+    const iso=d=>d.toISOString().slice(0,10);
+    const ps=iso(new Date(f.getTime()-days*86400000)),pe=iso(new Date(f.getTime()-86400000));
+    const pl=allRows.filter(d=>d.rk>=ps&&d.rk<=pe&&(opt.pm==="all"||d.pm===opt.pm));
+    if(pl.length)prior=_lgKpi(pl);
+  }
+  /* 월별 추이(최근 12개월) */
+  const now=new Date(),months=[];
+  for(let i=11;i>=0;i--){
+    const dt=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const key=`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,"0")}`;
+    const list=rows.filter(d=>d.rk.startsWith(key));
+    const kk=_lgKpi(list);
+    months.push({key,y:dt.getFullYear(),m:dt.getMonth()+1,total:kk.total,done:kk.done,doneRate:kk.doneRate,slaRate:kk.slaRate,leadAvg:kk.leadAvg,list});
+  }
+  months.forEach((m,i)=>{const w=months.slice(Math.max(0,i-2),i+1);m.ma3=_avg(w.map(x=>x.total));m.mom=i>0&&months[i-1].total?(m.total-months[i-1].total)/months[i-1].total:null;});
+  /* 원인 Pareto · 에러코드 · 부품 */
+  const pareto={cause:_lgPareto(rows,"causeType",10),err:_lgPareto(rows,"errorCode",10),part:_lgPareto(rows,"faultyPart",10)};
+  /* 리드타임 분포 */
+  const leadRows=rows.filter(d=>d.lead!==null);
+  const leadDist=_LG_BUCKETS.map(([label,lo,hi])=>{const c=leadRows.filter(d=>d.lead>lo&&d.lead<=hi).length;return{label,count:c,share:leadRows.length?c/leadRows.length:0};});
+  /* 요일별 */
+  const dow=_LG_DOW.map((n,i)=>({name:n,count:rows.filter(d=>d.receipt&&d.receipt.getUTCDay()===i).length}));
+  /* 브랜드·모델별 */
+  const bm=Object.values(_lgGroup(rows,d=>d.brand+"||"+(d.model||"모델 미입력"))).map(a=>{const kk=_lgKpi(a);return{brand:a[0].brand,model:a[0].model||"모델 미입력",k:kk};}).sort((a,b)=>b.k.total-a.k.total).slice(0,15);
+  /* 히트맵: 브랜드 × 월 */
+  const brands=[...new Set(rows.map(d=>d.brand))];
+  const matrix=brands.map(b=>months.map(m=>m.list.filter(d=>d.brand===b).length));
+  /* 현장 스코어카드 (위험점수: 재발35 + SLA위반25 + 미결비중15 + 접수량25) */
+  const sg=_lgGroup(rows,d=>d.siteName||"미등록");
+  const maxN=Math.max(...Object.values(sg).map(a=>a.length),1);
+  const sites=Object.entries(sg).map(([name,a])=>{
+    const kk=_lgKpi(a);
+    const risk=Math.round(100*((kk.repeatRate||0)*0.35+(kk.slaRate===null?0:(1-kk.slaRate))*0.25+(kk.total?kk.open/kk.total:0)*0.15+(a.length/maxN)*0.25));
+    return{name,client:a[0].client,k:kk,risk,grade:risk>=50?"R 위험":(risk>=30?"A 주의":"G 양호")};
+  }).sort((a,b)=>b.risk-a.risk);
+  const pms=Object.entries(_lgGroup(rows,d=>d.pm)).map(([name,a])=>({name,k:_lgKpi(a)})).sort((a,b)=>b.k.total-a.k.total);
+  const slaBadList=rows.filter(d=>d.sla==="위반").sort((a,b)=>b.lead-a.lead).slice(0,30);
+  const ug=_lgGroup(rows.filter(d=>d.unitKey),d=>d.unitKey);
+  const repeatUnits=Object.values(ug).filter(a=>a.length>=2).map(a=>{
+    const cs=_lgPareto(a,"causeType",1)[0];
+    return{label:a[0].serial||`${a[0].siteName} ${a[0].model}`,site:a[0].siteName,model:a[0].model,brand:a[0].brand,count:a.length,rep30:a.filter(d=>d.repeat==="재발(30일內)").length,last:a[a.length-1].rk,cause:cs?cs.name:"-"};
+  }).sort((a,b)=>b.count-a.count).slice(0,10);
+  /* 자동 시사점 · 권고 */
+  const ins=[],recs=[];
+  if(k.total){
+    ins.push(`총 ${k.total}건 접수 중 ${k.done}건 완료(완료율 ${_pc(k.doneRate)}, 목표 ${LG_TARGET.done*100}%), 미결 ${k.open}건.`);
+    if(k.slaRate!==null){
+      const wc=_lgPareto(rows.filter(d=>d.sla==="위반"),"causeType",1)[0];
+      ins.push(`SLA(${SLA_HOURS}h) 준수율 ${_pc(k.slaRate)} (목표 ${LG_TARGET.sla*100}%) — 위반 ${k.slaBad}건${wc?`, 위반 최다 원인은 「${wc.name}」(${wc.count}건)`:""}. 평균 리드타임 ${_n1(k.leadAvg)}h / 중앙값 ${_n1(k.leadMed)}h / 상위10%(P90) ${_n1(k.leadP90)}h.`);
+    }
+    if(k.repeat>0){
+      const ru=repeatUnits[0];
+      ins.push(`동일 장비 30일 내 재발 ${k.repeat}건(재발률 ${_pc(k.repeatRate)}, 목표 ${LG_TARGET.repeat*100}% 이하)${ru?` — 최다 접수 장비: ${ru.label}(${ru.count}회, ${ru.site})`:""}.`);
+    }else ins.push("동일 장비 30일 내 재발 접수는 확인되지 않았습니다.");
+    if(k.long>0){
+      const lg=rows.filter(d=>d.aging!=="").sort((a,b)=>b.aging-a.aging)[0];
+      ins.push(`미결 15일 이상 장기지연 ${k.long}건 — 최장 ${lg.aging}일(${lg.siteName}, ${lg.mgmtNo}).`);
+    }
+    if(pareto.cause.length){
+      let n=0;for(const e of pareto.cause){n++;if(e.cum>=0.8)break;}
+      ins.push(`원인 구분 Pareto: 상위 ${n}개 원인이 전체의 ${_pc(pareto.cause[n-1].cum)}를 차지 — 「${pareto.cause[0].name}」 ${_pc(pareto.cause[0].share)}.`);
+    }
+    if(sites.length){const s0=[...sites].sort((a,b)=>b.k.total-a.k.total)[0];ins.push(`최다 접수 현장: ${s0.name} ${s0.k.total}건(전체의 ${_pc(s0.k.total/k.total)}). 위험등급 R 현장 ${sites.filter(s=>s.grade[0]==="R").length}곳.`);}
+    ins.push(`유상 AS ${k.paid}건(${_pc(k.paid/k.total)}), AS 원가 합계 ${k.cost.toLocaleString("ko-KR")}원${k.costCases?`(원가 입력 ${k.costCases}건, 건당 평균 ${Math.round(k.cost/k.costCases).toLocaleString("ko-KR")}원)`:""}.`);
+    if(k.slaRate!==null&&k.slaRate<LG_TARGET.sla)recs.push("SLA 위반 건의 접수→완료 구간을 점검하고, 위반 최다 원인 유형의 사전 부품 확보·표준 조치 절차 정비를 권고합니다.");
+    if(k.repeatRate!==null&&k.repeatRate>LG_TARGET.repeat)recs.push("재발 다발 장비는 근본원인 재분석(RCA) 및 부품·펌웨어 교체 여부를 검토하고, 동일 장비 재접수 시 상위 기술자 에스컬레이션을 적용하십시오.");
+    if(k.long>0)recs.push("미결 15일 이상 건은 주간 회의에서 담당자·목표 완료일을 확정하고 '미결·지연관리' 시트에 조치 계획을 기록하십시오.");
+    if(sites.some(s=>s.grade[0]==="R"))recs.push("위험등급(R) 현장은 예방점검 주기 단축 및 현장 담당자 정기 면담을 권고합니다.");
+    if(!recs.length)recs.push("주요 지표가 목표 범위 내에 있습니다. 현행 관리 수준을 유지하되 월별 추이를 지속 모니터링하십시오.");
+  }
+  return{k,prior,months,pareto,leadDist,dow,bm,brands,matrix,sites,pms,slaBadList,repeatUnits,insights:ins,recs};
+}
+
+/* ── SVG 차트 (HTML 출력에 그대로 삽입, 엑셀에는 PNG로 변환해 삽입) ── */
+const _SVGH='xmlns="http://www.w3.org/2000/svg" font-family="Malgun Gothic,Noto Sans KR,sans-serif"';
+function _lgSvgMonthly(ms){
+  const w=640,h=250,mL=36,mR=16,mT=36,mB=30,cw=w-mL-mR,ch=h-mT-mB;
+  const mx=Math.max(...ms.map(m=>m.total),1)*1.2,st=cw/ms.length,bw=Math.min(14,st*0.3);
+  const y=v=>mT+ch-v/mx*ch;
+  let s=`<svg ${_SVGH} width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><rect width="${w}" height="${h}" fill="#fff"/><text x="${mL}" y="18" font-size="12" font-weight="700" fill="#0f2942">월별 접수·완료 추이 (최근 12개월)</text>`;
+  s+=`<rect x="${w-250}" y="8" width="9" height="9" fill="#0f2942"/><text x="${w-238}" y="16" font-size="9" fill="#475569">접수</text><rect x="${w-200}" y="8" width="9" height="9" fill="#0d9488"/><text x="${w-188}" y="16" font-size="9" fill="#475569">완료</text><line x1="${w-150}" y1="12" x2="${w-132}" y2="12" stroke="#f59e0b" stroke-width="2"/><text x="${w-128}" y="16" font-size="9" fill="#475569">3개월 이동평균</text>`;
+  [0,.5,1].forEach(f=>{const yy=mT+ch-f*ch;s+=`<line x1="${mL}" y1="${yy}" x2="${w-mR}" y2="${yy}" stroke="#e2e8f0"/><text x="${mL-4}" y="${yy+3}" font-size="9" text-anchor="end" fill="#64748b">${Math.round(mx*f)}</text>`;});
+  ms.forEach((m,i)=>{
+    const cx=mL+st*i+st/2;
+    s+=`<rect x="${cx-bw-1}" y="${y(m.total)}" width="${bw}" height="${mT+ch-y(m.total)}" fill="#0f2942"/><rect x="${cx+1}" y="${y(m.done)}" width="${bw}" height="${mT+ch-y(m.done)}" fill="#0d9488"/>`;
+    if(m.total)s+=`<text x="${cx-bw/2-1}" y="${y(m.total)-3}" font-size="8.5" text-anchor="middle" fill="#0f2942">${m.total}</text>`;
+    s+=`<text x="${cx}" y="${h-12}" font-size="9" text-anchor="middle" fill="#64748b">${m.m}월</text>`;
+  });
+  s+=`<polyline points="${ms.map((m,i)=>`${(mL+st*i+st/2).toFixed(1)},${y(m.ma3).toFixed(1)}`).join(" ")}" fill="none" stroke="#f59e0b" stroke-width="2"/>`;
+  return s+"</svg>";
+}
+function _lgSvgPareto(en,title){
+  const w=640,h=250,mL=36,mR=36,mT=36,mB=44,cw=w-mL-mR,ch=h-mT-mB;
+  const list=en.slice(0,8),mx=Math.max(...list.map(e=>e.count),1)*1.15,st=cw/Math.max(list.length,1),bw=Math.min(40,st*0.55);
+  let s=`<svg ${_SVGH} width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><rect width="${w}" height="${h}" fill="#fff"/><text x="${mL}" y="18" font-size="12" font-weight="700" fill="#0f2942">${esc(title)} (막대: 건수 · 선: 누적비중)</text>`;
+  if(!list.length)return s+`<text x="${w/2}" y="${h/2}" text-anchor="middle" font-size="11" fill="#94a3b8">데이터 없음</text></svg>`;
+  const y80=mT+ch-0.8*ch;
+  s+=`<line x1="${mL}" y1="${y80}" x2="${w-mR}" y2="${y80}" stroke="#e11d48" stroke-dasharray="4 3"/><text x="${w-mR+3}" y="${y80+3}" font-size="9" fill="#e11d48">80%</text>`;
+  list.forEach((e,i)=>{
+    const cx=mL+st*i+st/2,bh=e.count/mx*ch;
+    s+=`<rect x="${cx-bw/2}" y="${mT+ch-bh}" width="${bw}" height="${bh}" fill="${e.grade==="A"?"#0f2942":(e.grade==="B"?"#64748b":"#cbd5e1")}"/><text x="${cx}" y="${mT+ch-bh-3}" font-size="9" text-anchor="middle" fill="#0f2942">${e.count}</text>`;
+    const nm=e.name.length>8?e.name.slice(0,7)+"…":e.name;
+    s+=`<text x="${cx}" y="${h-26}" font-size="9" text-anchor="middle" fill="#475569">${esc(nm)}</text>`;
+  });
+  s+=`<polyline points="${list.map((e,i)=>`${(mL+st*i+st/2).toFixed(1)},${(mT+ch-e.cum*ch).toFixed(1)}`).join(" ")}" fill="none" stroke="#e11d48" stroke-width="2"/>`;
+  list.forEach((e,i)=>{s+=`<circle cx="${mL+st*i+st/2}" cy="${mT+ch-e.cum*ch}" r="3" fill="#e11d48"/><text x="${mL+st*i+st/2}" y="${mT+ch-e.cum*ch-6}" font-size="8.5" text-anchor="middle" fill="#e11d48">${Math.round(e.cum*100)}%</text>`;});
+  return s+"</svg>";
+}
+function _lgSvgHBar(items,title,color){
+  const w=640,rowH=26,h=44+Math.max(items.length,1)*rowH,mL=130,mR=60;
+  const mx=Math.max(...items.map(i=>i.value),1);
+  let s=`<svg ${_SVGH} width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><rect width="${w}" height="${h}" fill="#fff"/><text x="12" y="20" font-size="12" font-weight="700" fill="#0f2942">${esc(title)}</text>`;
+  if(!items.length)s+=`<text x="${w/2}" y="${h/2+8}" text-anchor="middle" font-size="11" fill="#94a3b8">데이터 없음</text>`;
+  items.forEach((it,i)=>{
+    const y=34+i*rowH,bw=(w-mL-mR)*it.value/mx;
+    const lb=it.label.length>14?it.label.slice(0,13)+"…":it.label;
+    s+=`<text x="${mL-8}" y="${y+14}" font-size="10" text-anchor="end" fill="#334155">${esc(lb)}</text><rect x="${mL}" y="${y+2}" width="${Math.max(bw,1)}" height="${rowH-8}" rx="2" fill="${it.color||color||"#0d9488"}"/><text x="${mL+bw+5}" y="${y+14}" font-size="10" font-weight="700" fill="#334155">${esc(it.text||it.value)}</text>`;
+  });
+  return s+"</svg>";
+}
+function _lgSvgToPng(svg,w,h){
+  return new Promise((res,rej)=>{
+    const img=new Image();
+    const url=URL.createObjectURL(new Blob([svg],{type:"image/svg+xml;charset=utf-8"}));
+    img.onload=()=>{const c=document.createElement("canvas");c.width=w*2;c.height=h*2;const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);res(c.toDataURL("image/png"));};
+    img.onerror=e=>{URL.revokeObjectURL(url);rej(e);};
+    img.src=url;
+  });
+}
+function _lgSvgSize(svg){const m=svg.match(/width="(\d+)" height="(\d+)"/);return m?[+m[1],+m[2]]:[640,250];}
+
+/* ── 엑셀: 표 작성 헬퍼 ── */
+function _lgPutTable(ws,r,heads,data,fmts,aligns){
+  heads.forEach((h,i)=>{const c=ws.getCell(r,i+1);c.value=h;c.font={name:LG_FONT,size:10,bold:true,color:{argb:"FFFFFFFF"}};c.fill=_lgFill(LG_NAVY);c.border=_lgBorder();c.alignment={horizontal:"center",vertical:"middle",wrapText:true};});
+  ws.getRow(r).height=26;
+  data.forEach((row,ri)=>{row.forEach((v,i)=>{
+    const c=ws.getCell(r+1+ri,i+1);
+    c.value=(v===undefined||v===""||v===null)?null:v;
+    c.font={name:LG_FONT,size:10};c.border=_lgBorder();
+    c.alignment={horizontal:(aligns&&aligns[i])||"center",vertical:"middle",wrapText:true};
+    if(fmts&&fmts[i])c.numFmt=fmts[i];
+    if(ri%2)c.fill=_lgFill(LG_ZEBRA);
+  });});
+  return r+data.length+2;
+}
+function _lgSec(ws,r,text,ncol){
+  ws.mergeCells(r,1,r,ncol);
+  const c=ws.getCell(r,1);c.value=text;c.font={name:LG_FONT,size:11,bold:true,color:{argb:"FFFFFFFF"}};
+  c.fill=_lgFill(LG_TEAL);c.alignment={vertical:"middle",indent:1};ws.getRow(r).height=22;
+  return r+1;
+}
+function _lgNote(ws,r,text,ncol){
+  ws.mergeCells(r,1,r,ncol);
+  const c=ws.getCell(r,1);c.value=text;c.font={name:LG_FONT,size:9,color:{argb:"FF64748B"}};c.alignment={wrapText:true,vertical:"top"};
+  ws.getRow(r).height=Math.max(16,Math.ceil(text.length/(ncol*11))*14);
+  return r+1;
+}
+const _lgCF=(bg,fc,t)=>({type:"cellIs",operator:"equal",formulae:[`"${t}"`],style:{fill:{type:"pattern",pattern:"solid",bgColor:{argb:bg}},font:{color:{argb:fc},bold:true}}});
+const _LG_SCALE=c=>({type:"colorScale",cfvo:[{type:"min"},{type:"max"}],color:[{argb:"FFFFFFFF"},{argb:c}]});
+
+/* ── 엑셀: 경영진요약 + 통계분석 + 현장·담당자성과 + 기준설정 ── */
+async function _lgAddStatSheets(wb,rows,all,ctx){
+  const{EXS:EX,L,LS,DATA0,DATAEND,docNo,condText,printedAt,opt}=ctx;
+  const R=k=>`'${LS}'!$${L[k]}$${DATA0}:$${L[k]}$${DATAEND}`;
+  const st=_lgComputeStats(rows,all,opt),k=st.k,pr=st.prior;
+  const TGT="'기준설정'!";
+
+  /* ════ 경영진요약 ════ */
+  [26,15,15,15,17,13,50].forEach((w,i)=>{EX.getColumn(i+1).width=w;});
+  EX.mergeCells("A1:G1");
+  EX.getCell("A1").value="AS 서비스 경영진 요약 (Executive Summary)";
+  EX.getCell("A1").font={name:LG_FONT,size:20,bold:true,color:{argb:LG_NAVY}};EX.getRow(1).height=32;
+  EX.mergeCells("A2:G2");
+  EX.getCell("A2").value=`${COMPANY_NAME} ${TEAM_NAME} | 문서번호 ${docNo} | 출력 ${printedAt} | 출력자 ${opt.preparer||"-"} | ${condText}`;
+  EX.getCell("A2").font={name:LG_FONT,size:9,color:{argb:"FF64748B"}};EX.getCell("A2").alignment={wrapText:true,vertical:"top"};EX.getRow(2).height=28;
+  [["▶ 접수관리대장",LS],["▶ 요약대시보드","요약대시보드"],["▶ 통계분석","통계분석"],["▶ 현장·담당자성과","현장·담당자성과"],["▶ 미결·지연관리","미결·지연관리"],["▶ 기준설정","기준설정"]].forEach(([t,sn],i)=>{
+    const c=EX.getCell(3,i+1);c.value={text:t,hyperlink:`#'${sn}'!A1`};c.font={name:LG_FONT,size:10,color:{argb:"FF2563EB"},underline:true,bold:true};c.alignment={horizontal:"center",vertical:"middle"};
+  });
+  EX.getRow(3).height=22;
+  let r=4;
+  r=_lgSec(EX,r,"1. 핵심 성과 지표(KPI) 및 목표 대비 판정  ※ 목표값은 '기준설정' 시트에서 수정하면 판정이 즉시 갱신됩니다",7);
+  const KP=[
+    {lb:"총 접수 건수",f:`COUNTA(${R("mgmtNo")})`,res:k.total,fmt:"#,##0",pri:pr?pr.total:null,desc:"관리번호 기준 접수 건수"},
+    {lb:"완료율",f:`IFERROR(COUNTIF(${R("status")},"완료")/COUNTA(${R("mgmtNo")}),0)`,res:k.doneRate||0,fmt:"0.0%",tc:"$C$6",tv:LG_TARGET.done,dir:"hi",pri:pr?pr.doneRate:null,desc:"처리상태 '완료' ÷ 총 접수"},
+    {lb:"평균 리드타임 (영업일 h)",f:`IFERROR(AVERAGE(${R("lead")}),0)`,res:k.leadAvg||0,fmt:"0.0",tc:"$C$7",tv:LG_TARGET.lead,dir:"lo",pri:pr?pr.leadAvg:null,desc:"접수일→완료일, 토·일 제외 (낮을수록 우수)"},
+    {lb:`SLA 준수율 (${SLA_HOURS}h)`,f:`IFERROR(COUNTIF(${R("sla")},"준수")/(COUNTIF(${R("sla")},"준수")+COUNTIF(${R("sla")},"위반")),0)`,res:k.slaRate||0,fmt:"0.0%",tc:"$C$5",tv:LG_TARGET.sla,dir:"hi",pri:pr?pr.slaRate:null,desc:"완료 건 중 기준시간 이내 처리 비율"},
+    {lb:"동일장비 30일 내 재발률",f:`IFERROR(COUNTIF(${R("repeat")},"재발*")/COUNTA(${R("mgmtNo")}),0)`,res:k.repeatRate||0,fmt:"0.0%",tc:"$C$8",tv:LG_TARGET.repeat,dir:"lo",pri:pr?pr.repeatRate:null,desc:"동일 시리얼(없으면 현장+모델) 직전 접수 후 30일 이내 재접수 (낮을수록 우수)"},
+    {lb:"장기지연 (미결 15일 이상)",f:`COUNTIF(${R("aging")},">=15")`,res:k.long,fmt:'0"건"',tc:"$C$9",tv:LG_TARGET.long,dir:"lo",tol:2,pri:pr?pr.long:null,desc:"즉시 에스컬레이션 대상"},
+  ];
+  ["지표","실적","목표","판정","직전 동기간","증감","산출 기준"].forEach((h,i)=>{
+    const c=EX.getCell(r,i+1);c.value=h;c.font={name:LG_FONT,size:10,bold:true,color:{argb:LG_NAVY}};c.fill=_lgFill("FFE2E8F0");c.border=_lgBorder();c.alignment={horizontal:"center",vertical:"middle"};
+  });
+  r++;const kr0=r;
+  KP.forEach(p=>{
+    const a=EX.getCell(r,1);a.value=p.lb;a.font={name:LG_FONT,size:10,bold:true};a.fill=_lgFill("FFF1F5F9");a.border=_lgBorder();a.alignment={vertical:"middle",indent:1};
+    const b=EX.getCell(r,2);b.value={formula:p.f,result:p.res};b.numFmt=p.fmt;
+    const c=EX.getCell(r,3),d=EX.getCell(r,4);
+    if(p.tc){
+      c.value={formula:TGT+p.tc,result:p.tv};c.numFmt=p.fmt==="0.0"?'0" h"':p.fmt;
+      const tol=p.tol||0;
+      const fx=p.dir==="hi"?`IF(B${r}>=C${r},"● 달성",IF(B${r}>=C${r}*0.9,"▲ 주의","▼ 미달"))`:`IF(B${r}<=C${r},"● 달성",IF(B${r}<=C${r}*1.2+${tol},"▲ 주의","▼ 미달"))`;
+      d.value={formula:fx,result:_lgJudge(p.res,p.tv,p.dir,tol)};
+    }else{c.value="-";d.value="-";}
+    const e=EX.getCell(r,5);e.value=(p.pri===null||p.pri===undefined)?null:p.pri;e.numFmt=p.fmt;
+    const f=EX.getCell(r,6);f.value={formula:`IF(ISNUMBER(E${r}),B${r}-E${r},"")`,result:(p.pri===null||p.pri===undefined)?"":p.res-p.pri};f.numFmt=p.fmt.includes("%")?'+0.0%;-0.0%;0.0%':'+0.0;-0.0;0.0';
+    const g=EX.getCell(r,7);g.value=p.desc;g.font={name:LG_FONT,size:9,color:{argb:"FF64748B"}};g.alignment={wrapText:true,vertical:"middle"};
+    [b,c,d,e,f].forEach(x=>{x.font={name:LG_FONT,size:11,bold:x===b};x.alignment={horizontal:"center",vertical:"middle"};});
+    for(let i=1;i<=7;i++)EX.getCell(r,i).border=_lgBorder();
+    EX.getRow(r).height=24;r++;
+  });
+  EX.addConditionalFormatting({ref:`D${kr0}:D${r-1}`,rules:[_lgCF("FFDCFCE7","FF166534","● 달성"),_lgCF("FFFEF3C7","FFB45309","▲ 주의"),_lgCF("FFFEE2E2","FFB91C1C","▼ 미달")]});
+  r=_lgNote(EX,r,pr?"※ 직전 동기간 = 조회 기간과 같은 길이의 바로 앞 기간(담당 PM 조건 동일 적용).":"※ 조회 기간(시작·종료일)을 모두 지정하면 직전 동기간 대비 증감이 표시됩니다.",7)+1;
+  r=_lgSec(EX,r,"2. 핵심 시사점 (데이터 기반 자동 분석)",7);
+  st.insights.forEach(t=>{EX.mergeCells(r,1,r,7);const c=EX.getCell(r,1);c.value="• "+t;c.font={name:LG_FONT,size:10};c.alignment={wrapText:true,vertical:"middle",indent:1};EX.getRow(r).height=Math.max(20,Math.ceil(t.length/70)*15);r++;});
+  r++;
+  r=_lgSec(EX,r,"3. 개선 권고",7);
+  st.recs.forEach(t=>{EX.mergeCells(r,1,r,7);const c=EX.getCell(r,1);c.value="▶ "+t;c.font={name:LG_FONT,size:10,color:{argb:"FF9F1239"}};c.alignment={wrapText:true,vertical:"middle",indent:1};EX.getRow(r).height=Math.max(20,Math.ceil(t.length/70)*15);r++;});
+  r++;
+  r=_lgSec(EX,r,"4. 추이 · 원인 분석 차트",7);
+  const charts=[_lgSvgMonthly(st.months),_lgSvgPareto(st.pareto.cause,"원인 구분 Pareto"),
+    _lgSvgHBar(st.leadDist.map(d=>({label:d.label,value:d.count,text:`${d.count}건 (${_pc(d.share)})`,color:d.label==="72시간 이내"?"#0d9488":undefined})),"리드타임 분포 (완료 건)","#0d9488"),
+    _lgSvgHBar(st.sites.slice().sort((a,b)=>b.k.total-a.k.total).slice(0,8).map(s=>({label:s.name,value:s.k.total,text:`${s.k.total}건`})),"현장별 접수 TOP 8","#0f2942")];
+  let imgOk=true;
+  for(const svg of charts){
+    try{
+      const [w,h]=_lgSvgSize(svg);
+      const png=await _lgSvgToPng(svg,w,h);
+      const id=wb.addImage({base64:png.split(",")[1],extension:"png"});
+      EX.addImage(id,{tl:{col:0.1,row:r-1},ext:{width:w,height:h}});
+      r+=Math.ceil(h/20)+1;
+    }catch(e){imgOk=false;console.error("차트 이미지 생성 실패",e);}
+  }
+  if(!imgOk)r=_lgNote(EX,r,"※ 일부 차트 이미지를 생성하지 못했습니다(브라우저 제한). 수치 표는 '통계분석' 시트를 참조하세요.",7);
+  EX.pageSetup={paperSize:9,orientation:"portrait",fitToPage:true,fitToWidth:1,fitToHeight:0,margins:{left:.5,right:.5,top:.7,bottom:.7,header:.3,footer:.3}};
+  EX.headerFooter.oddFooter=`&L&9${docNo}&C&9Page &P / &N&R&9대외비`;
+
+  /* ════ 통계분석 ════ */
+  const SA=wb.addWorksheet("통계분석",{views:[{showGridLines:false}],properties:{tabColor:{argb:"FF7C3AED"}}});
+  [30,13,13,13,13,13,13,13,13,13,13,13,13].forEach((w,i)=>{SA.getColumn(i+1).width=w;});
+  SA.mergeCells("A1:I1");SA.getCell("A1").value="AS 통계 분석";SA.getCell("A1").font={name:LG_FONT,size:18,bold:true,color:{argb:LG_NAVY}};SA.getRow(1).height=30;{const c=SA.getCell("J1");c.value={text:"◀ 경영진요약",hyperlink:"#'경영진요약'!A1"};c.font={name:LG_FONT,size:9,color:{argb:"FF2563EB"},underline:true};}
+  SA.mergeCells("A2:I2");SA.getCell("A2").value=`${docNo} | ${condText} | 본 시트는 출력 시점의 스냅샷입니다(원장 수정 시 자동 갱신되지 않음).`;SA.getCell("A2").font={name:LG_FONT,size:9,color:{argb:"FF64748B"}};
+  r=4;
+  r=_lgSec(SA,r,"A. 리드타임 요약 및 분포 (완료 건, 영업일 기준)",9);
+  r=_lgPutTable(SA,r,["지표","값(h)","표본(건)"],[["평균",_lgR1(k.leadAvg),k.leadN],["중앙값(P50)",_lgR1(k.leadMed),k.leadN],["상위 10%(P90)",_lgR1(k.leadP90),k.leadN],["최대",_lgR1(k.leadMax),k.leadN]],[null,"0.0","0"]);
+  const ld0=r+1;
+  r=_lgPutTable(SA,r,["리드타임 구간","건수","비중"],st.leadDist.map(d=>[d.label,d.count,d.share]),[null,"0","0.0%"]);
+  SA.addConditionalFormatting({ref:`C${ld0}:C${ld0+st.leadDist.length-1}`,rules:[_LG_SCALE("FF5EEAD4")]});
+  r=_lgSec(SA,r,"B. 월별 추이 (최근 12개월, 접수월 기준)",9);
+  r=_lgPutTable(SA,r,["월","접수","완료","완료율","SLA 준수율","평균 리드(h)","전월 대비","3개월 이동평균"],st.months.map(m=>[`${m.y}년 ${m.m}월`,m.total,m.done,m.doneRate,m.slaRate,_lgR1(m.leadAvg),m.mom,_lgR1(m.ma3)]),[null,"0","0","0.0%","0.0%","0.0","+0.0%;-0.0%;0.0%","0.0"]);
+  const pareTable=(title,en,label)=>{
+    r=_lgSec(SA,r,title,9);
+    r=_lgPutTable(SA,r,[label,"건수","비중","누적비중","Pareto 등급"],en.map(e=>[e.name,e.count,e.share,e.cum,e.grade]),[null,"0","0.0%","0.0%",null],["left"]);
+    if(!en.length){SA.getCell(r-1,1).value="데이터 없음";r++;}
+  };
+  pareTable("C. 원인 구분 Pareto  (A등급 = 누적 80% 이내 핵심 원인)",st.pareto.cause,"원인 구분");
+  pareTable("D. 에러코드 TOP 10",st.pareto.err,"에러코드");
+  pareTable("E. 불량 부품·모듈 TOP 10",st.pareto.part,"부품·모듈");
+  r=_lgSec(SA,r,"F. 브랜드·모델별 현황 (상위 15)",9);
+  r=_lgPutTable(SA,r,["브랜드 / 모델","접수","완료율","평균 리드(h)","SLA 준수율","재발(30일)","AS 원가(원)"],st.bm.map(b=>[`${b.brand} ${b.model}`,b.k.total,b.k.doneRate,_lgR1(b.k.leadAvg),b.k.slaRate,b.k.repeat,b.k.cost||null]),[null,"0","0.0%","0.0","0.0%","0","#,##0"],["left"]);
+  r=_lgSec(SA,r,"G. 요일별 접수 분포",9);
+  const dw0=r+1;
+  r=_lgPutTable(SA,r,["구분"].concat(_LG_DOW),[["접수 건수"].concat(st.dow.map(d=>d.count))],null);
+  SA.addConditionalFormatting({ref:`B${dw0}:H${dw0}`,rules:[_LG_SCALE("FF5EEAD4")]});
+  r=_lgSec(SA,r,"H. 히트맵 — 브랜드 × 월 접수 건수",13);
+  const hm0=r+1;
+  r=_lgPutTable(SA,r,["브랜드"].concat(st.months.map(m=>`${m.m}월`)),st.brands.map((b,i)=>[b].concat(st.matrix[i])),null);
+  if(st.brands.length)SA.addConditionalFormatting({ref:`B${hm0}:M${hm0+st.brands.length-1}`,rules:[_LG_SCALE("FF0D9488")]});
+  r=_lgSec(SA,r,"I. SLA 위반 상세 (리드타임 긴 순, 최대 30건)",9);
+  r=_lgPutTable(SA,r,["관리번호","접수일","완료일","현장명","리드타임(h)",`초과(h)`,"원인 구분","담당 PM"],st.slaBadList.map(d=>[d.mgmtNo,d.receipt,d.complete,d.siteName,d.lead,_lgR1(d.lead-SLA_HOURS),d.causeType,d.pm]),[null,"yyyy-mm-dd","yyyy-mm-dd",null,"0.0","0.0"],["center","center","center","left"]);
+  if(!st.slaBadList.length){SA.getCell(r-1,1).value="SLA 위반 건이 없습니다.";r++;}
+  SA.pageSetup={paperSize:9,orientation:"portrait",fitToPage:true,fitToWidth:1,fitToHeight:0};
+  SA.headerFooter.oddFooter=`&L&9${docNo}&C&9Page &P / &N&R&9대외비`;
+
+  /* ════ 현장·담당자성과 ════ */
+  const SC=wb.addWorksheet("현장·담당자성과",{views:[{showGridLines:false}],properties:{tabColor:{argb:"FFF59E0B"}}});
+  [26,16,10,11,12,12,11,10,11,15,10,10,11].forEach((w,i)=>{SC.getColumn(i+1).width=w;});
+  SC.mergeCells("A1:M1");SC.getCell("A1").value="현장 · 담당자 성과 스코어카드";SC.getCell("A1").font={name:LG_FONT,size:18,bold:true,color:{argb:LG_NAVY}};SC.getRow(1).height=30;{const c=SC.getCell("N1");c.value={text:"◀ 경영진요약",hyperlink:"#'경영진요약'!A1"};c.font={name:LG_FONT,size:9,color:{argb:"FF2563EB"},underline:true};}
+  SC.mergeCells("A2:M2");SC.getCell("A2").value=`${docNo} | ${condText}`;SC.getCell("A2").font={name:LG_FONT,size:9,color:{argb:"FF64748B"}};
+  r=4;
+  r=_lgSec(SC,r,"A. 현장별 스코어카드 (위험점수 높은 순) — 위험점수 = 재발률×35 + SLA위반율×25 + 미결비중×15 + 접수량비중×25",13);
+  const s0=r+1;
+  r=_lgPutTable(SC,r,["현장명","고객사","접수","완료율","평균 리드(h)","SLA 준수율","재발(30일)","미결","장기지연","AS 원가(원)","유상(건)","위험점수","등급"],
+    st.sites.map(s=>[s.name,s.client,s.k.total,s.k.doneRate,_lgR1(s.k.leadAvg),s.k.slaRate,s.k.repeat,s.k.open,s.k.long,s.k.cost||null,s.k.paid,s.risk,s.grade]),
+    [null,null,"0","0.0%","0.0","0.0%","0","0","0","#,##0","0","0",null],["left","left"]);
+  if(st.sites.length){
+    SC.addConditionalFormatting({ref:`L${s0}:L${s0+st.sites.length-1}`,rules:[_LG_SCALE("FFF87171")]});
+    SC.addConditionalFormatting({ref:`M${s0}:M${s0+st.sites.length-1}`,rules:[_lgCF("FFFEE2E2","FFB91C1C","R 위험"),_lgCF("FFFEF3C7","FFB45309","A 주의"),_lgCF("FFDCFCE7","FF166534","G 양호")]});
+    SC.autoFilter={from:{row:s0-1,column:1},to:{row:s0+st.sites.length-1,column:13}};
+  }
+  r=_lgSec(SC,r,"B. 담당 PM별 성과",13);
+  r=_lgPutTable(SC,r,["담당 PM","접수","완료","완료율","평균 리드(h)","중앙값(h)","SLA 준수율","미결","미결 평균경과(일)","AS 원가(원)","건당 원가(원)","재발(30일)"],
+    st.pms.map(p=>[p.name,p.k.total,p.k.done,p.k.doneRate,_lgR1(p.k.leadAvg),_lgR1(p.k.leadMed),p.k.slaRate,p.k.open,_lgR1(p.k.openAgeAvg),p.k.cost||null,p.k.costCases?Math.round(p.k.cost/p.k.costCases):null,p.k.repeat]),
+    [null,"0","0","0.0%","0.0","0.0","0.0%","0","0.0","#,##0","#,##0","0"],["left"]);
+  r=_lgSec(SC,r,"C. 재접수 다발 장비 TOP 10 (동일 장비 누적 접수 2회 이상)",13);
+  r=_lgPutTable(SC,r,["장비(S/N 또는 현장+모델)","현장","브랜드","모델","누적 접수","재발(30일)","최근 접수일","최다 원인"],
+    st.repeatUnits.map(u=>[u.label,u.site,u.brand,u.model,u.count,u.rep30,u.last,u.cause]),[null,null,null,null,"0","0"],["left","left"]);
+  if(!st.repeatUnits.length){SC.getCell(r-1,1).value="재접수 다발 장비가 없습니다.";r++;}
+  SC.pageSetup={paperSize:9,orientation:"landscape",fitToPage:true,fitToWidth:1,fitToHeight:0};
+  SC.headerFooter.oddFooter=`&L&9${docNo}&C&9Page &P / &N&R&9대외비`;
+
+  /* ════ 기준설정 ════ */
+  const TG=wb.addWorksheet("기준설정",{views:[{showGridLines:false}],properties:{tabColor:{argb:"FF94A3B8"}}});
+  [16,30,14,70].forEach((w,i)=>{TG.getColumn(i+1).width=w;});
+  TG.mergeCells("A1:D1");TG.getCell("A1").value="KPI 목표 및 산식 기준";TG.getCell("A1").font={name:LG_FONT,size:18,bold:true,color:{argb:LG_NAVY}};TG.getRow(1).height=30;
+  TG.mergeCells("A2:D2");TG.getCell("A2").value="노란색 칸의 목표값을 수정하면 '경영진요약' 시트의 판정이 즉시 갱신됩니다.";TG.getCell("A2").font={name:LG_FONT,size:9,color:{argb:"FF64748B"}};
+  const tg=[["서비스 품질","SLA 준수율 목표",LG_TARGET.sla,"0%",`완료 건 중 ${SLA_HOURS}시간 이내 처리 비율 (이상이면 달성, 90% 이상이면 주의)`],
+    ["서비스 품질","완료율 목표",LG_TARGET.done,"0%","총 접수 대비 완료 비율"],
+    ["서비스 품질","평균 리드타임 목표(h)",LG_TARGET.lead,'0" h"',"접수→완료 영업일 기준 평균 (이하이면 달성, 120% 이내 주의)"],
+    ["신뢰성","재발률 목표(상한)",LG_TARGET.repeat,"0%","동일 장비 30일 내 재접수 비율 (이하이면 달성)"],
+    ["운영 리스크","장기지연 허용 건수",LG_TARGET.long,'0"건"',"미결 15일 이상 건수 (이하이면 달성, +2건 이내 주의)"]];
+  ["구분","지표","목표값","설명"].forEach((h,i)=>{const c=TG.getCell(4,i+1);c.value=h;c.font={name:LG_FONT,size:10,bold:true,color:{argb:"FFFFFFFF"}};c.fill=_lgFill(LG_NAVY);c.border=_lgBorder();c.alignment={horizontal:"center"};});
+  tg.forEach((t,i)=>{
+    t.slice(0,2).forEach((v,j)=>{const c=TG.getCell(5+i,j+1);c.value=v;c.font={name:LG_FONT,size:10};c.border=_lgBorder();});
+    const c=TG.getCell(5+i,3);c.value=t[2];c.numFmt=t[3];c.fill=_lgFill("FFFEF9C3");c.border=_lgBorder();c.font={name:LG_FONT,size:11,bold:true};c.alignment={horizontal:"center"};
+    const d=TG.getCell(5+i,4);d.value=t[4];d.font={name:LG_FONT,size:9,color:{argb:"FF475569"}};d.border=_lgBorder();d.alignment={wrapText:true};
+  });
+  let tr=11;
+  tr=_lgSec(TG,tr,"산식 및 용어 정의",4);
+  [["관리번호","AS-접수연도-연도별 일련번호(접수일·등록순). 조회 조건과 무관하게 동일 건은 항상 같은 번호."],
+   ["리드타임","접수일~완료일 경과시간 중 토·일을 제외한 영업일 시간(h). 완료일이 입력된 완료 건만 대상."],
+   ["SLA 준수/위반",`리드타임 ≤ ${SLA_HOURS}h 이면 준수, 초과면 위반. 접수일·완료일 모두 있는 완료 건만 평가.`],
+   ["미결 경과일","처리상태가 '완료'가 아닌 건의 (오늘 − 접수일). 원장 시트는 TODAY() 수식으로 열 때마다 갱신."],
+   ["재발(30일內)","동일 장비(시리얼, 없으면 현장+모델)의 직전 접수일로부터 30일 이내 재접수된 건. 30일 초과 재접수는 '재접수'로 구분."],
+   ["Pareto 등급","원인별 건수를 내림차순 누적했을 때, 누적비중 80% 이내 = A, 95% 이내 = B, 이후 = C."],
+   ["현장 위험점수","재발률×35 + SLA위반율×25 + 미결비중×15 + (현장 접수량/최다 현장 접수량)×25 (0~100). 50 이상 R, 30 이상 A, 미만 G."],
+   ["데이터 한계","완료일·원인·조치 등 입력값이 비어 있으면 해당 통계에서 제외됩니다. 통계는 입력된 AS 이력카드 기준입니다."]].forEach(([a,b])=>{
+    const c1=TG.getCell(tr,1);c1.value=a;c1.font={name:LG_FONT,size:10,bold:true};c1.border=_lgBorder();c1.fill=_lgFill("FFF1F5F9");
+    TG.mergeCells(tr,2,tr,4);const c2=TG.getCell(tr,2);c2.value=b;c2.font={name:LG_FONT,size:10};c2.alignment={wrapText:true,vertical:"middle"};
+    TG.getRow(tr).height=Math.max(20,Math.ceil(b.length/70)*15);tr++;
+  });
+}
+const _lgR1=v=>(v===null||v===undefined)?null:Math.round(v*10)/10;
+
+/* ── HTML 출력용 통계 섹션 ── */
+function _lgStatsHTML(st){
+  const k=st.k;
+  const ul=a=>`<ul class="lg-ul">${a.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`;
+  const riskBadge=g=>g[0]==="R"?_lgBadge(g,"#fee2e2","#b91c1c"):(g[0]==="A"?_lgBadge(g,"#fef3c7","#b45309"):_lgBadge(g,"#dcfce7","#166534"));
+  const kj=(lb,val,tgt,j)=>`<tr><td>${lb}</td><td class="lg-c"><b>${val}</b></td><td class="lg-c">${tgt}</td><td class="lg-c">${j==="● 달성"?_lgBadge(j,"#dcfce7","#166534"):j==="▲ 주의"?_lgBadge(j,"#fef3c7","#b45309"):j==="▼ 미달"?_lgBadge(j,"#fee2e2","#b91c1c"):"-"}</td></tr>`;
+  const siteRows=st.sites.slice(0,8).map(s=>`<tr><td>${esc(s.name)}</td><td class="lg-c">${s.k.total}</td><td class="lg-c">${_pc(s.k.doneRate)}</td><td class="lg-c">${_pc(s.k.slaRate)}</td><td class="lg-c">${s.k.repeat}</td><td class="lg-c">${s.k.long}</td><td class="lg-c">${s.risk}</td><td class="lg-c">${riskBadge(s.grade)}</td></tr>`).join("");
+  const pmRows=st.pms.slice(0,8).map(p=>`<tr><td>${esc(p.name)}</td><td class="lg-c">${p.k.total}</td><td class="lg-c">${_pc(p.k.doneRate)}</td><td class="lg-c">${_n1(p.k.leadAvg)}</td><td class="lg-c">${_pc(p.k.slaRate)}</td><td class="lg-c">${p.k.open}</td></tr>`).join("");
+  return`<details class="lg-sec lg-stats-sec" open><summary>통계 분석 요약 — KPI 판정 · 시사점 · 추이 · 스코어카드</summary><div class="lg-sec-b">
+    <div class="lg-h2">■ 목표 대비 KPI 판정 (목표: SLA ${LG_TARGET.sla*100}% · 완료율 ${LG_TARGET.done*100}% · 리드타임 ${LG_TARGET.lead}h · 재발률 ${LG_TARGET.repeat*100}% 이하 · 장기지연 ${LG_TARGET.long}건)</div>
+    <table class="lg-mini"><thead><tr><th>지표</th><th>실적</th><th>목표</th><th>판정</th></tr></thead><tbody>
+      ${kj("완료율",_pc(k.doneRate),LG_TARGET.done*100+"%",_lgJudge(k.doneRate,LG_TARGET.done,"hi"))}
+      ${kj("평균 리드타임(영업일)",_n1(k.leadAvg)+"h (중앙값 "+_n1(k.leadMed)+"h · P90 "+_n1(k.leadP90)+"h)","≤ "+LG_TARGET.lead+"h",_lgJudge(k.leadAvg,LG_TARGET.lead,"lo"))}
+      ${kj("SLA 준수율("+SLA_HOURS+"h)",_pc(k.slaRate)+" (위반 "+k.slaBad+"건)",LG_TARGET.sla*100+"%",_lgJudge(k.slaRate,LG_TARGET.sla,"hi"))}
+      ${kj("30일 내 재발률",_pc(k.repeatRate)+" ("+k.repeat+"건)","≤ "+LG_TARGET.repeat*100+"%",_lgJudge(k.repeatRate,LG_TARGET.repeat,"lo"))}
+      ${kj("장기지연(미결 15일+)",k.long+"건","≤ "+LG_TARGET.long+"건",_lgJudge(k.long,LG_TARGET.long,"lo",2))}
+    </tbody></table>
+    <div class="lg-h2">■ 핵심 시사점 및 개선 권고</div>
+    ${ul(st.insights)}<div style="height:4px"></div>${ul(st.recs.map(t=>"[권고] "+t))}
+    <div class="lg-h2">■ 추이 · 원인 분석</div>
+    <div class="lg-2col"><div>${_lgSvgMonthly(st.months)}</div><div>${_lgSvgPareto(st.pareto.cause,"원인 구분 Pareto")}</div>
+      <div>${_lgSvgHBar(st.leadDist.map(d=>({label:d.label,value:d.count,text:d.count+"건 ("+_pc(d.share)+")"})),"리드타임 분포 (완료 건)","#0d9488")}</div>
+      <div>${_lgSvgHBar(st.sites.slice().sort((a,b)=>b.k.total-a.k.total).slice(0,6).map(s=>({label:s.name,value:s.k.total,text:s.k.total+"건"})),"현장별 접수 TOP 6","#0f2942")}</div></div>
+    <div class="lg-2col" style="margin-top:8px;">
+      <div><div class="lg-h2">■ 현장별 위험 스코어카드 (상위 8)</div><table class="lg-mini"><thead><tr><th>현장</th><th>접수</th><th>완료율</th><th>SLA</th><th>재발</th><th>장기</th><th>위험점수</th><th>등급</th></tr></thead><tbody>${siteRows||"<tr><td colspan='8' class='lg-c'>-</td></tr>"}</tbody></table></div>
+      <div><div class="lg-h2">■ 담당 PM별 성과</div><table class="lg-mini"><thead><tr><th>PM</th><th>접수</th><th>완료율</th><th>평균리드(h)</th><th>SLA</th><th>미결</th></tr></thead><tbody>${pmRows||"<tr><td colspan='6' class='lg-c'>-</td></tr>"}</tbody></table></div>
+    </div>
+  </div></details>`;
+}
+/* ═════════ [통계 엔진 · 경영진 요약 · 고급 분석 끝] ═════════ */
 
 const PAGES={
   dashboard:{fn:renderDashboard,label:"Dashboard"},
