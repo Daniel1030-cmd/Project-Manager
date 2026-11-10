@@ -889,14 +889,7 @@ input,textarea,[contenteditable="true"]{
 img,svg{-webkit-user-drag:none;user-drag:none;pointer-events:auto;}
 
 /* 창 비활성/캡처 감지 시 화면 블러 오버레이 */
-#secBlurOverlay{
-  position:fixed;inset:0;z-index:99999;display:none;
-  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-  background:rgba(15,23,42,.55);
-  align-items:center;justify-content:center;
-  color:#fff;font-size:14px;font-weight:600;text-align:center;
-  flex-direction:column;gap:10px;
-}
+
 #secBlurOverlay.show{display:flex;}
 #secWarnToast{
   position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
